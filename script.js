@@ -68,6 +68,7 @@
     const cursorRing = document.getElementById('cursorRing');
     const floatingNav = document.getElementById('floatingNav');
     const navItems = document.querySelectorAll('.nav-item');
+    const navDot = document.getElementById('navDot');
     const particlesContainer = document.getElementById('particlesContainer');
     const certTrack = document.getElementById('certTrack');
     const certModal = document.getElementById('certModal');
@@ -91,7 +92,6 @@
     const allSections = document.querySelectorAll('.section[id]');
     const homeSection = document.getElementById('home');
     const heroImage = document.getElementById('heroImage');
-    const navIndicator = document.querySelector('.nav-active-indicator');
     const certCarousel = document.querySelector('.cert-carousel');
     const certScrollWrapper = document.querySelector('#certificates .cert-scroll-wrapper');
     const certPrev = document.getElementById('certPrev');
@@ -146,8 +146,6 @@
         'Problem Solving': { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M8 10a4 4 0 1 1 8 0c0 1.3-.6 2.4-1.5 3.1-.6.5-1 .9-1 1.9H10.5c0-1-.4-1.4-1-1.9C8.6 12.4 8 11.3 8 10z"/></svg>', accent: '#f5d463', background: 'rgba(245,212,99,0.14)' },
         'Responsive Design': { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="10" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="15" y="8" width="5" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 18h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>', accent: '#6fb7ff', background: 'rgba(111,183,255,0.14)' },
         DevOps: { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5 9 7v10l3 2.5 3-2.5V7z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 12h3M16.5 12h3M12 4.5v3M12 16.5v3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>', accent: '#98a6c3', background: 'rgba(152,166,195,0.14)' },
-        GitHub: { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5a7.5 7.5 0 0 0-2.37 14.62c.38.07.52-.16.52-.36v-1.28c-2.13.46-2.57-.9-2.57-.9-.35-.9-.86-1.14-.86-1.14-.7-.49.05-.48.05-.48.78.06 1.2.8 1.2.8.7 1.19 1.83.84 2.27.64.07-.5.27-.84.49-1.04-1.68-.19-3.45-.83-3.45-3.71 0-.82.29-1.48.78-2-.08-.19-.34-.97.07-2.02 0 0 .64-.2 2.1.78a7.2 7.2 0 0 1 3.82 0c1.46-.98 2.1-.78 2.1-.78.41 1.05.15 1.83.07 2.02.49.52.78 1.18.78 2 0 2.89-1.78 3.52-3.47 3.7.28.25.53.73.53 1.47v2.18c0 .21.14.45.52.38A7.5 7.5 0 0 0 12 4.5z"/></svg>', accent: '#b8c0ff', background: 'rgba(184,192,255,0.14)' },
-        Linux: { svg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5c2.5 0 4.5 1.9 4.5 4.2 0 1-.3 1.9-.9 2.6.7.8 1.1 1.7 1.1 2.9 0 2.4-1.8 4.3-4.7 4.3s-4.7-1.9-4.7-4.3c0-1.2.4-2.1 1.1-2.9-.6-.7-.9-1.6-.9-2.6C7.5 6.4 9.5 4.5 12 4.5z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9.7 17.2c.7.4 1.5.6 2.3.6s1.6-.2 2.3-.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>', accent: '#9ad15f', background: 'rgba(154,209,95,0.14)' },
     };
 
     const skillGroups = [
@@ -215,7 +213,6 @@
     }, 100);
     document.body.style.overflow = 'hidden';
 
-
     // Particles
     for (let i = 0; i < 40; i++) {
         const p = document.createElement('div');
@@ -231,26 +228,19 @@
         particlesContainer.appendChild(p);
     }
 
-    // Nav visibility
-    let lastScrollY = window.scrollY;
-    let navVisible = true;
-    function updateNavVisibility() {
-        const homeBottom = homeSection.getBoundingClientRect().bottom;
-        const currentScrollY = window.scrollY;
-        if (homeBottom > 100) {
-            if (!navVisible) { floatingNav.classList.remove('hidden'); navVisible = true; }
-        } else {
-            if (currentScrollY > lastScrollY && navVisible) {
-                floatingNav.classList.add('hidden'); navVisible = false;
-            } else if (currentScrollY < lastScrollY && !navVisible) {
-                floatingNav.classList.remove('hidden'); navVisible = true;
-            }
-        }
-        lastScrollY = currentScrollY;
+    // ============================================================
+    // NAVIGATION: Active state & dot sliding
+    // ============================================================
+    function updateNavDot() {
+        const activeItem = document.querySelector('.nav-item.active');
+        if (!activeItem || !navDot) return;
+        const navInner = document.querySelector('.nav-inner');
+        const itemRect = activeItem.getBoundingClientRect();
+        const innerRect = navInner.getBoundingClientRect();
+        const dotY = itemRect.top - innerRect.top + (itemRect.height - navDot.offsetHeight) / 2;
+        navDot.style.transform = `translateY(${dotY}px)`;
     }
-    window.addEventListener('scroll', updateNavVisibility, { passive: true });
 
-    // Active nav section
     function updateActiveNav() {
         let current = 'home';
         allSections.forEach(section => {
@@ -259,25 +249,47 @@
                 current = section.id;
             }
         });
-        navItems.forEach(item => item.classList.toggle('active', item.dataset.section === current));
-        updateNavIndicator(current);
+        navItems.forEach(item => {
+            const isActive = item.dataset.section === current;
+            item.classList.toggle('active', isActive);
+        });
+        // Update dot position after class change
+        requestAnimationFrame(updateNavDot);
     }
-    function updateNavIndicator(sectionId) {
-        if (!navIndicator) return;
-        const activeItem = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
-        if (!activeItem) return;
-        navIndicator.style.transform = `translateY(${activeItem.offsetTop}px)`;
-        navIndicator.style.height = `${activeItem.offsetHeight}px`;
-    }
+
+    // Initial dot position after DOM ready
+    setTimeout(() => {
+        updateNavDot();
+    }, 100);
+
+    // Scroll and resize listeners
     window.addEventListener('scroll', updateActiveNav, { passive: true });
+    window.addEventListener('resize', updateNavDot, { passive: true });
+
+    // Click handling with smooth scroll
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            document.getElementById(item.dataset.section)?.scrollIntoView({ behavior: 'smooth' });
+            const targetId = item.dataset.section;
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
     });
 
-    // Certificates
+    // Also update dot on any scroll after a short delay
+    let navUpdateTimeout = null;
+    window.addEventListener('scroll', () => {
+        if (navUpdateTimeout) cancelAnimationFrame(navUpdateTimeout);
+        navUpdateTimeout = requestAnimationFrame(() => {
+            updateActiveNav();
+        });
+    }, { passive: true });
+
+    // ============================================================
+    // CERTIFICATES (unchanged)
+    // ============================================================
     function buildCertificates() {
         const certs = CONFIG.certificates;
         const loopCerts = [...certs, ...certs];
@@ -524,7 +536,9 @@
         resumeCertificateAutoScroll(200);
     });
 
-    // Journey
+    // ============================================================
+    // JOURNEY (unchanged)
+    // ============================================================
     function buildJourney() {
         journeyRoadmap.innerHTML = CONFIG.journey.map((m, i) => {
             const side = i % 2 === 0 ? 'left' : 'right';
@@ -632,7 +646,9 @@
     }
     window.addEventListener('scroll', updateJourneyVisibility, { passive: true });
 
-    // Skills
+    // ============================================================
+    // SKILLS (unchanged)
+    // ============================================================
     function buildSkills() {
         skillsCloud.innerHTML = skillGroups.map(group => {
             const bubbles = group.names.map(name => {
@@ -688,7 +704,9 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSkillPopup(); });
     buildSkills();
 
-    // Projects
+    // ============================================================
+    // PROJECTS (unchanged)
+    // ============================================================
     function getProjectTheme(project, index) {
         const themes = [
             { accent: '#f0b36a', soft: 'rgba(240,179,106,0.14)', mesh: 'radial-gradient(circle at 20% 18%, rgba(240,179,106,0.36), transparent 30%), radial-gradient(circle at 78% 24%, rgba(255,255,255,0.16), transparent 22%), linear-gradient(145deg, rgba(28, 25, 40, 0.96), rgba(14, 14, 20, 0.96))' },
@@ -751,7 +769,9 @@
     }
     buildProjects();
 
-    // Contact form
+    // ============================================================
+    // CONTACT (unchanged)
+    // ============================================================
     contactForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const btn = contactForm.querySelector('button');
@@ -761,14 +781,18 @@
         setTimeout(() => { btn.textContent = orig; btn.style.background = ''; contactForm.reset(); }, 2500);
     });
 
-    // Download resume
+    // ============================================================
+    // DOWNLOAD RESUME (unchanged)
+    // ============================================================
     downloadResume.addEventListener('click', (e) => {
         e.preventDefault();
         if (CONFIG.resumePDF && CONFIG.resumePDF !== '#') window.open(CONFIG.resumePDF, '_blank');
         else alert('Resume PDF will be available soon!');
     });
 
-    // AI Chatbot
+    // ============================================================
+    // AI CHATBOT (unchanged)
+    // ============================================================
     const knowledgeBase = [
         { patterns: ['who are you','about bikash','tell me about','who is bikash'], response: 'I\'m Bikash Dhakal, CS student & full-stack dev.' },
         { patterns: ['skills','technologies','tech stack'], response: 'HTML, CSS, JS, PHP, MySQL, Git, Linux, C, C++, Java, OpenGL, React (learning), Docker (learning).' },
@@ -817,7 +841,9 @@
     chatClose.addEventListener('click', () => chatWindow.classList.remove('open'));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && chatWindow.classList.contains('open')) chatWindow.classList.remove('open'); });
 
-    // Intersection Observer for reveals
+    // ============================================================
+    // INTERSECTION OBSERVER (reveal)
+    // ============================================================
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -840,7 +866,9 @@
         journeyRoadmap.querySelectorAll('.journey-milestone').forEach(m => journeyObserver.observe(m));
     }, 200);
 
-    // Parallax on hero
+    // ============================================================
+    // PARALLAX ON HERO (unchanged)
+    // ============================================================
     let heroParallaxFrame = null;
     function updateHeroParallax() {
         heroParallaxFrame = null;
@@ -871,6 +899,9 @@
         homeSection.style.setProperty('--hero-image-shift-y', `${Math.min(72, window.scrollY * 0.08) + (y * -6)}px`);
     });
 
+    // ============================================================
+    // CUSTOM CURSOR (unchanged)
+    // ============================================================
     if (isDesktop && cursorDot && cursorRing) {
         document.body.classList.add('cursor-ready');
         document.addEventListener('pointermove', (e) => {
@@ -887,7 +918,12 @@
         });
     }
 
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
     updateNavVisibility();
     updateActiveNav();
     requestJourneyLayoutUpdate();
 })();
+
+lucide.createIcons();

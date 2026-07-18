@@ -1,90 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bikash Dhakal — Portfolio</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Custom fonts (optional, remove if not needed) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bikash Dhakal — Portfolio 2026</title>
+
+    <!-- ===== FONTS ===== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-    <!-- ==================== LOADING SCREEN ==================== -->
+    <!-- ========== LOADING SCREEN ========== -->
     <div class="loader" id="loader" aria-hidden="true">
         <div class="loader-logo">BD</div>
         <div class="loader-percentage" id="loaderPercent">0%</div>
     </div>
 
-    <!-- ==================== CUSTOM CURSOR ==================== -->
+    <!-- ========== CUSTOM CURSOR ========== -->
     <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
     <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
 
-    <!-- ==================== FLOATING NAVIGATION ==================== -->
+    <!-- ========== FLOATING NAV — REFINED PILL ========== -->
     <nav class="floating-nav" id="floatingNav" aria-label="Main navigation">
-        <span class="nav-active-indicator" aria-hidden="true"></span>
-        <a href="#home" class="nav-item active" data-section="home" aria-label="Home">
-            <span class="nav-active-dot"></span>
-            <span class="nav-icon">●</span>
-            <span class="nav-tooltip">Home</span>
-        </a>
-        <a href="#certificates" class="nav-item" data-section="certificates" aria-label="Certificates">
-            <span class="nav-active-dot"></span>
-            <span class="nav-icon">★</span>
-            <span class="nav-tooltip">Certificates</span>
-        </a>
-        <a href="#journey" class="nav-item" data-section="journey" aria-label="Journey">
-            <span class="nav-active-dot"></span>
-            <span class="nav-icon">⌂</span>
-            <span class="nav-tooltip">Journey</span>
-        </a>
-        <a href="#skills" class="nav-item" data-section="skills" aria-label="Skills">
-            <span class="nav-active-dot"></span>
-            <span class="nav-icon">◆</span>
-            <span class="nav-tooltip">Skills</span>
-        </a>
-        <a href="#projects" class="nav-item" data-section="projects" aria-label="Projects">
-            <span class="nav-active-dot"></span>
-            <span class="nav-icon">■</span>
-            <span class="nav-tooltip">Projects</span>
-        </a>
-        <a href="#contact" class="nav-item" data-section="contact" aria-label="Contact">
-            <span class="nav-active-dot"></span>
-            <span class="nav-icon">✉</span>
-            <span class="nav-tooltip">Contact</span>
-        </a>
+        <div class="nav-inner">
+            <!-- Active dot indicator — slides vertically -->
+            <div class="nav-dot" id="navDot" aria-hidden="true"></div>
+
+            <a href="#home" class="nav-item active" data-section="home" aria-label="Home">
+                <span class="nav-label">Home</span>
+            </a>
+            <a href="#certificates" class="nav-item" data-section="certificates" aria-label="Certificates">
+                <span class="nav-label">Certificates</span>
+            </a>
+            <a href="#journey" class="nav-item" data-section="journey" aria-label="Journey">
+                <span class="nav-label">Journey</span>
+            </a>
+            <a href="#skills" class="nav-item" data-section="skills" aria-label="Skills">
+                <span class="nav-label">Skills</span>
+            </a>
+            <a href="#projects" class="nav-item" data-section="projects" aria-label="Projects">
+                <span class="nav-label">Projects</span>
+            </a>
+            <a href="#contact" class="nav-item" data-section="contact" aria-label="Contact">
+                <span class="nav-label">Contact</span>
+            </a>
+        </div>
     </nav>
 
-    <!-- ==================== HOME SECTION ==================== -->
+    <!-- ========== HOME ========== -->
     <section class="section" id="home" aria-label="Home section">
         <div class="hero-image-fallback"></div>
         <div class="hero-image-wrapper">
-            <!-- PLACEHOLDER: Replace src with your portrait image -->
-            <img src="./profilePicture.png"
-            alt="Bikash Dhakal portrait"
-            class="hero-image-placeholder"
-            id="heroImage"
-            onerror="this.style.display='none';"
-            loading="eager">
+            <img src="./profilePicture.png" alt="Bikash Dhakal portrait" class="hero-image-placeholder" id="heroImage" onerror="this.style.display='none';" loading="eager" />
         </div>
         <div class="hero-overlay"></div>
-            <div class="hero-vignette" aria-hidden="true"></div>
-            <div class="hero-gradient-overlay" aria-hidden="true"></div>
-            <div class="hero-grain" aria-hidden="true"></div>
+        <div class="hero-vignette" aria-hidden="true"></div>
+        <div class="hero-gradient-overlay" aria-hidden="true"></div>
+        <div class="hero-grain" aria-hidden="true"></div>
         <div class="particles-container" id="particlesContainer" aria-hidden="true"></div>
         <div class="hero-content">
-                <span class="hero-chip">Available for opportunities</span>
-            <h1 class="hero-name">Bikash<br>Dhakal</h1>
-                <p class="hero-subtitle">Computer Science Student • Full Stack Developer • UI Designer<br>Problem Solver • Building thoughtful digital experiences</p>
+            <span class="hero-chip">Available for opportunities</span>
+            <h1 class="hero-name">Bikash<br />Dhakal</h1>
+            <p class="hero-subtitle">Computer Science Student • Full Stack Developer • UI Designer<br />Problem Solver • Building thoughtful digital experiences</p>
             <div class="hero-buttons">
-                <a href="#" class="btn btn-primary" id="downloadResume" aria-label="Download Resume">
-                    ↓ Download Resume
-                </a>
-                <a href="#projects" class="btn btn-outline" aria-label="View Projects">
-                    View Projects →
-                </a>
+                <a href="#" class="btn btn-primary" id="downloadResume" aria-label="Download Resume">↓ Download Resume</a>
+                <a href="#projects" class="btn btn-outline" aria-label="View Projects">View Projects →</a>
             </div>
         </div>
         <div class="scroll-indicator" aria-hidden="true">
@@ -93,35 +78,27 @@
         </div>
     </section>
 
-    <!-- ==================== CERTIFICATES SECTION ==================== -->
+    <!-- ========== CERTIFICATES ========== -->
     <section class="section" id="certificates" aria-label="Certificates section">
         <span class="section-label">Credentials</span>
         <h2 class="section-title reveal">Certificates</h2>
         <div class="cert-carousel reveal">
             <div class="cert-carousel-shell">
-                <button class="cert-nav-btn cert-nav-prev" id="certPrev" aria-label="Previous certificates">
-                    <span>‹</span>
-                </button>
+                <button class="cert-nav-btn cert-nav-prev" id="certPrev" aria-label="Previous certificates"><span>‹</span></button>
                 <div class="cert-scroll-wrapper">
-                    <div class="cert-track" id="certTrack">
-                        <!-- Populated by JavaScript -->
-                    </div>
+                    <div class="cert-track" id="certTrack"></div>
                 </div>
-                <button class="cert-nav-btn cert-nav-next" id="certNext" aria-label="Next certificates">
-                    <span>›</span>
-                </button>
+                <button class="cert-nav-btn cert-nav-next" id="certNext" aria-label="Next certificates"><span>›</span></button>
             </div>
             <div class="cert-pagination" id="certPagination" aria-label="Certificate pagination"></div>
         </div>
     </section>
     <!-- Cert Modal -->
     <div class="modal-overlay" id="certModal" aria-hidden="true">
-        <div class="modal-content" id="certModalContent">
-            <!-- Populated dynamically -->
-        </div>
+        <div class="modal-content" id="certModalContent"></div>
     </div>
 
-    <!-- ==================== JOURNEY SECTION ==================== -->
+    <!-- ========== JOURNEY ========== -->
     <section class="section" id="journey" aria-label="Journey section">
         <span class="section-label">My Path</span>
         <h2 class="section-title reveal">Journey</h2>
@@ -134,26 +111,22 @@
             <svg class="journey-route" id="journeyRoute" viewBox="0 0 1200 1200" preserveAspectRatio="none" aria-hidden="true">
                 <defs>
                     <marker id="journeyArrow" markerWidth="8" markerHeight="8" refX="5.5" refY="4" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L8,4 L0,8 z" fill="currentColor"></path>
+                        <path d="M0,0 L8,4 L0,8 z" fill="currentColor" />
                     </marker>
                 </defs>
                 <path id="journeyRouteBase"></path>
                 <path id="journeyRouteProgress"></path>
                 <path id="journeyRouteDash"></path>
             </svg>
-            <div class="journey-roadmap" id="journeyRoadmap">
-                <!-- Populated by JavaScript -->
-            </div>
+            <div class="journey-roadmap" id="journeyRoadmap"></div>
         </div>
     </section>
 
-    <!-- ==================== SKILLS SECTION ==================== -->
+    <!-- ========== SKILLS ========== -->
     <section class="section" id="skills" aria-label="Skills section">
         <span class="section-label">Expertise</span>
         <h2 class="section-title reveal">Skills</h2>
-        <div class="skills-cloud stagger-children" id="skillsCloud">
-            <!-- Populated by JavaScript -->
-        </div>
+        <div class="skills-cloud stagger-children" id="skillsCloud"></div>
     </section>
     <!-- Skill Popup -->
     <div class="popup-backdrop" id="skillBackdrop"></div>
@@ -162,29 +135,27 @@
         <div id="skillPopupContent"></div>
     </div>
 
-    <!-- ==================== PROJECTS SECTION ==================== -->
+    <!-- ========== PROJECTS ========== -->
     <section class="section" id="projects" aria-label="Projects section">
         <span class="section-label">Work</span>
         <h2 class="section-title reveal">Projects</h2>
-        <div class="projects-horizontal" id="projectsHorizontal">
-            <!-- Populated by JavaScript -->
-        </div>
+        <div class="projects-horizontal" id="projectsHorizontal"></div>
     </section>
 
-    <!-- ==================== CONTACT SECTION ==================== -->
+    <!-- ========== CONTACT ========== -->
     <section class="section" id="contact" aria-label="Contact section">
         <span class="section-label">Get In Touch</span>
         <h2 class="section-title reveal">Contact</h2>
         <div class="contact-grid reveal">
             <form class="contact-form" id="contactForm" aria-label="Contact form">
-                <input type="text" placeholder="Your Name" required aria-label="Name">
-                <input type="email" placeholder="Your Email" required aria-label="Email">
+                <input type="text" placeholder="Your Name" required aria-label="Name" />
+                <input type="email" placeholder="Your Email" required aria-label="Email" />
                 <textarea placeholder="Your Message" required aria-label="Message"></textarea>
                 <button type="submit" class="btn btn-primary">Send Message ↗</button>
             </form>
             <div>
                 <p class="contact-info-text">
-                    Feel free to reach out for collaborations, freelance projects, or just a friendly chat.<br><br>
+                    Feel free to reach out for collaborations, freelance projects, or just a friendly chat.<br /><br />
                     Email: <a href="mailto:bikash@example.com">bikash@example.com</a>
                 </p>
                 <div class="social-icons">
@@ -198,7 +169,7 @@
         </div>
     </section>
 
-    <!-- ==================== AI ASSISTANT ==================== -->
+    <!-- ========== AI ASSISTANT ========== -->
     <div class="ai-assistant" id="aiAssistant" aria-label="AI Assistant">
         <div class="ai-orb" id="aiOrb" title="Ask me anything about Bikash">
             ✦
@@ -214,7 +185,7 @@
             </div>
             <div class="chat-typing" id="chatTyping">Typing...</div>
             <div class="chat-input-row">
-                <input type="text" id="chatInput" placeholder="Ask a question..." aria-label="Chat input">
+                <input type="text" id="chatInput" placeholder="Ask a question..." aria-label="Chat input" />
                 <button class="chat-send" id="chatSend" aria-label="Send message">↑</button>
             </div>
         </div>
