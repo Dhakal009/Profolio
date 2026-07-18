@@ -326,41 +326,8 @@ body.cursor-press .cursor-dot {
     align-items: flex-start;
 }
 
-.nav-dot {
-    position: absolute;
-    left: -10px;
-    top: 0;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-accent-primary);
-    box-shadow: 0 0 12px rgba(212, 167, 106, 0.35);
-    transition: transform 0.6s var(--ease-out-expo), opacity 0.3s ease;
-    transform: translateY(0);
-    will-change: transform;
-    /* pulse animation applied via JS after position set */
-}
 
-.nav-dot::after {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    background: var(--color-accent-primary);
-    opacity: 0.25;
-    animation: dotPulse 2.2s ease-in-out infinite;
-}
 
-@keyframes dotPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.4;
-    }
-    50% {
-        transform: scale(1.25);
-        opacity: 0.1;
-    }
-}
 
 .nav-item {
     position: relative;
@@ -399,6 +366,55 @@ body.cursor-press .cursor-dot {
 .nav-item.active {
     color: var(--color-accent-primary);
     font-weight: 600;
+}
+
+/* ============================================================
+   5.  FLOATING NAV — RIGHT EDGE
+   ============================================================ */
+.floating-nav {
+    position: fixed;
+    right: 0;                     /* flush against right edge */
+    top: 50%;
+    transform: translateY(-50%) translateX(40px);
+    z-index: var(--z-nav);
+    opacity: 0;
+    animation: navEntrance 0.6s var(--ease-out-expo) 0.7s forwards;
+
+    background: rgba(18, 18, 22, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 32px 0 0 32px;  /* rounded on left, straight on right */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 20px 16px 20px 24px;  /* less padding on the right side */
+}
+/* Make the navbar more transparent when the cursor is anywhere on the page */
+body:hover .floating-nav {
+    opacity: 0.3; /* adjust this value (0–1) to control transparency */
+    transition: opacity 0.3s ease;
+}
+
+/* Keep the navbar fully visible when hovering directly over it */
+.floating-nav:hover {
+    opacity: 1 !important;
+    transition: opacity 0.15s ease;
+}
+
+/* responsive adjustments */
+@media (max-width: 768px) {
+    .floating-nav {
+        right: 0;
+        padding: 14px 12px 14px 16px;
+        border-radius: 24px 0 0 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-nav {
+        right: 0;
+        padding: 12px 10px 12px 12px;
+        border-radius: 20px 0 0 20px;
+    }
 }
 
 /* Hide any stray indicators from old design */
@@ -523,6 +539,8 @@ body.cursor-press .cursor-dot {
 }
 .hero-image-wrapper {
     position: absolute;
+    max-width: 100%;
+    overflow: hidden;
     inset: 0;
     z-index: -1;
     transform: translate3d(var(--hero-image-shift-x, 0px), var(--hero-image-shift-y, 0px), 0) scale(1.07);
@@ -653,6 +671,54 @@ body.cursor-press .cursor-dot {
     justify-content: flex-start;
     padding-top: 8px;
     animation: heroRise 1s var(--ease-out-expo) 0.18s both;
+}
+@media (max-width: 768px) {
+    .hero-image-wrapper {
+        position: absolute;
+        inset: 0;
+        transform: none !important;   /* remove parallax shift on mobile */
+        height: 50vh;                /* limit height to half the viewport */
+        top: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .hero-image-placeholder {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 20%;  /* keep face visible */
+        filter: brightness(0.6) saturate(0.9);
+    }
+
+    /* Adjust hero content to sit below/over the image */
+    #home {
+        align-items: flex-end;        /* push content to bottom */
+        justify-content: center;
+        padding-top: 0;
+    }
+
+    .hero-content {
+        margin: 0 auto;
+        padding: 20px 24px 40px;
+        width: 100%;
+        text-align: center;
+        align-items: center;
+        background: linear-gradient(0deg, rgba(10,10,13,0.9) 0%, transparent 100%);
+        position: relative;
+        z-index: 4;
+    }
+
+    /* Ensure the gradient overlays still cover the image */
+    .hero-overlay,
+    .hero-gradient-overlay,
+    .hero-vignette {
+        z-index: 1;
+    }
+    .hero-content {
+        z-index: 3;
+    }
 }
 .btn {
     display: inline-flex;

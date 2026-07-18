@@ -232,13 +232,15 @@
     // NAVIGATION: Active state & dot sliding
     // ============================================================
     function updateNavDot() {
-        const activeItem = document.querySelector('.nav-item.active');
-        if (!activeItem || !navDot) return;
-        const navInner = document.querySelector('.nav-inner');
-        const itemRect = activeItem.getBoundingClientRect();
-        const innerRect = navInner.getBoundingClientRect();
-        const dotY = itemRect.top - innerRect.top + (itemRect.height - navDot.offsetHeight) / 2;
-        navDot.style.transform = `translateY(${dotY}px)`;
+        requestAnimationFrame(() => {
+            const activeItem = document.querySelector('.nav-item.active');
+            if (!activeItem || !navDot) return;
+            const navInner = document.querySelector('.nav-inner');
+            const itemRect = activeItem.getBoundingClientRect();
+            const innerRect = navInner.getBoundingClientRect();
+            const dotY = itemRect.top - innerRect.top + (itemRect.height - navDot.offsetHeight) / 2;
+            navDot.style.transform = `translateY(${dotY}px)`;
+    });
     }
 
     function updateActiveNav() {
