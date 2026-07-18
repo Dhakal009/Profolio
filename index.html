@@ -8,7 +8,7 @@
     <!-- Custom fonts (optional, remove if not needed) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -24,6 +24,7 @@
 
     <!-- ==================== FLOATING NAVIGATION ==================== -->
     <nav class="floating-nav" id="floatingNav" aria-label="Main navigation">
+        <span class="nav-active-indicator" aria-hidden="true"></span>
         <a href="#home" class="nav-item active" data-section="home" aria-label="Home">
             <span class="nav-active-dot"></span>
             <span class="nav-icon">●</span>
@@ -61,7 +62,7 @@
         <div class="hero-image-fallback"></div>
         <div class="hero-image-wrapper">
             <!-- PLACEHOLDER: Replace src with your portrait image -->
-            <img src="./profile (1).png"
+            <img src="./profilePicture.png"
             alt="Bikash Dhakal portrait"
             class="hero-image-placeholder"
             id="heroImage"
@@ -69,10 +70,14 @@
             loading="eager">
         </div>
         <div class="hero-overlay"></div>
+            <div class="hero-vignette" aria-hidden="true"></div>
+            <div class="hero-gradient-overlay" aria-hidden="true"></div>
+            <div class="hero-grain" aria-hidden="true"></div>
         <div class="particles-container" id="particlesContainer" aria-hidden="true"></div>
         <div class="hero-content">
+                <span class="hero-chip">Available for opportunities</span>
             <h1 class="hero-name">Bikash<br>Dhakal</h1>
-            <p class="hero-subtitle">Computer Science Student • Full Stack Developer • UI Designer • Problem Solver</p>
+                <p class="hero-subtitle">Computer Science Student • Full Stack Developer • UI Designer<br>Problem Solver • Building thoughtful digital experiences</p>
             <div class="hero-buttons">
                 <a href="#" class="btn btn-primary" id="downloadResume" aria-label="Download Resume">
                     ↓ Download Resume
@@ -92,10 +97,21 @@
     <section class="section" id="certificates" aria-label="Certificates section">
         <span class="section-label">Credentials</span>
         <h2 class="section-title reveal">Certificates</h2>
-        <div class="cert-scroll-wrapper reveal">
-            <div class="cert-track" id="certTrack">
-                <!-- Populated by JavaScript -->
+        <div class="cert-carousel reveal">
+            <div class="cert-carousel-shell">
+                <button class="cert-nav-btn cert-nav-prev" id="certPrev" aria-label="Previous certificates">
+                    <span>‹</span>
+                </button>
+                <div class="cert-scroll-wrapper">
+                    <div class="cert-track" id="certTrack">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+                <button class="cert-nav-btn cert-nav-next" id="certNext" aria-label="Next certificates">
+                    <span>›</span>
+                </button>
             </div>
+            <div class="cert-pagination" id="certPagination" aria-label="Certificate pagination"></div>
         </div>
     </section>
     <!-- Cert Modal -->
@@ -109,9 +125,25 @@
     <section class="section" id="journey" aria-label="Journey section">
         <span class="section-label">My Path</span>
         <h2 class="section-title reveal">Journey</h2>
-        <div class="journey-roadmap" id="journeyRoadmap">
-            <div class="journey-line" id="journeyLine"></div>
-            <!-- Populated by JavaScript -->
+        <div class="journey-map-shell">
+            <div class="journey-map-texture" aria-hidden="true"></div>
+            <div class="journey-map-glow journey-map-glow-a" aria-hidden="true"></div>
+            <div class="journey-map-glow journey-map-glow-b" aria-hidden="true"></div>
+            <div class="journey-map-corner" aria-hidden="true">N • E • S • W</div>
+            <div class="journey-progress-chip" id="journeyProgressChip" aria-hidden="true">Route progress 0%</div>
+            <svg class="journey-route" id="journeyRoute" viewBox="0 0 1200 1200" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                    <marker id="journeyArrow" markerWidth="8" markerHeight="8" refX="5.5" refY="4" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L8,4 L0,8 z" fill="currentColor"></path>
+                    </marker>
+                </defs>
+                <path id="journeyRouteBase"></path>
+                <path id="journeyRouteProgress"></path>
+                <path id="journeyRouteDash"></path>
+            </svg>
+            <div class="journey-roadmap" id="journeyRoadmap">
+                <!-- Populated by JavaScript -->
+            </div>
         </div>
     </section>
 
