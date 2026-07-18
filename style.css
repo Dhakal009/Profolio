@@ -673,15 +673,13 @@ body:hover .floating-nav {
     animation: heroRise 1s var(--ease-out-expo) 0.18s both;
 }
 @media (max-width: 768px) {
-    .hero-image-wrapper {
-        position: absolute;
-        inset: 0;
-        transform: none !important;   /* remove parallax shift on mobile */
-        height: 50vh;                /* limit height to half the viewport */
-        top: 0;
-        left: 0;
+   /* Ensure the picture and its image fill the hero wrapper */
+    .hero-image-wrapper picture,
+    .hero-image-wrapper picture img {
+        display: block;
         width: 100%;
-        overflow: hidden;
+        height: 100%;
+        object-fit: cover;
     }
 
     .hero-image-placeholder {
