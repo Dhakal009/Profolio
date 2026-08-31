@@ -1,201 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bikash Dhakal — Portfolio 2026</title>
-
-    <!-- ===== FONTS ===== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bikash Dhakal Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <!-- ========== LOADING SCREEN ========== -->
-    <div class="loader" id="loader" aria-hidden="true">
-        <div class="loader-logo">BD</div>
-        <div class="loader-percentage" id="loaderPercent">0%</div>
+  <!-- SCROLL PROGRESS -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a href="#home" class="logo">B<span class="logo-dot">.</span>D</a>
+      <nav class="top-nav" id="topNav">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#education" class="nav-link">Education</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+      <div class="nav-actions">
+        <a href="#contact" class="nav-cta">Let's talk</a>
+        <a href="resume.pdf" class="resume-btn" download target="_blank" rel="noopener">Resume</a>
+      </div>
+      <button class="menu-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section id="home" class="section hero">
+    <div class="hero-glow" id="heroGlow"></div>
+    <div class="bean bean-1"></div>
+    <div class="bean bean-2"></div>
+    <div class="bean bean-3"></div>
+    <div class="steam-wrap">
+      <span class="steam s1"></span>
+      <span class="steam s2"></span>
+      <span class="steam s3"></span>
     </div>
 
-    <!-- ========== CUSTOM CURSOR ========== -->
-    <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
-    <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <p class="hero-eyebrow" data-parallax="0.15">Web Developer, based in Kathmandu</p>
+      <h1 class="hero-name" id="heroName">
+        <span class="reveal-line">Bikash</span>
+        <span class="reveal-line">Dhakal</span>
+      </h1>
+      <p class="hero-text" data-parallax="0.25">
+        I build clean, thoughtful web experiences — the kind that feel
+        as good to use as a slow morning coffee. Currently crafting
+        interfaces and side projects, one cup at a time.
+      </p>
 
-    <!-- ========== FLOATING NAV — REFINED PILL ========== -->
-    <nav class="floating-nav" id="floatingNav" aria-label="Main navigation">
-        <div class="nav-inner">
-            <!-- Active dot indicator — slides vertically -->
-            <div class="nav-dot" id="navDot" aria-hidden="true"></div>
+      <div class="hero-actions">
+        <a href="#projects" class="hero-cta magnetic">See my work</a>
+        <a href="#contact" class="hero-cta hero-cta--ghost magnetic">Get in touch</a>
+      </div>
 
-            <a href="#home" class="nav-item active" data-section="home" aria-label="Home">
-                <span class="nav-label">Home</span>
-            </a>
-            <a href="#certificates" class="nav-item" data-section="certificates" aria-label="Certificates">
-                <span class="nav-label">Certificates</span>
-            </a>
-            <a href="#journey" class="nav-item" data-section="journey" aria-label="Journey">
-                <span class="nav-label">Journey</span>
-            </a>
-            <a href="#skills" class="nav-item" data-section="skills" aria-label="Skills">
-                <span class="nav-label">Skills</span>
-            </a>
-            <a href="#projects" class="nav-item" data-section="projects" aria-label="Projects">
-                <span class="nav-label">Projects</span>
-            </a>
-            <a href="#contact" class="nav-item" data-section="contact" aria-label="Contact">
-                <span class="nav-label">Contact</span>
-            </a>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number" data-target="1">0</span><span class="stat-suffix">+</span>
+          <p>Years coding</p>
         </div>
-    </nav>
+        <div class="stat">
+          <span class="stat-number" data-target="0">0</span><span class="stat-suffix">+</span>
+          <p>Projects shipped</p>
+        </div>
+        <div class="stat">
+          <span class="stat-number" data-target="900">0</span><span class="stat-suffix">+</span>
+          <p>Sips of Chiya</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <!-- ========== HOME ========== -->
-    <section class="section" id="home" aria-label="Home section">
-        <div class="hero-image-fallback"></div>
-        <div class="hero-image-wrapper">
-            <picture>
-                <!-- Mobile image (screen width ≤ 768px) -->
-                <source media="(max-width: 768px)" srcset="./pictures/mobileBackground.png">
-                <!-- Desktop image (default) -->
-                <img src="./pictures/desktopBackground.png" alt="Bikash Dhakal portrait" class="hero-image-placeholder" id="heroImage" loading="eager" />
-            </picture>
+  <!-- ABOUT -->
+  <section id="about" class="section about">
+    <div class="section-inner">
+      <h2 class="section-title" data-parallax="0.1">About</h2>
+      <div class="about-grid">
+        <div class="about-photo reveal">
+          <div class="photo-frame">BD</div>
+          <div class="photo-tag">Currently: building side projects &amp; drinking too much chiya</div>
         </div>
-        <div class="hero-overlay"></div>
-        <div class="hero-vignette" aria-hidden="true"></div>
-        <div class="hero-gradient-overlay" aria-hidden="true"></div>
-        <div class="hero-grain" aria-hidden="true"></div>
-        <div class="particles-container" id="particlesContainer" aria-hidden="true"></div>
-        <div class="hero-content">
-            <span class="hero-chip">Available for opportunities</span>
-            <h1 class="hero-name">Bikash<br />Dhakal</h1>
-            <p class="hero-subtitle">Computer Science Student • Full Stack Developer • UI Designer<br />Problem Solver • Building thoughtful digital experiences</p>
-            <div class="hero-buttons">
-                <a href="#" class="btn btn-primary" id="downloadResume" aria-label="Download Resume">↓ Download Resume</a>
-                <a href="#projects" class="btn btn-outline" aria-label="View Projects">View Projects →</a>
-            </div>
+        <div class="about-copy">
+          <p class="about-lead reveal">
+            I'm <strong>Bikash Dhakal</strong>, a 21-year-old developer
+            living in Kathmandu, Nepal.
+          </p>
+          <p class="reveal">
+            I like turning rough ideas into interfaces that feel
+            simple and honest to use. My favourite part of the job is
+            the small details — the transition that feels just right,
+            the layout that doesn't need instructions.
+          </p>
+          <p class="reveal">
+            Outside of code, you'll usually find me with a cup of
+            milk tea, reading about design, or getting lost in
+            the old streets of the city looking for the next good
+            place to sit and write.
+          </p>
+          <ul class="about-facts reveal">
+            <li><span>Name</span>Bikash Dhakak</li>
+            <li><span>Age</span>21</li>
+            <li><span>Location</span>Shankhamul,Kathmandu, Nepal</li>
+            <li><span>Focus</span>MERN Stack &amp; Web Development</li>
+            <li><span>Availability</span>Open to freelance &amp; full-time roles</li>
+          </ul>
         </div>
-        <div class="scroll-indicator" aria-hidden="true">
-            <span>SCROLL</span>
-            <div class="scroll-line"></div>
-        </div>
-    </section>
+      </div>
 
-    <!-- ========== CERTIFICATES ========== -->
-    <section class="section" id="certificates" aria-label="Certificates section">
-        <span class="section-label">Credentials</span>
-        <h2 class="section-title reveal">Certificates</h2>
-        <div class="cert-carousel reveal">
-            <div class="cert-carousel-shell">
-                <button class="cert-nav-btn cert-nav-prev" id="certPrev" aria-label="Previous certificates"><span>‹</span></button>
-                <div class="cert-scroll-wrapper">
-                    <div class="cert-track" id="certTrack"></div>
-                </div>
-                <button class="cert-nav-btn cert-nav-next" id="certNext" aria-label="Next certificates"><span>›</span></button>
-            </div>
-            <div class="cert-pagination" id="certPagination" aria-label="Certificate pagination"></div>
+      <div class="fun-facts">
+        <div class="fact-card reveal">
+          <h4>Favourite stack</h4>
+          <p>React, Node.js and a strong cup of tea</p>
         </div>
-    </section>
-    <!-- Cert Modal -->
-    <div class="modal-overlay" id="certModal" aria-hidden="true">
-        <div class="modal-content" id="certModalContent"></div>
+        <div class="fact-card reveal">
+          <h4>Currently learning</h4>
+          <p>TypeScript, Next.js and system design</p>
+        </div>
+        <div class="fact-card reveal">
+          <h4>Off the clock</h4>
+          <p>Nerd , chess and long walks</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION & SKILLS -->
+  <section id="education" class="section education">
+    <div class="section-inner">
+      <h2 class="section-title" data-parallax="0.1">Education &amp; Skills</h2>
+
+      <div class="edu-timeline">
+        <div class="edu-item reveal">
+          <div class="edu-year">2020 — 2022</div>
+          <div class="edu-body">
+            <h3>Higher Secondary, Science</h3>
+            <p>Khwopa Secondary School</p>
+          </div>
+        </div>
+        <div class="edu-item reveal">
+          <div class="edu-year">2024 — Present</div>
+          <div class="edu-body">
+            <h3>B.Sc.CSIT Computer Science</h3>
+            <p>Himalaya College of Engineering</p>
+            <p>Tribhuvan University, Kathmandu</p>
+          </div>
+        </div>
+        <div class="edu-item reveal">
+          <div class="edu-year">2026</div>
+          <div class="edu-body">
+            <p>Self Learning from Youtube and Websites</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="cert-row reveal">
+        <span class="cert-chip">freeCodeCamp — RWD</span>
+        <span class="cert-chip">Meta — Frontend Developer</span>
+        <span class="cert-chip">AWS Cloud Practitioner</span>
+      </div> -->
+
+      <div class="skills-block">
+        <h3 class="skills-heading">Skills</h3>
+        <div class="skills-grid">
+          <div class="skill-card reveal">
+            <h4>Frontend</h4>
+            <p>HTML, CSS, JavaScript, React</p>
+            <div class="skill-bar"><span style="--level:92%"></span></div>
+          </div>
+          <div class="skill-card reveal">
+            <h4>Backend</h4>
+            <p>Node.js, Express, REST APIs</p>
+            <div class="skill-bar"><span style="--level:78%"></span></div>
+          </div>
+          <div class="skill-card reveal">
+            <h4>Database</h4>
+            <p>MongoDB, MySQL</p>
+            <div class="skill-bar"><span style="--level:72%"></span></div>
+          </div>
+          <div class="skill-card reveal">
+            <h4>Tools</h4>
+            <p>Git, GitHub, Figma, VS Code</p>
+            <div class="skill-bar"><span style="--level:85%"></span></div>
+          </div>
+          <div class="skill-card reveal">
+            <h4>Currently learning</h4>
+            <p>TypeScript, Next.js, GraphQL</p>
+            <div class="skill-bar"><span style="--level:55%"></span></div>
+          </div>
+          <div class="skill-card reveal">
+            <h4>Soft skills</h4>
+            <p>Communication, ownership, mentoring</p>
+            <div class="skill-bar"><span style="--level:88%"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="section projects">
+    <div class="section-inner">
+      <h2 class="section-title" data-parallax="0.1">Projects</h2>
+      <p class="section-sub">A few things I've built recently. Hover the edges to navigate.</p>
     </div>
 
-    <!-- ========== JOURNEY ========== -->
-    <section class="section" id="journey" aria-label="Journey section">
-        <span class="section-label">My Path</span>
-        <h2 class="section-title reveal">Journey</h2>
-        <div class="journey-map-shell">
-            <div class="journey-map-texture" aria-hidden="true"></div>
-            <div class="journey-map-glow journey-map-glow-a" aria-hidden="true"></div>
-            <div class="journey-map-glow journey-map-glow-b" aria-hidden="true"></div>
-            <div class="journey-map-corner" aria-hidden="true">N • E • S • W</div>
-            <div class="journey-progress-chip" id="journeyProgressChip" aria-hidden="true">Route progress 0%</div>
-            <svg class="journey-route" id="journeyRoute" viewBox="0 0 1200 1200" preserveAspectRatio="none" aria-hidden="true">
-                <defs>
-                    <marker id="journeyArrow" markerWidth="8" markerHeight="8" refX="5.5" refY="4" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L8,4 L0,8 z" fill="currentColor" />
-                    </marker>
-                </defs>
-                <path id="journeyRouteBase"></path>
-                <path id="journeyRouteProgress"></path>
-                <path id="journeyRouteDash"></path>
+    <div class="project-carousel" id="projectCarousel">
+      <button class="project-nav prev" id="prevBtn" aria-label="Previous project">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <div class="project-viewport">
+        <div class="project-track" id="projectTrack">
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#5a3a26,#2b1c14)">Weather App</div>
+            <div class="project-body">
+              <h3>Weatherly</h3>
+              <p>A minimal weather app with live data, location search and clean data visualisation.</p>
+              <div class="tag-row"><span>React</span><span>API</span><span>Chart.js</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#6b4423,#3d2418)">Task Manager</div>
+            <div class="project-body">
+              <h3>Taskbrew</h3>
+              <p>A drag-and-drop task board built with React, focused on speed and keyboard shortcuts.</p>
+              <div class="tag-row"><span>React</span><span>DnD</span><span>LocalStorage</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#7a5230,#2b1c14)">Recipe Finder</div>
+            <div class="project-body">
+              <h3>Grindhouse</h3>
+              <p>Search recipes by ingredients you already have, with saved favourites and filters.</p>
+              <div class="tag-row"><span>JavaScript</span><span>API</span><span>CSS Grid</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#4a3020,#1b120d)">Blog Platform</div>
+            <div class="project-body">
+              <h3>Roastnotes</h3>
+              <p>A lightweight blogging platform with markdown editing and instant preview.</p>
+              <div class="tag-row"><span>Node.js</span><span>MongoDB</span><span>Markdown</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#8a5f36,#3d2418)">Budget Tracker</div>
+            <div class="project-body">
+              <h3>Pennywise</h3>
+              <p>A simple expense tracker with monthly breakdowns and category insights.</p>
+              <div class="tag-row"><span>React</span><span>Recharts</span><span>REST API</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#5e3d24,#1e1410)">Chat App</div>
+            <div class="project-body">
+              <h3>Brewline</h3>
+              <p>A real-time chat app with rooms, typing indicators and message history.</p>
+              <div class="tag-row"><span>Socket.io</span><span>Express</span><span>MongoDB</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+          <article class="project-card">
+            <div class="project-img" style="background:linear-gradient(135deg,#8a5f36,#2b1c14)">Portfolio v1</div>
+            <div class="project-body">
+              <h3>This site</h3>
+              <p>The very portfolio you're looking at — built with plain HTML, CSS and JS.</p>
+              <div class="tag-row"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+              <a href="https://github.com" target="_blank" rel="noopener">View on GitHub →</a>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <button class="project-nav next" id="nextBtn" aria-label="Next project">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+      </button>
+
+      <div class="project-counter">
+        <span id="projectCurrent">01</span> / <span id="projectTotal">07</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="section contact">
+    <div class="section-inner">
+      <h2 class="section-title" data-parallax="0.1">Contact</h2>
+      <p class="section-sub">Feel free to reach out — I usually reply within a day. Currently open to freelance work and
+        full-time roles.</p>
+      <div class="contact-grid">
+        <a class="contact-card reveal magnetic" href="mailto:aarav.sharma.dev@gmail.com">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 6l9 7 9-7M3 6v12h18V6M3 6h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
-            <div class="journey-roadmap" id="journeyRoadmap"></div>
-        </div>
-    </section>
-
-    <!-- ========== SKILLS ========== -->
-    <section class="section" id="skills" aria-label="Skills section">
-        <span class="section-label">Expertise</span>
-        <h2 class="section-title reveal">Skills</h2>
-        <div class="skills-cloud stagger-children" id="skillsCloud"></div>
-    </section>
-    <!-- Skill Popup -->
-    <div class="popup-backdrop" id="skillBackdrop"></div>
-    <div class="skill-popup" id="skillPopup">
-        <button class="skill-popup-close" id="skillPopupClose">&times;</button>
-        <div id="skillPopupContent"></div>
+          </span>
+          <span class="contact-label">Email</span>
+          <span class="contact-value">bikashdhakal546@gmail.com</span>
+        </a>
+        <a class="contact-card reveal magnetic" href="https://github.com/Dhakal009" target="_blank" rel="noopener">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2a10 10 0 00-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.83-2.34 4.68-4.57 4.92.36.31.68.92.68 1.86v2.75c0 .27.18.58.69.48A10 10 0 0012 2z"
+                fill="currentColor" />
+            </svg>
+          </span>
+          <span class="contact-label">GitHub</span>
+          <span class="contact-value">github.com/Dhakal009</span>
+        </a>
+        <a class="contact-card reveal magnetic" href="https://linkedin.com/in/aaravsharma" target="_blank"
+          rel="noopener">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M6.94 6.5a1.94 1.94 0 11-3.88 0 1.94 1.94 0 013.88 0zM3.5 8.75h3v11.75h-3zM9.5 8.75h2.87v1.6h.04c.4-.76 1.38-1.6 2.85-1.6 3.05 0 3.61 2 3.61 4.6v7.15h-3v-6.34c0-1.51-.03-3.46-2.1-3.46-2.11 0-2.43 1.65-2.43 3.35v6.45h-3z"
+                fill="currentColor" />
+            </svg>
+          </span>
+          <span class="contact-label">LinkedIn</span>
+          <span class="contact-value">linkedin.com/in/bikashdhakal</span>
+        </a>
+        <a class="contact-card reveal magnetic" href="https://twitter.com/aaravsharma" target="_blank" rel="noopener">
+          <span class="contact-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path
+                d="M22 5.9c-.7.3-1.5.5-2.2.6.8-.5 1.4-1.2 1.7-2.1-.8.4-1.6.8-2.5.9A3.9 3.9 0 0016 4c-2.2 0-3.9 1.8-3.9 4 0 .3 0 .6.1.9-3.3-.2-6.2-1.7-8.1-4.1-.3.6-.5 1.2-.5 2 0 1.4.7 2.6 1.8 3.3-.6 0-1.2-.2-1.7-.5v.1c0 1.9 1.4 3.5 3.2 3.9-.3.1-.7.1-1.1.1-.3 0-.5 0-.8-.1.5 1.6 2 2.8 3.8 2.8A7.9 7.9 0 012 18.6 11 11 0 008 20.4c7 0 10.8-5.8 10.8-10.8v-.5c.8-.5 1.4-1.2 2-2z"
+                fill="currentColor" />
+            </svg>
+          </span>
+          <span class="contact-label">Twitter / X</span>
+          <span class="contact-value">@bikashdhakal</span>
+        </a>
+      </div>
     </div>
+  </section>
 
-    <!-- ========== PROJECTS ========== -->
-    <section class="section" id="projects" aria-label="Projects section">
-        <span class="section-label">Work</span>
-        <h2 class="section-title reveal">Projects</h2>
-        <div class="projects-horizontal" id="projectsHorizontal"></div>
-    </section>
-
-    <!-- ========== CONTACT ========== -->
-    <section class="section" id="contact" aria-label="Contact section">
-        <span class="section-label">Get In Touch</span>
-        <h2 class="section-title reveal">Contact</h2>
-        <div class="contact-grid reveal">
-            <form class="contact-form" id="contactForm" aria-label="Contact form">
-                <input type="text" placeholder="Your Name" required aria-label="Name" />
-                <input type="email" placeholder="Your Email" required aria-label="Email" />
-                <textarea placeholder="Your Message" required aria-label="Message"></textarea>
-                <button type="submit" class="btn btn-primary">Send Message ↗</button>
-            </form>
-            <div>
-                <p class="contact-info-text">
-                    Feel free to reach out for collaborations, freelance projects, or just a friendly chat.<br /><br />
-                    Email: <a href="mailto:bikash@example.com">bikash@example.com</a>
-                </p>
-                <div class="social-icons">
-                    <a href="https://github.com/bikashdhakal" class="social-icon" target="_blank" rel="noopener" aria-label="GitHub">⚙</a>
-                    <a href="https://linkedin.com/in/bikashdhakal" class="social-icon" target="_blank" rel="noopener" aria-label="LinkedIn">★</a>
-                    <a href="mailto:bikash@example.com" class="social-icon" aria-label="Gmail">✉</a>
-                    <a href="https://instagram.com/bikashdhakal" class="social-icon" target="_blank" rel="noopener" aria-label="Instagram">◆</a>
-                    <a href="https://twitter.com/bikashdhakal" class="social-icon" target="_blank" rel="noopener" aria-label="Twitter/X">✕</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ========== AI ASSISTANT ========== -->
-    <div class="ai-assistant" id="aiAssistant" aria-label="AI Assistant">
-        <div class="ai-orb" id="aiOrb" title="Ask me anything about Bikash">
-            ✦
-            <div class="ai-orb-pulse"></div>
-        </div>
-        <div class="chat-window" id="chatWindow">
-            <div class="chat-header">
-                <span>AI Assistant</span>
-                <button class="chat-close" id="chatClose">&times;</button>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-msg bot">Hello! Ask me anything about Bikash's portfolio, skills, or projects. 💡</div>
-            </div>
-            <div class="chat-typing" id="chatTyping">Typing...</div>
-            <div class="chat-input-row">
-                <input type="text" id="chatInput" placeholder="Ask a question..." aria-label="Chat input" />
-                <button class="chat-send" id="chatSend" aria-label="Send message">↑</button>
-            </div>
-        </div>
+  <footer class="site-footer">
+    <div class="footer-top">
+      <p>Designed &amp; built by Bikash Dhakal</p>
+      <nav class="footer-nav">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#education">Education</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </nav>
     </div>
+    <p class="footer-year">© <span id="year"></span> Bikash Dhakal. Made with Passion.</p>
+  </footer>
 
-    <script src="script.js"></script>
+  <button class="to-top" id="toTop" aria-label="Back to top">↑</button>
+
+  <script src="script.js"></script>
 </body>
+
 </html>
