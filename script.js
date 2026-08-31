@@ -198,6 +198,33 @@ if (menuToggle) {
   });
 }
 
+/* ---------- SKILL CARD DETAILS ---------- */
+document.querySelectorAll('.skill-card').forEach(card => {
+  const toggle = card.querySelector('.skill-toggle');
+  if (!toggle) return;
+
+  const toggleCard = () => {
+    const isOpen = card.classList.contains('is-open');
+    document.querySelectorAll('.skill-card').forEach(item => {
+      item.classList.remove('is-open');
+      const itemToggle = item.querySelector('.skill-toggle');
+      if (itemToggle) itemToggle.setAttribute('aria-expanded', 'false');
+    });
+
+    if (!isOpen) {
+      card.classList.add('is-open');
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+  };
+
+  toggle.addEventListener('click', toggleCard);
+  card.addEventListener('click', (event) => {
+    if (event.target.closest('button, h4, p')) {
+      toggleCard();
+    }
+  });
+});
+
 /* ---------- PROJECT CAROUSEL ---------- */
 const projectCarousel = document.getElementById('projectCarousel');
 const projectTrack = document.getElementById('projectTrack');
