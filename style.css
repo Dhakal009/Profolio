@@ -558,19 +558,6 @@ img{max-width:100%;display:block;}
   opacity:1;margin-top:0.8rem;
 }
 .skill-details p{color:var(--muted);font-size:0.84rem;line-height:1.6;margin:0;}
-.skill-bar{
-  width:100%;height:4px;margin-top:0.9rem;
-  background:rgba(255,255,255,0.08);
-  border-radius:2px;
-  overflow:hidden;
-}
-.skill-bar span{
-  display:block;height:100%;width:0;
-  background:var(--accent);
-  border-radius:2px;
-  transition:width 1.1s cubic-bezier(.22,1,.36,1);
-}
-.skill-card.in-view .skill-bar span{width:var(--level);}
 
 /* ---------- PROJECTS ---------- */
 .projects{background:transparent;}
