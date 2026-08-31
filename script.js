@@ -163,18 +163,33 @@ const statObserver = new IntersectionObserver((entries, obs) => {
 
 statNumbers.forEach(el => statObserver.observe(el));
 
-/* ---------- HERO GLOW FOLLOWS POINTER ---------- */
+/* ---------- HERO GLOW + TILT FOLLOWS POINTER ---------- */
 const heroGlow = document.getElementById('heroGlow');
 const heroSection = document.getElementById('home');
+const heroInner = document.getElementById('heroInner');
 const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
-if (heroGlow && heroSection && hasFinePointer && !prefersReducedMotion) {
+if (heroSection && hasFinePointer && !prefersReducedMotion) {
   heroSection.addEventListener('mousemove', (e) => {
     const rect = heroSection.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    heroGlow.style.setProperty('--x', `${x}px`);
-    heroGlow.style.setProperty('--y', `${y}px`);
+
+    if (heroGlow) {
+      heroGlow.style.setProperty('--x', `${x}px`);
+      heroGlow.style.setProperty('--y', `${y}px`);
+    }
+
+    if (heroInner) {
+      const relX = (x / rect.width - 0.5) * 2;   // -1 to 1
+      const relY = (y / rect.height - 0.5) * 2;  // -1 to 1
+      const maxTilt = 4; // degrees
+      heroInner.style.transform = `rotateY(${relX * maxTilt}deg) rotateX(${relY * -maxTilt}deg)`;
+    }
+  });
+
+  heroSection.addEventListener('mouseleave', () => {
+    if (heroInner) heroInner.style.transform = 'rotateY(0deg) rotateX(0deg)';
   });
 }
 
