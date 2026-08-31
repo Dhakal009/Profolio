@@ -203,10 +203,21 @@ document.querySelectorAll('.skill-card').forEach(card => {
   const toggle = card.querySelector('.skill-toggle');
   if (!toggle) return;
 
+  const details = card.querySelector('.skill-details');
+
+  const syncDetailsHeight = () => {
+    if (!details) return;
+    const targetHeight = card.classList.contains('is-open') ? `${details.scrollHeight}px` : '0px';
+    details.style.maxHeight = targetHeight;
+  };
+
   const toggleCard = () => {
     const isOpen = card.classList.contains('is-open');
+
     document.querySelectorAll('.skill-card').forEach(item => {
       item.classList.remove('is-open');
+      const itemDetails = item.querySelector('.skill-details');
+      if (itemDetails) itemDetails.style.maxHeight = '0px';
       const itemToggle = item.querySelector('.skill-toggle');
       if (itemToggle) itemToggle.setAttribute('aria-expanded', 'false');
     });
@@ -215,14 +226,13 @@ document.querySelectorAll('.skill-card').forEach(card => {
       card.classList.add('is-open');
       toggle.setAttribute('aria-expanded', 'true');
     }
+
+    syncDetailsHeight();
   };
 
-  toggle.addEventListener('click', toggleCard);
-  card.addEventListener('click', (event) => {
-    if (event.target.closest('button, h4, p')) {
-      toggleCard();
-    }
-  });
+  card.addEventListener('click', () => toggleCard());
+  window.addEventListener('resize', syncDetailsHeight);
+  syncDetailsHeight();
 });
 
 /* ---------- PROJECT CAROUSEL ---------- */

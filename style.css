@@ -555,7 +555,7 @@ img{max-width:100%;display:block;}
   transition:max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease;
 }
 .skill-card.is-open .skill-details{
-  max-height:180px;opacity:1;margin-top:0.8rem;
+  opacity:1;margin-top:0.8rem;
 }
 .skill-details p{color:var(--muted);font-size:0.84rem;line-height:1.6;margin:0;}
 .skill-bar{
