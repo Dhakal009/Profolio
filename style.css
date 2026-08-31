@@ -770,6 +770,15 @@ img{max-width:100%;display:block;}
   .section{padding:5.5rem 1.4rem;}
   .hero{padding:6rem 1.2rem 2.5rem;}
   .hero-inner{padding:2.4rem 1.6rem;border-radius:20px;}
+  .status-badge{
+    width:100%;
+    margin:0 auto 1.3rem;
+    padding:0.45rem 0.8rem;
+    font-size:0.7rem;
+    gap:0.45rem;
+    line-height:1.3;
+  }
+  .status-dot{width:7px;height:7px;}
   .edu-item{grid-template-columns:1fr;gap:0.3rem;}
   .footer-top{flex-direction:column;align-items:flex-start;}
   .to-top{right:1.2rem;bottom:1.2rem;}
