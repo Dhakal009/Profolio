@@ -135,34 +135,6 @@ const revealObserver = new IntersectionObserver((entries, obs) => {
 
 document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-/* ---------- STAT COUNTERS ---------- */
-const statNumbers = document.querySelectorAll('.stat-number');
-
-function animateCount(el){
-  const target = parseInt(el.getAttribute('data-target'), 10) || 0;
-  const duration = 1400;
-  const start = performance.now();
-
-  function tick(now){
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.round(eased * target);
-    if (progress < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-const statObserver = new IntersectionObserver((entries, obs) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      animateCount(entry.target);
-      obs.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.5 });
-
-statNumbers.forEach(el => statObserver.observe(el));
-
 /* ---------- HERO GLOW + TILT FOLLOWS POINTER ---------- */
 const heroGlow = document.getElementById('heroGlow');
 const heroSection = document.getElementById('home');
