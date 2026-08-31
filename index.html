@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bikash Dhakal Portfolio</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aarav Sharma — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+
+  <!-- AMBIENT BACKGROUND GLOW -->
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
 
   <!-- SCROLL PROGRESS -->
   <div class="progress-bar" id="progressBar"></div>
@@ -20,7 +21,7 @@
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
     <div class="header-inner">
-      <a href="#home" class="logo">B<span class="logo-dot">.</span>D</a>
+      <a href="#home" class="logo">A<span class="logo-dot">.</span>S</a>
       <nav class="top-nav" id="topNav">
         <a href="#home" class="nav-link active">Home</a>
         <a href="#about" class="nav-link">About</a>
@@ -41,20 +42,12 @@
   <!-- HOME -->
   <section id="home" class="section hero">
     <div class="hero-glow" id="heroGlow"></div>
-    <div class="bean bean-1"></div>
-    <div class="bean bean-2"></div>
-    <div class="bean bean-3"></div>
-    <div class="steam-wrap">
-      <span class="steam s1"></span>
-      <span class="steam s2"></span>
-      <span class="steam s3"></span>
-    </div>
 
     <div class="hero-inner">
-      <p class="hero-eyebrow" data-parallax="0.15">Web Developer, based in Kathmandu</p>
+      <p class="hero-eyebrow" data-parallax="0.15">Software Developer, based in Kathmandu</p>
       <h1 class="hero-name" id="heroName">
-        <span class="reveal-line">Bikash</span>
-        <span class="reveal-line">Dhakal</span>
+        <span class="reveal-line">Aarav</span>
+        <span class="reveal-line">Sharma</span>
       </h1>
       <p class="hero-text" data-parallax="0.25">
         I build clean, thoughtful web experiences — the kind that feel
@@ -69,18 +62,23 @@
 
       <div class="hero-stats">
         <div class="stat">
-          <span class="stat-number" data-target="1">0</span><span class="stat-suffix">+</span>
+          <span class="stat-number" data-target="3">0</span><span class="stat-suffix">+</span>
           <p>Years coding</p>
         </div>
         <div class="stat">
-          <span class="stat-number" data-target="0">0</span><span class="stat-suffix">+</span>
+          <span class="stat-number" data-target="24">0</span><span class="stat-suffix">+</span>
           <p>Projects shipped</p>
         </div>
         <div class="stat">
           <span class="stat-number" data-target="900">0</span><span class="stat-suffix">+</span>
-          <p>Sips of Chiya</p>
+          <p>Cups of coffee</p>
         </div>
       </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
     </div>
   </section>
 
@@ -90,12 +88,12 @@
       <h2 class="section-title" data-parallax="0.1">About</h2>
       <div class="about-grid">
         <div class="about-photo reveal">
-          <div class="photo-frame">BD</div>
-          <div class="photo-tag">Currently: building side projects &amp; drinking too much chiya</div>
+          <div class="photo-frame">AS</div>
+          <div class="photo-tag">Currently: building side projects &amp; drinking too much espresso</div>
         </div>
         <div class="about-copy">
           <p class="about-lead reveal">
-            I'm <strong>Bikash Dhakal</strong>, a 21-year-old developer
+            I'm <strong>Aarav Sharma</strong>, a 23-year-old developer
             living in Kathmandu, Nepal.
           </p>
           <p class="reveal">
@@ -106,15 +104,15 @@
           </p>
           <p class="reveal">
             Outside of code, you'll usually find me with a cup of
-            milk tea, reading about design, or getting lost in
+            black coffee, reading about design, or getting lost in
             the old streets of the city looking for the next good
             place to sit and write.
           </p>
           <ul class="about-facts reveal">
-            <li><span>Name</span>Bikash Dhakak</li>
-            <li><span>Age</span>21</li>
-            <li><span>Location</span>Shankhamul,Kathmandu, Nepal</li>
-            <li><span>Focus</span>MERN Stack &amp; Web Development</li>
+            <li><span>Name</span>Aarav Sharma</li>
+            <li><span>Age</span>23</li>
+            <li><span>Location</span>Kathmandu, Nepal</li>
+            <li><span>Focus</span>Frontend &amp; Web Development</li>
             <li><span>Availability</span>Open to freelance &amp; full-time roles</li>
           </ul>
         </div>
@@ -123,7 +121,7 @@
       <div class="fun-facts">
         <div class="fact-card reveal">
           <h4>Favourite stack</h4>
-          <p>React, Node.js and a strong cup of tea</p>
+          <p>React, Node.js and a strong cup of coffee</p>
         </div>
         <div class="fact-card reveal">
           <h4>Currently learning</h4>
@@ -131,7 +129,7 @@
         </div>
         <div class="fact-card reveal">
           <h4>Off the clock</h4>
-          <p>Nerd , chess and long walks</p>
+          <p>Street photography, chess and long walks</p>
         </div>
       </div>
     </div>
@@ -144,33 +142,33 @@
 
       <div class="edu-timeline">
         <div class="edu-item reveal">
-          <div class="edu-year">2020 — 2022</div>
+          <div class="edu-year">2021 — 2025</div>
           <div class="edu-body">
-            <h3>Higher Secondary, Science</h3>
-            <p>Khwopa Secondary School</p>
-          </div>
-        </div>
-        <div class="edu-item reveal">
-          <div class="edu-year">2024 — Present</div>
-          <div class="edu-body">
-            <h3>B.Sc.CSIT Computer Science</h3>
-            <p>Himalaya College of Engineering</p>
+            <h3>B.Sc. Computer Science</h3>
             <p>Tribhuvan University, Kathmandu</p>
           </div>
         </div>
         <div class="edu-item reveal">
-          <div class="edu-year">2026</div>
+          <div class="edu-year">2019 — 2021</div>
           <div class="edu-body">
-            <p>Self Learning from Youtube and Websites</p>
+            <h3>Higher Secondary, Science</h3>
+            <p>Kathmandu Model College</p>
+          </div>
+        </div>
+        <div class="edu-item reveal">
+          <div class="edu-year">2023</div>
+          <div class="edu-body">
+            <h3>Frontend Development Certificate</h3>
+            <p>freeCodeCamp — Responsive Web Design</p>
           </div>
         </div>
       </div>
 
-      <!-- <div class="cert-row reveal">
+      <div class="cert-row reveal">
         <span class="cert-chip">freeCodeCamp — RWD</span>
         <span class="cert-chip">Meta — Frontend Developer</span>
         <span class="cert-chip">AWS Cloud Practitioner</span>
-      </div> -->
+      </div>
 
       <div class="skills-block">
         <h3 class="skills-heading">Skills</h3>
@@ -219,16 +217,13 @@
 
     <div class="project-carousel" id="projectCarousel">
       <button class="project-nav prev" id="prevBtn" aria-label="Previous project">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-            stroke-linejoin="round" />
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
 
       <div class="project-viewport">
         <div class="project-track" id="projectTrack">
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#5a3a26,#2b1c14)">Weather App</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#3730a3,#050507)">Weather App</div>
             <div class="project-body">
               <h3>Weatherly</h3>
               <p>A minimal weather app with live data, location search and clean data visualisation.</p>
@@ -237,7 +232,7 @@
             </div>
           </article>
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#6b4423,#3d2418)">Task Manager</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#6d28d9,#050507)">Task Manager</div>
             <div class="project-body">
               <h3>Taskbrew</h3>
               <p>A drag-and-drop task board built with React, focused on speed and keyboard shortcuts.</p>
@@ -246,7 +241,7 @@
             </div>
           </article>
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#7a5230,#2b1c14)">Recipe Finder</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#4c1d95,#0a0a10)">Recipe Finder</div>
             <div class="project-body">
               <h3>Grindhouse</h3>
               <p>Search recipes by ingredients you already have, with saved favourites and filters.</p>
@@ -255,7 +250,7 @@
             </div>
           </article>
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#4a3020,#1b120d)">Blog Platform</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#8b5cf6,#050507)">Blog Platform</div>
             <div class="project-body">
               <h3>Roastnotes</h3>
               <p>A lightweight blogging platform with markdown editing and instant preview.</p>
@@ -264,7 +259,7 @@
             </div>
           </article>
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#8a5f36,#3d2418)">Budget Tracker</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#22d3ee,#0a0a10)">Budget Tracker</div>
             <div class="project-body">
               <h3>Pennywise</h3>
               <p>A simple expense tracker with monthly breakdowns and category insights.</p>
@@ -273,7 +268,7 @@
             </div>
           </article>
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#5e3d24,#1e1410)">Chat App</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#5b21b6,#050507)">Chat App</div>
             <div class="project-body">
               <h3>Brewline</h3>
               <p>A real-time chat app with rooms, typing indicators and message history.</p>
@@ -282,7 +277,7 @@
             </div>
           </article>
           <article class="project-card">
-            <div class="project-img" style="background:linear-gradient(135deg,#8a5f36,#2b1c14)">Portfolio v1</div>
+            <div class="project-img" style="background:linear-gradient(135deg,#6d28d9,#0a0a10)">Portfolio v1</div>
             <div class="project-body">
               <h3>This site</h3>
               <p>The very portfolio you're looking at — built with plain HTML, CSS and JS.</p>
@@ -294,10 +289,7 @@
       </div>
 
       <button class="project-nav next" id="nextBtn" aria-label="Next project">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-            stroke-linejoin="round" />
-        </svg>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
 
       <div class="project-counter">
@@ -310,52 +302,35 @@
   <section id="contact" class="section contact">
     <div class="section-inner">
       <h2 class="section-title" data-parallax="0.1">Contact</h2>
-      <p class="section-sub">Feel free to reach out — I usually reply within a day. Currently open to freelance work and
-        full-time roles.</p>
+      <p class="section-sub">Feel free to reach out — I usually reply within a day. Currently open to freelance work and full-time roles.</p>
       <div class="contact-grid">
         <a class="contact-card reveal magnetic" href="mailto:aarav.sharma.dev@gmail.com">
           <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path d="M3 6l9 7 9-7M3 6v12h18V6M3 6h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 6l9 7 9-7M3 6v12h18V6M3 6h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
           <span class="contact-label">Email</span>
-          <span class="contact-value">bikashdhakal546@gmail.com</span>
+          <span class="contact-value">aarav.sharma.dev@gmail.com</span>
         </a>
-        <a class="contact-card reveal magnetic" href="https://github.com/Dhakal009" target="_blank" rel="noopener">
+        <a class="contact-card reveal magnetic" href="https://github.com/aaravsharma" target="_blank" rel="noopener">
           <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2a10 10 0 00-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.83-2.34 4.68-4.57 4.92.36.31.68.92.68 1.86v2.75c0 .27.18.58.69.48A10 10 0 0012 2z"
-                fill="currentColor" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 00-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.15-1.11-1.46-1.11-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.56-1.11-4.56-4.93 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.6 9.6 0 015 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.83-2.34 4.68-4.57 4.92.36.31.68.92.68 1.86v2.75c0 .27.18.58.69.48A10 10 0 0012 2z" fill="currentColor"/></svg>
           </span>
           <span class="contact-label">GitHub</span>
-          <span class="contact-value">github.com/Dhakal009</span>
+          <span class="contact-value">github.com/aaravsharma</span>
         </a>
-        <a class="contact-card reveal magnetic" href="https://linkedin.com/in/aaravsharma" target="_blank"
-          rel="noopener">
+        <a class="contact-card reveal magnetic" href="https://linkedin.com/in/aaravsharma" target="_blank" rel="noopener">
           <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M6.94 6.5a1.94 1.94 0 11-3.88 0 1.94 1.94 0 013.88 0zM3.5 8.75h3v11.75h-3zM9.5 8.75h2.87v1.6h.04c.4-.76 1.38-1.6 2.85-1.6 3.05 0 3.61 2 3.61 4.6v7.15h-3v-6.34c0-1.51-.03-3.46-2.1-3.46-2.11 0-2.43 1.65-2.43 3.35v6.45h-3z"
-                fill="currentColor" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M6.94 6.5a1.94 1.94 0 11-3.88 0 1.94 1.94 0 013.88 0zM3.5 8.75h3v11.75h-3zM9.5 8.75h2.87v1.6h.04c.4-.76 1.38-1.6 2.85-1.6 3.05 0 3.61 2 3.61 4.6v7.15h-3v-6.34c0-1.51-.03-3.46-2.1-3.46-2.11 0-2.43 1.65-2.43 3.35v6.45h-3z" fill="currentColor"/></svg>
           </span>
           <span class="contact-label">LinkedIn</span>
-          <span class="contact-value">linkedin.com/in/bikashdhakal</span>
+          <span class="contact-value">linkedin.com/in/aaravsharma</span>
         </a>
         <a class="contact-card reveal magnetic" href="https://twitter.com/aaravsharma" target="_blank" rel="noopener">
           <span class="contact-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M22 5.9c-.7.3-1.5.5-2.2.6.8-.5 1.4-1.2 1.7-2.1-.8.4-1.6.8-2.5.9A3.9 3.9 0 0016 4c-2.2 0-3.9 1.8-3.9 4 0 .3 0 .6.1.9-3.3-.2-6.2-1.7-8.1-4.1-.3.6-.5 1.2-.5 2 0 1.4.7 2.6 1.8 3.3-.6 0-1.2-.2-1.7-.5v.1c0 1.9 1.4 3.5 3.2 3.9-.3.1-.7.1-1.1.1-.3 0-.5 0-.8-.1.5 1.6 2 2.8 3.8 2.8A7.9 7.9 0 012 18.6 11 11 0 008 20.4c7 0 10.8-5.8 10.8-10.8v-.5c.8-.5 1.4-1.2 2-2z"
-                fill="currentColor" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M22 5.9c-.7.3-1.5.5-2.2.6.8-.5 1.4-1.2 1.7-2.1-.8.4-1.6.8-2.5.9A3.9 3.9 0 0016 4c-2.2 0-3.9 1.8-3.9 4 0 .3 0 .6.1.9-3.3-.2-6.2-1.7-8.1-4.1-.3.6-.5 1.2-.5 2 0 1.4.7 2.6 1.8 3.3-.6 0-1.2-.2-1.7-.5v.1c0 1.9 1.4 3.5 3.2 3.9-.3.1-.7.1-1.1.1-.3 0-.5 0-.8-.1.5 1.6 2 2.8 3.8 2.8A7.9 7.9 0 012 18.6 11 11 0 008 20.4c7 0 10.8-5.8 10.8-10.8v-.5c.8-.5 1.4-1.2 2-2z" fill="currentColor"/></svg>
           </span>
           <span class="contact-label">Twitter / X</span>
-          <span class="contact-value">@bikashdhakal</span>
+          <span class="contact-value">@aaravsharma</span>
         </a>
       </div>
     </div>
@@ -363,7 +338,7 @@
 
   <footer class="site-footer">
     <div class="footer-top">
-      <p>Designed &amp; built by Bikash Dhakal</p>
+      <p>Designed &amp; built by Aarav Sharma</p>
       <nav class="footer-nav">
         <a href="#home">Home</a>
         <a href="#about">About</a>
@@ -372,12 +347,11 @@
         <a href="#contact">Contact</a>
       </nav>
     </div>
-    <p class="footer-year">© <span id="year"></span> Bikash Dhakal. Made with Passion.</p>
+    <p class="footer-year">© <span id="year"></span> Aarav Sharma. Made with plain HTML, CSS &amp; JS.</p>
   </footer>
 
   <button class="to-top" id="toTop" aria-label="Back to top">↑</button>
 
   <script src="script.js"></script>
 </body>
-
 </html>
