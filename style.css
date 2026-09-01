@@ -414,12 +414,12 @@ img{max-width:100%;display:block;}
   --intro-anim:carLetterIn;
   display:inline-block;
   opacity:0;
-  transform:translateX(-70px) rotate(-10deg);
+  transform:translateX(-90px) translateY(16px) rotate(-12deg) scale(0.88);
   animation-name:var(--intro-anim);
-  animation-duration:0.58s;
-  animation-timing-function:cubic-bezier(.18,.88,.25,1);
+  animation-duration:0.92s;
+  animation-timing-function:cubic-bezier(.16,1,.3,1);
   animation-fill-mode:forwards;
-  animation-delay:calc(var(--line-index, 0) * 200ms + var(--char-index, 0) * 36ms + 60ms);
+  animation-delay:calc(var(--line-index, 0) * 280ms + var(--char-index, 0) * 52ms + 120ms);
   will-change:transform, opacity, filter;
 }
 .hero-name .char.spin-char{
@@ -438,25 +438,31 @@ img{max-width:100%;display:block;}
   background-clip:text;
   color:transparent;
   -webkit-text-fill-color:transparent;
-  animation-name:var(--intro-anim), shimmer;
-  animation-duration:0.58s, 5s;
-  animation-timing-function:cubic-bezier(.18,.88,.25,1), linear;
-  animation-fill-mode:forwards, none;
-  animation-iteration-count:1, infinite;
-  animation-delay:calc(var(--line-index, 0) * 200ms + var(--char-index, 0) * 36ms + 60ms), 1.1s;
+  animation-name:var(--intro-anim), shimmer, letterGlow;
+  animation-duration:0.92s, 6.5s, 2.8s;
+  animation-timing-function:cubic-bezier(.16,1,.3,1), linear, ease-in-out;
+  animation-fill-mode:forwards, none, both;
+  animation-iteration-count:1, infinite, infinite;
+  animation-delay:calc(var(--line-index, 0) * 280ms + var(--char-index, 0) * 52ms + 120ms), 1.7s, 1.7s;
 }
 @keyframes carLetterIn{
-  0%{transform:translateX(-180px) rotate(-8deg) scale(0.92);opacity:0;filter:blur(7px);}
-  58%{transform:translateX(20px) rotate(1deg) scale(1.04);opacity:1;filter:blur(0);}
-  100%{transform:translateX(0) rotate(0) scale(1);opacity:1;filter:blur(0);}
+  0%{transform:translateX(-220px) translateY(26px) rotate(-14deg) scale(0.78);opacity:0;filter:blur(14px) brightness(1.6);}
+  55%{transform:translateX(30px) translateY(-8px) rotate(3deg) scale(1.08);opacity:1;filter:blur(0) brightness(1.15);}
+  78%{transform:translateX(-10px) translateY(3px) rotate(-1deg) scale(0.99);opacity:1;filter:blur(0) brightness(1.02);}
+  100%{transform:translateX(0) translateY(0) rotate(0) scale(1);opacity:1;filter:blur(0) brightness(1);}
 }
 @keyframes carLetterSpinIn{
-  0%{transform:translateX(-220px) rotate(-560deg) scale(0.85);opacity:0;filter:blur(8px);}
-  72%{transform:translateX(24px) rotate(28deg) scale(1.04);opacity:1;filter:blur(0);}
-  100%{transform:translateX(0) rotate(0) scale(1);opacity:1;filter:blur(0);}
+  0%{transform:translateX(-260px) translateY(22px) rotate(-680deg) scale(0.7);opacity:0;filter:blur(14px) brightness(1.7);}
+  68%{transform:translateX(34px) translateY(-10px) rotate(24deg) scale(1.1);opacity:1;filter:blur(0) brightness(1.2);}
+  84%{transform:translateX(-12px) translateY(3px) rotate(-6deg) scale(0.98);opacity:1;filter:blur(0) brightness(1.04);}
+  100%{transform:translateX(0) translateY(0) rotate(0) scale(1);opacity:1;filter:blur(0) brightness(1);}
 }
 @keyframes shimmer{
   to{background-position:-300% 0;}
+}
+@keyframes letterGlow{
+  0%, 100%{filter:drop-shadow(0 0 0 rgba(34,211,238,0));}
+  50%{filter:drop-shadow(0 0 10px rgba(34,211,238,0.5)) drop-shadow(0 0 18px rgba(139,92,246,0.35));}
 }
 .hero-text{
   color:var(--muted);
