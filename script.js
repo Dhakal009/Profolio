@@ -2,6 +2,42 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ---------- HERO NAME: CHARACTER-BY-CHARACTER OPENING ---------- */
+function initHeroNameCharacters(){
+  const nameLines = document.querySelectorAll('#heroName .reveal-line');
+  if (!nameLines.length) return;
+
+  nameLines.forEach((line, lineIndex) => {
+    if (line.dataset.splitReady === 'true') return;
+
+    const text = line.textContent || '';
+    const fragment = document.createDocumentFragment();
+    let charIndex = 0;
+
+    for (const ch of text) {
+      const span = document.createElement('span');
+      span.className = ch === ' ' ? 'char space' : 'char';
+      span.textContent = ch;
+      if (ch === ' ') {
+        span.innerHTML = '&nbsp;';
+      } else {
+        const shouldSpin = (charIndex % 4 === 0) || (lineIndex === 1 && charIndex === 2);
+        if (shouldSpin) span.classList.add('spin-char');
+        span.style.setProperty('--char-index', String(charIndex));
+        span.style.setProperty('--line-index', String(lineIndex));
+        charIndex += 1;
+      }
+      fragment.appendChild(span);
+    }
+
+    line.textContent = '';
+    line.appendChild(fragment);
+    line.dataset.splitReady = 'true';
+  });
+}
+
+initHeroNameCharacters();
+
 /* ---------- SCROLL PROGRESS BAR ---------- */
 const progressBar = document.getElementById('progressBar');
 function updateProgress(){
@@ -123,6 +159,7 @@ updateProgress();
 /* ---------- ACTIVE SECTION TRACKING (top navbar) ---------- */
 const sections = document.querySelectorAll('.section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
+const contentPages = document.querySelectorAll('.content-page');
 
 const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -136,6 +173,20 @@ const sectionObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.5 });
 
 sections.forEach(section => sectionObserver.observe(section));
+
+/* ---------- CONTENT PAGE ACTIVE TRANSITION ---------- */
+if (contentPages.length) {
+  const pageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        contentPages.forEach(page => page.classList.remove('is-current'));
+        entry.target.classList.add('is-current');
+      }
+    });
+  }, { threshold: 0.45, rootMargin: '-10% 0px -20% 0px' });
+
+  contentPages.forEach(page => pageObserver.observe(page));
+}
 
 /* ---------- PARALLAX EFFECT ---------- */
 const parallaxEls = document.querySelectorAll('[data-parallax]');
