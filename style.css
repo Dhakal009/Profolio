@@ -69,6 +69,34 @@ img{max-width:100%;display:block;}
   transition:width 0.1s linear;
 }
 
+/* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
+#pageMain{
+  will-change:transform;
+}
+#pageMain.bounce-top{
+  animation:bounceTop 0.7s cubic-bezier(.22,1,.36,1);
+}
+#pageMain.bounce-bottom{
+  animation:bounceBottom 0.7s cubic-bezier(.22,1,.36,1);
+}
+@keyframes bounceTop{
+  0%{transform:translateY(0);}
+  35%{transform:translateY(48px);}
+  60%{transform:translateY(-10px);}
+  82%{transform:translateY(4px);}
+  100%{transform:translateY(0);}
+}
+@keyframes bounceBottom{
+  0%{transform:translateY(0);}
+  35%{transform:translateY(-48px);}
+  60%{transform:translateY(10px);}
+  82%{transform:translateY(-4px);}
+  100%{transform:translateY(0);}
+}
+@media (prefers-reduced-motion: reduce){
+  #pageMain.bounce-top, #pageMain.bounce-bottom{animation:none;}
+}
+
 /* ---------- HEADER ---------- */
 .site-header{
   position:fixed;top:0;left:0;right:0;z-index:100;
@@ -174,13 +202,31 @@ img{max-width:100%;display:block;}
 .section-inner{max-width:960px;margin:0 auto;}
 .section-title{
   font-family:var(--font-display);
-  font-size:clamp(2.2rem,4vw,3.2rem);
+  font-size:clamp(2.6rem,5vw,4rem);
   font-weight:600;
   color:var(--foam);
   margin-bottom:1rem;
   will-change:transform, opacity;
 }
 .section-sub{color:var(--muted);margin-bottom:2.5rem;max-width:56ch;}
+
+/* ---------- STICKY SECTION TITLE (About / Education / Projects / Contact) ---------- */
+/* Plain, simple sticky heading: it sits at the top of each section's content and,
+   once you scroll to it, pins just below the fixed header while the rest of that
+   section's content scrolls underneath — normal page scrolling, no snapping. */
+.about, .education, .projects, .contact{
+  overflow:visible; /* position:sticky breaks if an ancestor clips overflow */
+}
+.sticky-title{
+  position:sticky;
+  top:86px;
+  z-index:5;
+  display:inline-block;
+  padding:0.3rem 0;
+  background:rgba(5,5,7,0.72);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
 
 /* ---------- REVEAL ON SCROLL ---------- */
 .reveal{
@@ -205,33 +251,6 @@ img{max-width:100%;display:block;}
   background:transparent;
   perspective:1200px;
 }
-.next-section-indicator{
-  position:fixed;
-  right:1.4rem;
-  top:50%;
-  transform:translateY(-50%);
-  width:54px;height:54px;
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--line);
-  color:var(--foam);
-  box-shadow:0 18px 40px rgba(0,0,0,0.22);
-  backdrop-filter:var(--glass-blur);
-  -webkit-backdrop-filter:var(--glass-blur);
-  z-index:30;
-  transition:transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
-}
-.next-section-indicator:hover{
-  transform:translateY(-50%) translateX(-4px);
-  background:rgba(139,92,246,0.12);
-  border-color:rgba(139,92,246,0.7);
-  box-shadow:0 18px 40px rgba(139,92,246,0.2);
-}
-.next-section-indicator svg{
-  width:18px;height:18px;
-}
-.next-section-indicator svg path{stroke:currentColor;}
 .hero-aura{
   position:absolute;
   width:900px;height:900px;
@@ -788,6 +807,7 @@ img{max-width:100%;display:block;}
   }
   .status-dot{width:7px;height:7px;}
   .edu-item{grid-template-columns:1fr;gap:0.3rem;}
+  .sticky-title{top:70px;}
   .footer-top{flex-direction:column;align-items:flex-start;}
   .to-top{right:1.2rem;bottom:1.2rem;}
   .hero-stats{gap:1.6rem;}

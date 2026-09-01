@@ -11,6 +11,52 @@ function updateProgress(){
   progressBar.style.width = pct + '%';
 }
 
+/* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
+const pageMain = document.getElementById('pageMain');
+let bounceCooldown = false;
+
+function isAtTop(){
+  return window.scrollY <= 0;
+}
+function isAtBottom(){
+  return window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+}
+function triggerBounce(direction){
+  if (!pageMain || bounceCooldown || prefersReducedMotion) return;
+  bounceCooldown = true;
+  const className = direction === 'top' ? 'bounce-top' : 'bounce-bottom';
+  pageMain.classList.add(className);
+  pageMain.addEventListener('animationend', function handler(){
+    pageMain.classList.remove(className);
+    pageMain.removeEventListener('animationend', handler);
+    bounceCooldown = false;
+  });
+}
+
+if (pageMain) {
+  window.addEventListener('wheel', (e) => {
+    if (isAtTop() && e.deltaY < 0) {
+      triggerBounce('top');
+    } else if (isAtBottom() && e.deltaY > 0) {
+      triggerBounce('bottom');
+    }
+  }, { passive: true });
+
+  let edgeTouchStartY = 0;
+  window.addEventListener('touchstart', (e) => {
+    edgeTouchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    const currentY = e.touches[0].clientY;
+    const delta = edgeTouchStartY - currentY; // positive = finger moving up (scrolling down)
+    if (isAtTop() && delta < -6) {
+      triggerBounce('top');
+    } else if (isAtBottom() && delta > 6) {
+      triggerBounce('bottom');
+    }
+  }, { passive: true });
+}
+
 /* ---------- SMOOTH ANCHOR SCROLL (custom easing) ---------- */
 const HEADER_OFFSET = 90;
 
