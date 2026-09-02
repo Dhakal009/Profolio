@@ -253,23 +253,33 @@ img{max-width:100%;display:block;}
 }
 .section-sub{color:var(--muted);margin-bottom:2.5rem;max-width:56ch;}
 
-/* ---------- STICKY SECTION TITLE (About / Education / Projects / Contact) ---------- */
-/* Plain, simple sticky heading: it sits at the top of each section's content and,
-   once you scroll to it, pins just below the fixed header while the rest of that
-   section's content scrolls underneath — normal page scrolling, no snapping. */
+/* ---------- PAGE TITLE CARD (About / Education / Projects / Contact) ---------- */
+/* A short title + one-line description sits at the top of each content-page.
+   It settles into place (fades up slightly) exactly when its page becomes the
+   current one on screen, then flows straight into the content below it —
+   no hard seam, just spacing, so it reads as one normal page. */
 .about, .education, .projects, .contact{
-  overflow:visible; /* position:sticky breaks if an ancestor clips overflow */
+  overflow:visible;
 }
-.sticky-title{
-  position:relative;
-  top:auto;
-  z-index:1;
-  display:inline-block;
-  margin-bottom:1rem;
-  padding:0;
-  background:transparent;
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
+.page-title-card{
+  max-width:640px;
+  margin:0 auto 2.6rem;
+  text-align:center;
+  transform:translateY(16px);
+  opacity:0.82;
+  transition:transform 0.7s cubic-bezier(.22,1,.36,1), opacity 0.7s ease;
+}
+.content-page.is-current .page-title-card{
+  transform:translateY(0);
+  opacity:1;
+}
+.page-title-card .section-title{margin-bottom:0.7rem;}
+.page-title-desc,
+.page-title-card .section-sub{
+  color:var(--muted);
+  font-size:1rem;
+  max-width:52ch;
+  margin:0 auto;
 }
 
 /* ---------- REVEAL ON SCROLL ---------- */
@@ -902,7 +912,7 @@ img{max-width:100%;display:block;}
   }
   .status-dot{width:7px;height:7px;}
   .edu-item{grid-template-columns:1fr;gap:0.3rem;}
-  .sticky-title{top:auto;}
+  .page-title-card{margin-bottom:1.8rem;}
   .footer-top{flex-direction:column;align-items:flex-start;}
   .to-top{right:1.2rem;bottom:1.2rem;}
   .hero-stats{gap:1.6rem;}
