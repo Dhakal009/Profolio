@@ -9,7 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Major+Mono+Display&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="is-preloading">
+
+  <!-- PRELOADER: shows just the name (styled like the hero heading), then reveals the site -->
+  <div class="preloader" id="preloader" aria-hidden="true">
+    <h1 class="preloader-name" id="preloaderName">
+      <span class="preloader-line">Bikash</span>
+      <span class="preloader-line preloader-line--accent">DHAKAL</span>
+    </h1>
+  </div>
 
   <!-- AMBIENT BACKGROUND GLOW -->
   <div class="bg-orb bg-orb-1"></div>
@@ -62,9 +70,9 @@
       </h1>
 
       <p class="hero-text" data-parallax="0.25">
-        I build <span class="accent-text">modern MERN stack applications</span> —
-        thoughtful, scalable web experiences that balance clean UI with solid backend architecture.
-        Currently developing full-stack products, APIs, and user-focused interfaces with performance in mind.
+        I build <span class="accent-text">modern, responsive web experiences</span> —
+        clean interfaces, smooth interactions, and reliable code from front to back.
+        Currently crafting websites and web apps that are fast, accessible, and enjoyable to use.
       </p>
 
       <div class="hero-actions">
@@ -93,13 +101,13 @@
         </div>
         <div class="about-copy">
           <p class="about-lead reveal">
-            I'm <strong>Bikash Dhakal</strong>, a MERN stack developer
+            I'm <strong>Bikash Dhakal</strong>, a web developer
             based in Kathmandu, Nepal, building practical and polished web apps.
           </p>
           <p class="reveal">
-            I enjoy turning ideas into full-stack products that are easy to use,
-            reliable in production, and structured well enough to scale.
-            My focus is on building responsive interfaces, clean APIs, and smooth user flows.
+            I enjoy turning ideas into websites and web apps that are easy to use,
+            reliable in production, and built well enough to scale.
+            My focus is on building responsive interfaces, clean code, and smooth user flows.
           </p>
           <p class="reveal">
             Outside of code, you'll usually find me with a warm cup of tea,
@@ -109,7 +117,7 @@
             <li><span>Name</span>Bikash Dhakal</li>
             <li><span>Age</span>22</li>
             <li><span>Location</span>Kathmandu, Nepal</li>
-            <li><span>Focus</span>MERN Stack Development</li>
+            <li><span>Focus</span>Web Development</li>
             <li><span>Availability</span>Open to freelance &amp; full-time roles</li>
           </ul>
         </div>
@@ -117,12 +125,12 @@
 
       <div class="fun-facts">
         <div class="fact-card reveal">
-          <h4>Favourite stack</h4>
-          <p>MongoDB, Express, React, Node.js</p>
+          <h4>Favourite tools</h4>
+          <p>React, Node.js, and modern web tooling</p>
         </div>
         <div class="fact-card reveal">
           <h4>Currently learning</h4>
-          <p>TypeScript, Next.js, and production-ready backend patterns</p>
+          <p>TypeScript, Next.js, and better ways to build for the web</p>
         </div>
         <div class="fact-card reveal">
           <h4>Off the clock</h4>
@@ -380,6 +388,10 @@
     </svg>
   </button>
 
+  <!-- GSAP (animation engine) + ScrollTrigger & ScrollToPlugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

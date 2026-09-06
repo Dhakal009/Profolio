@@ -2,41 +2,75 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---------- HERO NAME: CHARACTER-BY-CHARACTER OPENING ---------- */
-function initHeroNameCharacters(){
-  const nameLines = document.querySelectorAll('#heroName .reveal-line');
-  if (!nameLines.length) return;
+/* ---------- PRELOADER → HERO NAME MERGE ----------
+   The preloader opens with the name pinned to the EXACT spot the real hero heading
+   occupies on screen (see positionPreloaderName() below) — not just centered in the
+   viewport. After a short beat, it softly dissolves — fades and loses focus right
+   where it already sits — while the real hero heading (identical font, size, text,
+   and now identical position) comes into focus in that same spot at the same
+   moment. No movement, no scaling, nothing flying across the screen: just a quick,
+   minimal cross-fade so the two hand off as one continuous name sitting in one
+   continuous place, rather than feeling like two separate animations. */
+(function initPreloaderMerge(){
+  const preloader = document.getElementById('preloader');
+  const preloaderName = document.getElementById('preloaderName');
+  const heroName = document.getElementById('heroName');
 
-  nameLines.forEach((line, lineIndex) => {
-    if (line.dataset.splitReady === 'true') return;
+  if (!preloader || !preloaderName || !heroName) {
+    document.body.classList.remove('is-preloading');
+    if (preloader) preloader.remove();
+    return;
+  }
 
-    const text = line.textContent || '';
-    const fragment = document.createDocumentFragment();
-    let charIndex = 0;
+  let merged = false;
 
-    for (const ch of text) {
-      const span = document.createElement('span');
-      span.className = ch === ' ' ? 'char space' : 'char';
-      span.textContent = ch;
-      if (ch === ' ') {
-        span.innerHTML = '&nbsp;';
-      } else {
-        const shouldSpin = (charIndex % 4 === 0) || (lineIndex === 1 && charIndex === 2);
-        if (shouldSpin) span.classList.add('spin-char');
-        span.style.setProperty('--char-index', String(charIndex));
-        span.style.setProperty('--line-index', String(lineIndex));
-        charIndex += 1;
-      }
-      fragment.appendChild(span);
-    }
+  // Point the preloader name at the hero heading's exact center. Centering both
+  // elements on the same point makes their (identical) text land in the same place
+  // even though their boxes are different widths (hero heading spans the full card;
+  // this one shrink-wraps to the text) — text-align:center does the rest.
+  function positionPreloaderName(){
+    if (merged) return;
+    const heroRect = heroName.getBoundingClientRect();
+    preloaderName.style.left = (heroRect.left + heroRect.width / 2) + 'px';
+    preloaderName.style.top = (heroRect.top + heroRect.height / 2) + 'px';
+  }
 
-    line.textContent = '';
-    line.appendChild(fragment);
-    line.dataset.splitReady = 'true';
-  });
+  positionPreloaderName();
+  preloaderName.classList.add('is-ready'); // now safe to fade in — it's in the right spot
+  window.addEventListener('resize', positionPreloaderName);
+  // Re-confirm once webfonts are actually loaded, in case the very first measurement
+  // was taken against a fallback font with slightly different metrics.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(positionPreloaderName);
+  }
+
+  function reveal(){
+    merged = true;
+    window.removeEventListener('resize', positionPreloaderName);
+    document.body.classList.remove('is-preloading');
+    heroName.classList.add('is-merging');
+    preloader.classList.add('is-hidden');
+    preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
+    window.setTimeout(() => preloader.remove(), 600); // safety net
+  }
+
+  // Let the preloader's own opening animation finish, plus a short beat so the name
+  // is actually readable, before the minimal merge/cross-fade kicks in.
+  const openDelay = prefersReducedMotion ? 150 : 900;
+  window.setTimeout(reveal, openDelay);
+})();
+
+/* ---------- GSAP SETUP ---------- */
+const hasGSAP = typeof gsap !== 'undefined';
+if (hasGSAP && typeof ScrollTrigger !== 'undefined') gsap.registerPlugin(ScrollTrigger);
+if (hasGSAP && typeof ScrollToPlugin !== 'undefined') gsap.registerPlugin(ScrollToPlugin);
+if (hasGSAP && prefersReducedMotion) gsap.globalTimeline.timeScale(20); // near-instant, but still resolves promises/callbacks correctly
+if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+  // Mobile browsers fire resize repeatedly as the address bar shows/hides while scrolling;
+  // without this, ScrollTrigger recalculates every trigger position on each one of those,
+  // which is a common source of scroll jank on phones.
+  ScrollTrigger.config({ ignoreMobileResize: true });
 }
-
-initHeroNameCharacters();
 
 /* ---------- SCROLL PROGRESS BAR ---------- */
 const progressBar = document.getElementById('progressBar');
@@ -61,9 +95,11 @@ function triggerBounce(direction){
   if (!pageMain || bounceCooldown || prefersReducedMotion) return;
   bounceCooldown = true;
   const className = direction === 'top' ? 'bounce-top' : 'bounce-bottom';
+  pageMain.style.willChange = 'transform';
   pageMain.classList.add(className);
   pageMain.addEventListener('animationend', function handler(){
     pageMain.classList.remove(className);
+    pageMain.style.willChange = 'auto';
     pageMain.removeEventListener('animationend', handler);
     bounceCooldown = false;
   });
@@ -93,26 +129,34 @@ if (pageMain) {
   }, { passive: true });
 }
 
-/* ---------- SMOOTH ANCHOR SCROLL (custom easing) ---------- */
+/* ---------- SMOOTH ANCHOR SCROLL (GSAP-powered) ---------- */
 const HEADER_OFFSET = 90;
 
-function easeInOutCubic(t){
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
-function smoothScrollTo(targetY, duration = 900){
-  const startY = window.scrollY;
-  const distance = targetY - startY;
-  const startTime = performance.now();
-
-  function step(now){
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = easeInOutCubic(progress);
-    window.scrollTo(0, startY + distance * eased);
-    if (progress < 1) requestAnimationFrame(step);
+function smoothScrollTo(targetY, durationSeconds = 1){
+  if (prefersReducedMotion) {
+    window.scrollTo(0, targetY);
+    return;
   }
-  requestAnimationFrame(step);
+  if (hasGSAP && typeof ScrollToPlugin !== 'undefined') {
+    gsap.to(window, {
+      duration: durationSeconds,
+      scrollTo: { y: targetY, autoKill: true },
+      ease: 'power3.inOut'
+    });
+  } else {
+    // fallback: plain eased scroll if the CDN failed to load
+    const startY = window.scrollY;
+    const distance = targetY - startY;
+    const startTime = performance.now();
+    const dur = durationSeconds * 1000;
+    function step(now){
+      const progress = Math.min((now - startTime) / dur, 1);
+      const eased = progress < 0.5 ? 4 * progress ** 3 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      window.scrollTo(0, startY + distance * eased);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
 }
 
 document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -124,12 +168,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
     e.preventDefault();
     const targetY = targetEl.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-
-    if (prefersReducedMotion) {
-      window.scrollTo(0, targetY);
-    } else {
-      smoothScrollTo(Math.max(targetY, 0));
-    }
+    smoothScrollTo(Math.max(targetY, 0), 1);
     history.pushState(null, '', targetId);
   });
 });
@@ -188,49 +227,100 @@ if (contentPages.length) {
   contentPages.forEach(page => pageObserver.observe(page));
 }
 
-/* ---------- PARALLAX EFFECT ---------- */
-const parallaxEls = document.querySelectorAll('[data-parallax]');
-
-function updateParallax(){
-  const viewportH = window.innerHeight;
-  parallaxEls.forEach(el => {
+/* ---------- PARALLAX EFFECT (GSAP ScrollTrigger scrub) ---------- */
+if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
+  gsap.utils.toArray('[data-parallax]').forEach(el => {
     const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
-    const rect = el.getBoundingClientRect();
-    const centerOffset = rect.top + rect.height / 2 - viewportH / 2;
-    const translate = centerOffset * speed * -0.15;
-    const distance = Math.min(Math.abs(centerOffset) / viewportH, 1);
-    const opacity = 1 - distance * 0.6;
-
-    el.style.transform = `translateY(${translate}px)`;
-    el.style.opacity = Math.max(0.4, opacity);
+    gsap.fromTo(el,
+      { y: 40 * speed, opacity: 1 },
+      {
+        y: -40 * speed,
+        opacity: 0.55,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.4
+        }
+      }
+    );
   });
-}
-
-if (!prefersReducedMotion) {
+} else if (!prefersReducedMotion) {
+  // fallback: manual rAF parallax if the GSAP CDN failed to load
+  const parallaxEls = document.querySelectorAll('[data-parallax]');
+  function updateParallax(){
+    const viewportH = window.innerHeight;
+    parallaxEls.forEach(el => {
+      const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
+      const rect = el.getBoundingClientRect();
+      const centerOffset = rect.top + rect.height / 2 - viewportH / 2;
+      const translate = centerOffset * speed * -0.15;
+      const distance = Math.min(Math.abs(centerOffset) / viewportH, 1);
+      el.style.transform = `translateY(${translate}px)`;
+      el.style.opacity = Math.max(0.4, 1 - distance * 0.6);
+    });
+  }
   window.addEventListener('scroll', () => requestAnimationFrame(updateParallax), { passive: true });
   updateParallax();
 }
 
-/* ---------- REVEAL ON SCROLL (staggered) ---------- */
-// assign a stagger index per parent container so siblings fade in one after another
-const parentCounters = new Map();
-document.querySelectorAll('.reveal').forEach(el => {
-  const parent = el.parentElement;
-  const count = parentCounters.get(parent) || 0;
-  el.style.setProperty('--stagger', count);
-  parentCounters.set(parent, count + 1);
-});
+/* ---------- REVEAL ON SCROLL (GSAP ScrollTrigger.batch, staggered) ---------- */
+if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+  gsap.set('.reveal', { opacity: 0, y: 28 });
 
-const revealObserver = new IntersectionObserver((entries, obs) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('in-view');
-      obs.unobserve(entry.target);
-    }
+  ScrollTrigger.batch('.reveal', {
+    start: 'top 88%',
+    once: true,
+    onEnter: (batch) => gsap.to(batch, {
+      opacity: 1,
+      y: 0,
+      duration: 0.7,
+      ease: 'power3.out',
+      stagger: 0.1
+    })
   });
-}, { threshold: 0.15 });
+} else {
+  // fallback: IntersectionObserver + CSS transition if the GSAP CDN failed to load
+  const parentCounters = new Map();
+  document.querySelectorAll('.reveal').forEach(el => {
+    const parent = el.parentElement;
+    const count = parentCounters.get(parent) || 0;
+    el.style.setProperty('--stagger', count);
+    parentCounters.set(parent, count + 1);
+  });
 
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+  const revealObserver = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+}
+
+/* ---------- PAGE TITLE CARD MERGE (GSAP ScrollTrigger) ---------- */
+if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+  gsap.utils.toArray('.page-title-card').forEach(card => {
+    gsap.fromTo(card,
+      { y: 22, opacity: 0.75 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        }
+      }
+    );
+  });
+}
 
 /* ---------- HERO GLOW + TILT FOLLOWS POINTER ---------- */
 const heroGlow = document.getElementById('heroGlow');
@@ -238,15 +328,35 @@ const heroSection = document.getElementById('home');
 const heroInner = document.getElementById('heroInner');
 const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
+/* ---------- PAUSE HERO DECORATIVE ANIMATIONS WHEN OFF-SCREEN ---------- */
+if (heroSection) {
+  const heroVisibilityObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      heroSection.classList.toggle('in-view', entry.isIntersecting);
+    });
+  }, { threshold: 0.05 });
+  heroVisibilityObserver.observe(heroSection);
+}
+
 if (heroSection && hasFinePointer && !prefersReducedMotion) {
-  heroSection.addEventListener('mousemove', (e) => {
+  let pendingEvent = null;
+  let rafScheduled = false;
+
+  function applyHeroPointerEffect(){
+    rafScheduled = false;
+    if (!pendingEvent) return;
+    const { clientX, clientY } = pendingEvent;
+    pendingEvent = null;
+
     const rect = heroSection.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
     if (heroGlow) {
-      heroGlow.style.setProperty('--x', `${x}px`);
-      heroGlow.style.setProperty('--y', `${y}px`);
+      // Offsets from the glow's default anchor (50%/30% of the section), so the
+      // element only ever animates via `transform` — never `left`/`top`.
+      heroGlow.style.setProperty('--gx', `${x - rect.width / 2}px`);
+      heroGlow.style.setProperty('--gy', `${y - rect.height * 0.3}px`);
     }
 
     if (heroInner) {
@@ -255,25 +365,58 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
       const maxTilt = 4; // degrees
       heroInner.style.transform = `rotateY(${relX * maxTilt}deg) rotateX(${relY * -maxTilt}deg)`;
     }
+  }
+
+  heroSection.addEventListener('mousemove', (e) => {
+    pendingEvent = e;
+    if (!rafScheduled) {
+      rafScheduled = true;
+      requestAnimationFrame(applyHeroPointerEffect);
+    }
+  }, { passive: true });
+
+  heroSection.addEventListener('mouseenter', () => {
+    if (heroInner) heroInner.style.willChange = 'transform';
   });
 
   heroSection.addEventListener('mouseleave', () => {
-    if (heroInner) heroInner.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    if (heroInner) {
+      heroInner.style.transform = 'rotateY(0deg) rotateX(0deg)';
+      heroInner.style.willChange = 'auto';
+    }
   });
 }
 
-/* ---------- MAGNETIC BUTTONS ---------- */
+/* ---------- MAGNETIC BUTTONS (GSAP quickTo) ---------- */
 if (hasFinePointer && !prefersReducedMotion) {
   document.querySelectorAll('.magnetic').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      btn.style.transform = `translate(${x * 0.12}px, ${y * 0.25}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = 'translate(0, 0)';
-    });
+    if (hasGSAP) {
+      const xTo = gsap.quickTo(btn, 'x', { duration: 0.45, ease: 'power3' });
+      const yTo = gsap.quickTo(btn, 'y', { duration: 0.45, ease: 'power3' });
+
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        xTo(x * 0.12);
+        yTo(y * 0.25);
+      });
+      btn.addEventListener('mouseleave', () => {
+        xTo(0);
+        yTo(0);
+      });
+    } else {
+      // fallback: direct style assignment if the GSAP CDN failed to load
+      btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.12}px, ${y * 0.25}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translate(0, 0)';
+      });
+    }
   });
 }
 
@@ -348,7 +491,15 @@ if (projectCarousel && projectTrack) {
   if (projectTotalEl) projectTotalEl.textContent = String(total).padStart(2, '0');
 
   function renderSlide(){
-    projectTrack.style.transform = `translateX(-${current * 100}%)`;
+    if (hasGSAP) {
+      gsap.to(projectTrack, {
+        xPercent: -100 * current,
+        duration: 0.7,
+        ease: 'power3.inOut'
+      });
+    } else {
+      projectTrack.style.transform = `translateX(-${current * 100}%)`;
+    }
     if (projectCurrentEl) projectCurrentEl.textContent = String(current + 1).padStart(2, '0');
     cards.forEach((card, i) => card.classList.toggle('active', i === current));
   }
@@ -415,6 +566,6 @@ toTopBtn.addEventListener('click', () => {
   if (prefersReducedMotion) {
     window.scrollTo(0, 0);
   } else {
-    smoothScrollTo(0, 1000);
+    smoothScrollTo(0, 1.1);
   }
 });
