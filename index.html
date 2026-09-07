@@ -3,13 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bikash Dhakal — Portfolio</title>
+<title>Bikash Dhakal | Full-Stack Web Developer</title>
+<meta name="description" content="Bikash Dhakal is a web developer from Nepal focused on building responsive and practical web applications with modern JavaScript technologies.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://bikashdhakal1.com.np/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bikashdhakal1.com.np/">
+<meta property="og:title" content="Bikash Dhakal | Full-Stack Web Developer">
+<meta property="og:description" content="Bikash Dhakal is a web developer from Nepal focused on building responsive and practical web applications with modern JavaScript technologies.">
+<meta property="og:site_name" content="Bikash Dhakal">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bikash Dhakal | Full-Stack Web Developer">
+<meta name="twitter:description" content="Bikash Dhakal is a web developer from Nepal focused on building responsive and practical web applications with modern JavaScript technologies.">
+
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Major+Mono+Display&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body class="is-preloading">
+
+  <a href="#home" class="skip-link">Skip to main content</a>
 
   <!-- PRELOADER: shows just the name (styled like the hero heading), then reveals the site -->
   <div class="preloader" id="preloader" aria-hidden="true">
@@ -31,9 +50,10 @@
   <header class="site-header" id="siteHeader">
     <div class="header-inner">
       <a href="#home" class="logo">B<span class="logo-dot">.</span>D</a>
-      <nav class="top-nav" id="topNav">
+      <nav class="top-nav" id="topNav" aria-label="Primary">
         <a href="#home" class="nav-link active">Home</a>
         <a href="#about" class="nav-link">About</a>
+        <a href="#skills" class="nav-link">Skills</a>
         <a href="#experience" class="nav-link">Experience</a>
         <a href="#education" class="nav-link">Education</a>
         <a href="#projects" class="nav-link">Projects</a>
@@ -43,7 +63,7 @@
         <a href="#contact" class="nav-cta">Let's talk</a>
         <a href="resume.pdf" class="resume-btn" download target="_blank" rel="noopener">Resume</a>
       </div>
-      <button class="menu-toggle" aria-label="Toggle menu">
+      <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="topNav">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -70,17 +90,18 @@
         <span class="reveal-line">DHAKAL</span>
       </h1>
 
+      <p class="hero-role">Full-Stack Web Developer</p>
+
       <p class="hero-text" data-parallax="0.25">
-        I build <span class="accent-text">modern, responsive web experiences</span> —
-        clean interfaces, smooth interactions, and reliable code from front to back.
-        Currently crafting websites and web apps that are fast, accessible, and enjoyable to use.
+        I build <span class="accent-text">responsive and practical web applications</span>
+        using modern JavaScript technologies.
       </p>
 
       <div class="hero-actions">
         <a href="#projects" class="hero-cta hero-cta--primary magnetic">
-          Projects
+          View My Work
         </a>
-        <a href="#contact" class="hero-cta hero-cta--ghost magnetic">Get in touch</a>
+        <a href="resume.pdf" class="hero-cta hero-cta--ghost magnetic" download target="_blank" rel="noopener">Download Resume</a>
       </div>
     </div>
 
@@ -220,61 +241,67 @@
           <span class="cert-chip">Responsive Web Design</span>
         </div>
 
-          <div class="skills-block">
+          <div class="skills-block" id="skills">
             <h3 class="skills-heading">Skills</h3>
             <div class="skills-grid">
               <div class="skill-card reveal">
                 <button class="skill-toggle" type="button" aria-expanded="false">
+                  <span class="skill-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M8 4L2 12l6 8M16 4l6 8-6 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
                   <h4>Frontend</h4>
                 </button>
-                <p class="skill-summary">HTML, CSS, JavaScript, React</p>
+                <p class="skill-summary">HTML, CSS, JavaScript, React, Tailwind CSS</p>
                 <div class="skill-details">
                   <p>Build fast, responsive, and accessible user interfaces using semantic HTML, modern CSS, JavaScript, and reusable React components for smooth, polished experiences.</p>
             </div>
           </div>
           <div class="skill-card reveal">
             <button class="skill-toggle" type="button" aria-expanded="false">
+              <span class="skill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="6" rx="1.5" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="14" width="18" height="6" rx="1.5" stroke="currentColor" stroke-width="1.7"/><circle cx="7" cy="7" r="0.9" fill="currentColor"/><circle cx="7" cy="17" r="0.9" fill="currentColor"/></svg>
+              </span>
               <h4>Backend</h4>
             </button>
-            <p class="skill-summary">Node.js, Express, REST APIs</p>
+            <p class="skill-summary">Node.js, Express.js</p>
             <div class="skill-details">
-              <p>Develop secure server-side logic, scalable REST APIs, authentication, and business workflows that connect the UI to real data and application processes.</p>
+              <p>Develop server-side logic, REST APIs, and business workflows that connect the UI to real data and application processes.</p>
             </div>
           </div>
           <div class="skill-card reveal">
             <button class="skill-toggle" type="button" aria-expanded="false">
+              <span class="skill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="5.5" rx="8" ry="3" stroke="currentColor" stroke-width="1.7"/><path d="M4 5.5V18.5C4 20.16 7.58 21.5 12 21.5C16.42 21.5 20 20.16 20 18.5V5.5" stroke="currentColor" stroke-width="1.7"/><path d="M4 12C4 13.66 7.58 15 12 15C16.42 15 20 13.66 20 12" stroke="currentColor" stroke-width="1.7"/></svg>
+              </span>
               <h4>Database</h4>
             </button>
-            <p class="skill-summary">MongoDB, MySQL</p>
+            <p class="skill-summary">MongoDB</p>
             <div class="skill-details">
-              <p>Design and manage data models, optimize queries, and structure database logic for efficient storage, retrieval, and long-term scalability in production apps.</p>
+              <p>Design data models, write queries, and structure database logic for efficient storage and retrieval in production apps.</p>
             </div>
           </div>
           <div class="skill-card reveal">
             <button class="skill-toggle" type="button" aria-expanded="false">
+              <span class="skill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M14.7 6.3a1 1 0 000-1.4l-2-2a1 1 0 00-1.4 0L3 11.2a1 1 0 000 1.4l1.6 1.6L4 18l3.8-.6 1.6 1.6a1 1 0 001.4 0l8.3-8.3a1 1 0 000-1.4l-2-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+              </span>
               <h4>Tools</h4>
             </button>
-            <p class="skill-summary">Git, GitHub, Figma, VS Code</p>
+            <p class="skill-summary">Git, GitHub, VS Code</p>
             <div class="skill-details">
-              <p>Use version control, collaborative workflows, design tools, and developer environments to iterate quickly, document work clearly, and ship quality code efficiently.</p>
+              <p>Use version control and collaborative workflows to iterate quickly, document work clearly, and ship code efficiently.</p>
             </div>
           </div>
           <div class="skill-card reveal">
             <button class="skill-toggle" type="button" aria-expanded="false">
+              <span class="skill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 014 18.5v-13z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M20 5.5c0-.83-.67-1.5-1.5-1.5H12v16h6.5a1.5 1.5 0 001.5-1.5v-13z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+              </span>
               <h4>Currently learning</h4>
             </button>
-            <p class="skill-summary">TypeScript, Next.js, GraphQL</p>
+            <p class="skill-summary">TypeScript, Next.js</p>
             <div class="skill-details">
-              <p>Deepening my knowledge in typed JavaScript, modern React ecosystems, and API-driven architectures to improve maintainability, performance, and application scale.</p>
-            </div>
-          </div>
-          <div class="skill-card reveal">
-            <button class="skill-toggle" type="button" aria-expanded="false">
-              <h4>Soft skills</h4>
-            </button>
-            <p class="skill-summary">Communication, leadership, mentoring</p>
-            <div class="skill-details">
-              <p>Work well within teams, communicate ideas clearly, solve problems collaboratively, and support both product direction and team growth during development.</p>
+              <p>Deepening my knowledge in typed JavaScript and modern React ecosystems to improve maintainability and performance.</p>
             </div>
           </div>
       </div>
@@ -402,34 +429,25 @@
     </div>
   </section>
 
-  <!-- TESTIMONIALS -->
+  <!-- WHAT I FOCUS ON -->
   <section id="testimonials" class="section testimonials content-page">
     <div class="section-inner">
       <div class="page-title-card">
-        <h2 class="section-title">Testimonials</h2>
-        <p class="page-title-desc">A few words from people I've worked with. (Placeholder quotes — swap in real feedback before publishing.)</p>
+        <h2 class="section-title">What I Focus On</h2>
+        <p class="page-title-desc">The areas of web development I spend most of my time building and learning in.</p>
       </div>
       <div class="testimonial-grid">
         <div class="testimonial-card reveal">
-          <p class="testimonial-quote">"Bikash took a vague idea and turned it into a clean, working site faster than I expected. Communication was easy the whole way through."</p>
-          <div class="testimonial-author">
-            <span class="testimonial-name">Priya Sharma</span>
-            <span class="testimonial-role">Small Business Owner</span>
-          </div>
+          <h3 class="focus-title">Frontend Development</h3>
+          <p class="testimonial-quote">Building responsive and interactive user interfaces with modern JavaScript, React, and clean CSS.</p>
         </div>
         <div class="testimonial-card reveal">
-          <p class="testimonial-quote">"Reliable, detail-oriented, and genuinely cares about getting the UI right. Our landing page conversions improved after the redesign."</p>
-          <div class="testimonial-author">
-            <span class="testimonial-name">Rajesh Thapa</span>
-            <span class="testimonial-role">Startup Founder</span>
-          </div>
+          <h3 class="focus-title">Backend Development</h3>
+          <p class="testimonial-quote">Developing APIs and server-side applications with Node.js and Express.</p>
         </div>
         <div class="testimonial-card reveal">
-          <p class="testimonial-quote">"Great to collaborate with during the internship — picked up our codebase quickly and shipped features with minimal hand-holding."</p>
-          <div class="testimonial-author">
-            <span class="testimonial-name">Anisha Karki</span>
-            <span class="testimonial-role">Engineering Lead</span>
-          </div>
+          <h3 class="focus-title">Full-Stack Development</h3>
+          <p class="testimonial-quote">Connecting modern frontend applications with databases and backend services end to end.</p>
         </div>
       </div>
     </div>
@@ -485,9 +503,10 @@
   <footer class="site-footer">
     <div class="footer-top">
       <p>Designed &amp; built by Bikash Dhakal</p>
-      <nav class="footer-nav">
+      <nav class="footer-nav" aria-label="Footer">
         <a href="#home">Home</a>
         <a href="#about">About</a>
+        <a href="#skills">Skills</a>
         <a href="#experience">Experience</a>
         <a href="#education">Education</a>
         <a href="#projects">Projects</a>

@@ -429,14 +429,16 @@ const topNav = document.querySelector('.top-nav');
 
 if (menuToggle) {
   menuToggle.addEventListener('click', () => {
-    topNav.classList.toggle('open');
-    menuToggle.classList.toggle('active');
+    const isOpen = topNav.classList.toggle('open');
+    menuToggle.classList.toggle('active', isOpen);
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
   });
 
   topNav.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', () => {
       topNav.classList.remove('open');
       menuToggle.classList.remove('active');
+      menuToggle.setAttribute('aria-expanded', 'false');
     });
   });
 }
