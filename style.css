@@ -232,8 +232,8 @@ body.is-preloading .to-top{
 }
 .nav-link{
   position:relative;
-  font-size:0.9rem;color:var(--muted);
-  padding:0.5rem 1.1rem;
+  font-size:0.88rem;color:var(--muted);
+  padding:0.5rem 0.9rem;
   border-radius:999px;
   transition:color 0.3s ease, background 0.3s ease;
 }
@@ -342,7 +342,7 @@ body.is-preloading .to-top{
    GSAP ScrollTrigger (see script.js) animates it into place as it scrolls
    into view, then it flows straight into the content below it — no hard
    seam, just spacing, so it reads as one normal page. */
-.about, .education, .projects, .contact{
+.about, .experience, .education, .projects, .testimonials, .contact{
   overflow:visible;
 }
 .page-title-card{
@@ -673,7 +673,75 @@ body.is-preloading .to-top{
 .fact-card h4{color:var(--accent);font-size:0.9rem;margin-bottom:0.4rem;}
 .fact-card p{color:var(--muted);font-size:0.88rem;}
 
+/* ---------- TESTIMONIALS ---------- */
+.testimonial-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1.2rem;
+}
+.testimonial-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:1.6rem;
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+  box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  transition:border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+}
+.testimonial-card:hover{border-color:var(--accent-soft);background:var(--surface-2);transform:translateY(-3px);}
+.testimonial-quote{
+  color:var(--foam);
+  font-size:0.95rem;
+  line-height:1.6;
+  margin-bottom:1.2rem;
+}
+.testimonial-author{display:flex;flex-direction:column;gap:0.15rem;}
+.testimonial-name{color:var(--accent);font-size:0.88rem;font-weight:500;}
+.testimonial-role{color:var(--muted);font-size:0.8rem;}
+
 /* ---------- EDUCATION & SKILLS ---------- */
+/* ---------- EXPERIENCE (fresher / open-to-work status) ---------- */
+.experience-status-card{
+  max-width:760px;
+  margin:0 auto;
+  text-align:center;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:2.8rem 2.4rem;
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+.experience-status-card .status-badge{margin:0 auto 1.6rem;}
+.experience-status-card h3{
+  font-family:var(--font-display);
+  font-size:clamp(1.3rem,2.6vw,1.7rem);
+  color:var(--foam);
+  margin-bottom:1rem;
+  line-height:1.35;
+}
+.experience-status-card > p{
+  color:var(--muted);
+  max-width:58ch;
+  margin:0 auto 2.2rem;
+  line-height:1.7;
+}
+.experience-highlights{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1.2rem;
+  text-align:left;
+  margin-bottom:2.2rem;
+}
+.highlight-item{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:1.2rem;
+}
+.highlight-item h4{color:var(--accent);font-size:0.85rem;margin-bottom:0.5rem;}
+.highlight-item p{color:var(--muted);font-size:0.88rem;line-height:1.6;}
+
 .edu-timeline{margin-bottom:2rem;}
 .edu-item{
   display:grid;grid-template-columns:160px 1fr;
@@ -786,7 +854,17 @@ body.is-preloading .to-top{
   transform:scale(1);
 }
 .project-body{padding:2.2rem 2.4rem 2.4rem;}
-.project-body h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:0.7rem;}
+.project-body h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:0.4rem;display:inline-block;}
+.project-role{
+  display:inline-block;
+  margin:0 0 0.9rem 0.7rem;
+  font-size:0.72rem;
+  color:var(--accent-2);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:0.2rem 0.65rem;
+  vertical-align:middle;
+}
 .project-body p{color:var(--muted);font-size:1rem;margin-bottom:1.3rem;max-width:56ch;}
 .tag-row{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.3rem;}
 .tag-row span{
@@ -794,6 +872,7 @@ body.is-preloading .to-top{
   border:1px solid var(--line);
   border-radius:12px;padding:0.3rem 0.75rem;
 }
+.project-links{display:flex;flex-wrap:wrap;gap:1.4rem;}
 .project-body a{color:var(--accent);font-size:0.95rem;}
 .project-body a:hover{text-decoration:underline;}
 
@@ -807,10 +886,11 @@ body.is-preloading .to-top{
   opacity:1;
   transform:translateY(0);
 }
-.project-card.active .project-body h3{transition-delay:0.12s;}
-.project-card.active .project-body p{transition-delay:0.22s;}
-.project-card.active .project-body .tag-row{transition-delay:0.32s;}
-.project-card.active .project-body a{transition-delay:0.42s;}
+.project-card.active .project-body h3{transition-delay:0.1s;}
+.project-card.active .project-body .project-role{transition-delay:0.18s;}
+.project-card.active .project-body p{transition-delay:0.26s;}
+.project-card.active .project-body .tag-row{transition-delay:0.36s;}
+.project-card.active .project-body .project-links{transition-delay:0.46s;}
 
 /* nav buttons: hidden by default, revealed only on hover near left/right edge */
 .project-nav{
@@ -881,6 +961,35 @@ body.is-preloading .to-top{
 .contact-icon svg{width:100%;height:100%;}
 .contact-label{color:var(--muted);font-size:0.8rem;}
 .contact-value{color:var(--foam);font-size:0.95rem;word-break:break-word;}
+
+/* ---------- SOCIAL ICON ROW (bottom-right of Contact) ---------- */
+.social-links-row{
+  display:flex;
+  justify-content:flex-end;
+  gap:0.8rem;
+  margin-top:1.6rem;
+}
+.social-icon-link{
+  width:42px;height:42px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  background:var(--surface);
+  border:1px solid var(--line);
+  color:var(--muted);
+  backdrop-filter:var(--glass-blur);
+  -webkit-backdrop-filter:var(--glass-blur);
+  transition:border-color 0.3s ease, color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+}
+.social-icon-link svg{width:18px;height:18px;}
+.social-icon-link:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+  background:var(--surface-2);
+  transform:translateY(-3px);
+}
+@media (max-width:700px){
+  .social-links-row{justify-content:center;}
+}
 
 /* ---------- FOOTER ---------- */
 .site-footer{
