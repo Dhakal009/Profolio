@@ -49,7 +49,8 @@ img{max-width:100%;display:block;}
   inset:0;
   z-index:500;
   background:var(--bg);
-  transition:opacity 0.45s ease, visibility 0.45s ease;
+  transition:opacity 0.65s cubic-bezier(.22,.68,.36,1), visibility 0.65s cubic-bezier(.22,.68,.36,1), transform 0.65s cubic-bezier(.22,.68,.36,1);
+  transform:scale(1);
 }
 .preloader-name{
   position:fixed;
@@ -69,7 +70,7 @@ img{max-width:100%;display:block;}
   color:var(--foam);
   opacity:0;
   filter:blur(0);
-  transition:filter 0.45s ease;
+  transition:filter 0.55s cubic-bezier(.22,.68,.36,1), opacity 0.55s cubic-bezier(.22,.68,.36,1), transform 0.55s cubic-bezier(.22,.68,.36,1);
 }
 .preloader-name.is-ready{
   animation:preloaderIn 0.6s ease forwards 0.1s;
@@ -94,9 +95,12 @@ img{max-width:100%;display:block;}
   opacity:0;
   visibility:hidden;
   pointer-events:none;
+  transform:scale(1.035);
 }
 .preloader.is-hidden .preloader-name{
   filter:blur(8px);
+  opacity:0;
+  transform:translate(-50%,-50%) translateY(-8px) scale(1.03);
 }
 /* Everything else stays invisible (but still loaded/laid out) until the preloader clears,
    so the existing hero entrance animation plays right as the site becomes visible. */
@@ -108,8 +112,13 @@ body.is-preloading .progress-bar,
 body.is-preloading .to-top{
   opacity:0;
 }
+body.is-preloading .site-header{
+  transform:translateY(-16px);
+}
+body.is-preloading .progress-bar{
+  transform:scaleX(0.6);
+}
 #pageMain,
-.bg-orb,
 .to-top{
   transition:opacity 0.5s ease 0.05s;
 }
@@ -125,6 +134,11 @@ body.is-preloading .to-top{
   filter:blur(100px);
   z-index:-1;
   pointer-events:none;
+  transform:scale(1);
+  transition:opacity 0.9s cubic-bezier(.16,1,.3,1) 0.1s, transform 1s cubic-bezier(.16,1,.3,1) 0.1s;
+}
+body.is-preloading .bg-orb{
+  transform:scale(1.12);
 }
 .bg-orb-1{
   width:520px;height:520px;
@@ -157,7 +171,9 @@ body.is-preloading .to-top{
   height:2px;width:0%;
   background:var(--accent);
   z-index:200;
-  transition:width 0.1s linear, opacity 0.5s ease 0.05s;
+  transform-origin:0% 50%;
+  transform:scaleX(1);
+  transition:width 0.1s linear, opacity 0.7s cubic-bezier(.16,1,.3,1) 0.05s, transform 0.7s cubic-bezier(.16,1,.3,1) 0.05s;
 }
 
 /* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
@@ -165,23 +181,32 @@ body.is-preloading .to-top{
    keeping it on permanently would force the whole page content onto its own GPU
    layer at all times, which is a big chunk of the "laggy" feeling on lower-end devices. */
 #pageMain.bounce-top{
-  animation:bounceTop 0.7s cubic-bezier(.22,1,.36,1);
+  animation:bounceTop 0.9s cubic-bezier(.22,1,.36,1);
 }
 #pageMain.bounce-bottom{
-  animation:bounceBottom 0.7s cubic-bezier(.22,1,.36,1);
+  animation:bounceBottom 0.9s cubic-bezier(.22,1,.36,1);
 }
+/* A fuller spring decay — pull, overshoot, and settle through several
+   diminishing oscillations instead of one correction — reads as a springier,
+   more premium rubber-band rather than a single snap-back. */
 @keyframes bounceTop{
   0%{transform:translateY(0);}
-  35%{transform:translateY(48px);}
-  60%{transform:translateY(-10px);}
-  82%{transform:translateY(4px);}
+  22%{transform:translateY(54px);}
+  40%{transform:translateY(-16px);}
+  55%{transform:translateY(7px);}
+  68%{transform:translateY(-3px);}
+  80%{transform:translateY(1.5px);}
+  90%{transform:translateY(-0.5px);}
   100%{transform:translateY(0);}
 }
 @keyframes bounceBottom{
   0%{transform:translateY(0);}
-  35%{transform:translateY(-48px);}
-  60%{transform:translateY(10px);}
-  82%{transform:translateY(-4px);}
+  22%{transform:translateY(-54px);}
+  40%{transform:translateY(16px);}
+  55%{transform:translateY(-7px);}
+  68%{transform:translateY(3px);}
+  80%{transform:translateY(-1.5px);}
+  90%{transform:translateY(0.5px);}
   100%{transform:translateY(0);}
 }
 @media (prefers-reduced-motion: reduce){
@@ -197,7 +222,8 @@ body.is-preloading .to-top{
   /* backdrop-filter is only ever toggled on/off (via .scrolled below), never
      transitioned — animating a blur filter every frame is one of the most expensive
      things a browser can paint, and this toggle doesn't need to be smooth to look good. */
-  transition:background 0.4s ease, border-color 0.4s ease, padding 0.4s ease, opacity 0.5s ease 0.05s;
+  transition:background 0.4s ease, border-color 0.4s ease, padding 0.4s ease, opacity 0.7s cubic-bezier(.16,1,.3,1) 0.05s, transform 0.7s cubic-bezier(.16,1,.3,1) 0.05s;
+  transform:translateY(0);
 }
 .site-header.scrolled{
   padding:1rem 3rem;
@@ -475,8 +501,11 @@ body.is-preloading .to-top{
   font-size:0.8rem;font-weight:600;letter-spacing:0.02em;
   box-shadow:0 10px 24px rgba(139,92,246,0.12);
   opacity:0;
-  animation:fadeIn 0.8s ease forwards;
-  animation-delay:0.05s;
+  transform:translateY(10px);
+}
+.hero-inner.is-revealed .status-badge{
+  animation:heroReveal 0.85s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.08s;
 }
 .status-dot{
   position:relative;
@@ -554,20 +583,30 @@ body.is-preloading .to-top{
   max-width:46ch;
   margin:0 auto 2.4rem;
   opacity:0;
-  animation:fadeIn 1s ease forwards;
-  animation-delay:0.75s;
+  transform:translateY(12px);
+  filter:blur(4px);
+}
+.hero-inner.is-revealed .hero-text{
+  animation:heroReveal 0.9s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.22s;
 }
 .accent-text{
   color:var(--foam);
   font-weight:600;
 }
 @keyframes fadeIn{to{opacity:1;}}
+@keyframes heroReveal{
+  to{opacity:1;transform:translateY(0);filter:blur(0);}
+}
 .hero-actions{
   display:flex;gap:1rem;flex-wrap:wrap;
   justify-content:center;
   opacity:0;
-  animation:fadeIn 1s ease forwards;
-  animation-delay:0.95s;
+  transform:translateY(12px);
+}
+.hero-inner.is-revealed .hero-actions{
+  animation:heroReveal 0.9s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.36s;
 }
 .hero-cta{
   display:inline-flex;

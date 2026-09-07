@@ -15,10 +15,12 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   const preloader = document.getElementById('preloader');
   const preloaderName = document.getElementById('preloaderName');
   const heroName = document.getElementById('heroName');
+  const heroInner = document.getElementById('heroInner');
 
   if (!preloader || !preloaderName || !heroName) {
     document.body.classList.remove('is-preloading');
     if (preloader) preloader.remove();
+    if (heroInner) heroInner.classList.add('is-revealed');
     return;
   }
 
@@ -49,9 +51,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     window.removeEventListener('resize', positionPreloaderName);
     document.body.classList.remove('is-preloading');
     heroName.classList.add('is-merging');
+    if (heroInner) heroInner.classList.add('is-revealed');
     preloader.classList.add('is-hidden');
     preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
-    window.setTimeout(() => preloader.remove(), 600); // safety net
+    window.setTimeout(() => preloader.remove(), 800); // safety net
   }
 
   // Let the preloader's own opening animation finish, plus a short beat so the name
