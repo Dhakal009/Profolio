@@ -51,15 +51,26 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     window.removeEventListener('resize', positionPreloaderName);
     document.body.classList.remove('is-preloading');
     heroName.classList.add('is-merging');
-    if (heroInner) heroInner.classList.add('is-revealed');
+    if (heroInner) {
+      heroInner.classList.add('is-revealed');
+      // Gentle, one-time landing bounce on the whole hero card as the page opens.
+      // Removed again once it finishes so it never lingers over the pointer-tilt
+      // effect, which also animates `transform` (via inline styles) on this element.
+      heroInner.classList.add('is-bouncing');
+      heroInner.addEventListener('animationend', function onBounceEnd(e){
+        if (e.animationName !== 'heroInnerBounce') return;
+        heroInner.classList.remove('is-bouncing');
+        heroInner.removeEventListener('animationend', onBounceEnd);
+      });
+    }
     preloader.classList.add('is-hidden');
     preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
-    window.setTimeout(() => preloader.remove(), 800); // safety net
+    window.setTimeout(() => preloader.remove(), 1000); // safety net
   }
 
   // Let the preloader's own opening animation finish, plus a short beat so the name
   // is actually readable, before the minimal merge/cross-fade kicks in.
-  const openDelay = prefersReducedMotion ? 150 : 900;
+  const openDelay = prefersReducedMotion ? 150 : 1000;
   window.setTimeout(reveal, openDelay);
 })();
 
@@ -135,7 +146,7 @@ if (pageMain) {
 /* ---------- SMOOTH ANCHOR SCROLL (GSAP-powered) ---------- */
 const HEADER_OFFSET = 90;
 
-function smoothScrollTo(targetY, durationSeconds = 1){
+function smoothScrollTo(targetY, durationSeconds = 1.15){
   if (prefersReducedMotion) {
     window.scrollTo(0, targetY);
     return;
@@ -171,7 +182,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
     e.preventDefault();
     const targetY = targetEl.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-    smoothScrollTo(Math.max(targetY, 0), 1);
+    smoothScrollTo(Math.max(targetY, 0), 1.15);
     history.pushState(null, '', targetId);
   });
 });
@@ -278,9 +289,9 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
     onEnter: (batch) => gsap.to(batch, {
       opacity: 1,
       y: 0,
-      duration: 0.7,
-      ease: 'power3.out',
-      stagger: 0.1
+      duration: 0.95,
+      ease: 'power2.out',
+      stagger: 0.12
     })
   });
 } else {
@@ -313,7 +324,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
       {
         y: 0,
         opacity: 1,
-        duration: 0.8,
+        duration: 0.95,
         ease: 'power2.out',
         scrollTrigger: {
           trigger: card,
@@ -394,8 +405,8 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
 if (hasFinePointer && !prefersReducedMotion) {
   document.querySelectorAll('.magnetic').forEach(btn => {
     if (hasGSAP) {
-      const xTo = gsap.quickTo(btn, 'x', { duration: 0.45, ease: 'power3' });
-      const yTo = gsap.quickTo(btn, 'y', { duration: 0.45, ease: 'power3' });
+      const xTo = gsap.quickTo(btn, 'x', { duration: 0.55, ease: 'power3' });
+      const yTo = gsap.quickTo(btn, 'y', { duration: 0.55, ease: 'power3' });
 
       btn.addEventListener('mousemove', (e) => {
         const rect = btn.getBoundingClientRect();
@@ -499,8 +510,8 @@ if (projectCarousel && projectTrack) {
     if (hasGSAP) {
       gsap.to(projectTrack, {
         xPercent: -100 * current,
-        duration: 0.7,
-        ease: 'power3.inOut'
+        duration: 0.85,
+        ease: 'power4.inOut'
       });
     } else {
       projectTrack.style.transform = `translateX(-${current * 100}%)`;
@@ -571,6 +582,6 @@ toTopBtn.addEventListener('click', () => {
   if (prefersReducedMotion) {
     window.scrollTo(0, 0);
   } else {
-    smoothScrollTo(0, 1.1);
+    smoothScrollTo(0, 1.25);
   }
 });

@@ -73,7 +73,7 @@ img{max-width:100%;display:block;}
   inset:0;
   z-index:500;
   background:var(--bg);
-  transition:opacity 0.65s cubic-bezier(.22,.68,.36,1), visibility 0.65s cubic-bezier(.22,.68,.36,1), transform 0.65s cubic-bezier(.22,.68,.36,1);
+  transition:opacity 0.85s cubic-bezier(.16,1,.3,1), visibility 0.85s cubic-bezier(.16,1,.3,1), transform 0.85s cubic-bezier(.16,1,.3,1);
   transform:scale(1);
 }
 .preloader-name{
@@ -94,10 +94,10 @@ img{max-width:100%;display:block;}
   color:var(--foam);
   opacity:0;
   filter:blur(0);
-  transition:filter 0.55s cubic-bezier(.22,.68,.36,1), opacity 0.55s cubic-bezier(.22,.68,.36,1), transform 0.55s cubic-bezier(.22,.68,.36,1);
+  transition:filter 0.75s cubic-bezier(.16,1,.3,1), opacity 0.75s cubic-bezier(.16,1,.3,1), transform 0.75s cubic-bezier(.16,1,.3,1);
 }
 .preloader-name.is-ready{
-  animation:preloaderIn 0.6s ease forwards 0.1s;
+  animation:preloaderIn 0.8s cubic-bezier(.16,1,.3,1) forwards 0.1s;
 }
 .preloader-line{display:block;}
 .preloader-line--accent{
@@ -119,12 +119,12 @@ img{max-width:100%;display:block;}
   opacity:0;
   visibility:hidden;
   pointer-events:none;
-  transform:scale(1.035);
+  transform:scale(1.03);
 }
 .preloader.is-hidden .preloader-name{
   filter:blur(8px);
   opacity:0;
-  transform:translate(-50%,-50%) translateY(-8px) scale(1.03);
+  transform:translate(-50%,-50%) translateY(-8px) scale(1.025);
 }
 /* Everything else stays invisible (but still loaded/laid out) until the preloader clears,
    so the existing hero entrance animation plays right as the site becomes visible. */
@@ -144,7 +144,7 @@ body.is-preloading .progress-bar{
 }
 #pageMain,
 .to-top{
-  transition:opacity 0.5s ease 0.05s;
+  transition:opacity 0.85s cubic-bezier(.16,1,.3,1) 0.08s;
 }
 @media (prefers-reduced-motion: reduce){
   .preloader{transition:none;}
@@ -159,10 +159,10 @@ body.is-preloading .progress-bar{
   z-index:-1;
   pointer-events:none;
   transform:scale(1);
-  transition:opacity 0.9s cubic-bezier(.16,1,.3,1) 0.1s, transform 1s cubic-bezier(.16,1,.3,1) 0.1s;
+  transition:opacity 1.2s cubic-bezier(.16,1,.3,1) 0.1s, transform 1.3s cubic-bezier(.16,1,.3,1) 0.1s;
 }
 body.is-preloading .bg-orb{
-  transform:scale(1.12);
+  transform:scale(1.1);
 }
 .bg-orb-1{
   width:520px;height:520px;
@@ -205,10 +205,10 @@ body.is-preloading .bg-orb{
    keeping it on permanently would force the whole page content onto its own GPU
    layer at all times, which is a big chunk of the "laggy" feeling on lower-end devices. */
 #pageMain.bounce-top{
-  animation:bounceTop 0.9s cubic-bezier(.22,1,.36,1);
+  animation:bounceTop 1.05s cubic-bezier(.22,1,.36,1);
 }
 #pageMain.bounce-bottom{
-  animation:bounceBottom 0.9s cubic-bezier(.22,1,.36,1);
+  animation:bounceBottom 1.05s cubic-bezier(.22,1,.36,1);
 }
 /* A fuller spring decay — pull, overshoot, and settle through several
    diminishing oscillations instead of one correction — reads as a springier,
@@ -246,7 +246,7 @@ body.is-preloading .bg-orb{
   /* backdrop-filter is only ever toggled on/off (via .scrolled below), never
      transitioned — animating a blur filter every frame is one of the most expensive
      things a browser can paint, and this toggle doesn't need to be smooth to look good. */
-  transition:background 0.4s ease, border-color 0.4s ease, padding 0.4s ease, opacity 0.7s cubic-bezier(.16,1,.3,1) 0.05s, transform 0.7s cubic-bezier(.16,1,.3,1) 0.05s;
+  transition:background 0.45s ease, border-color 0.45s ease, padding 0.45s ease, opacity 0.9s cubic-bezier(.16,1,.3,1) 0.08s, transform 0.9s cubic-bezier(.16,1,.3,1) 0.08s;
   transform:translateY(0);
 }
 .site-header.scrolled{
@@ -313,20 +313,19 @@ body.is-preloading .bg-orb{
   color:#fff;
   transform:translateY(-1px);
 }
-
-.resume-btn{
-  font-size:0.88rem;color:#fff;
-  background:var(--accent);
-  border:1px solid var(--accent);
-  border-radius:999px;
-  padding:0.55rem 1.3rem;
-  box-shadow:0 6px 20px -6px rgba(139,92,246,0.6);
-  transition:background 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+/* The Projects button is the primary highlight in the header — filled with the
+   same accent gradient as the hero's main CTA so it visually leads the eye,
+   while "Let's talk" stays the quieter secondary action next to it. */
+.nav-cta--highlight{
+  background:linear-gradient(135deg, var(--accent), var(--accent-soft));
+  color:#fff;
+  border-color:transparent;
+  box-shadow:0 8px 24px -6px rgba(139,92,246,0.6);
 }
-.resume-btn:hover{
-  background:transparent;
-  color:var(--accent);
-  box-shadow:none;
+.nav-cta--highlight:hover{
+  background:linear-gradient(135deg, var(--accent), var(--accent-soft));
+  border-color:transparent;
+  box-shadow:0 12px 30px -6px rgba(139,92,246,0.75);
   transform:translateY(-1px);
 }
 
@@ -351,6 +350,11 @@ body.is-preloading .bg-orb{
   z-index:2;
   margin-top:2.2rem;
   padding-bottom:2rem;
+}
+/* Standalone pages with no hero section (e.g. the Projects page) need their own
+   top clearance so content doesn't start underneath the fixed header. */
+.page-no-hero{
+  padding-top:7rem;
 }
 .content-page{
   width:min(70%, 1040px);
@@ -392,7 +396,7 @@ body.is-preloading .bg-orb{
    GSAP ScrollTrigger (see script.js) animates it into place as it scrolls
    into view, then it flows straight into the content below it — no hard
    seam, just spacing, so it reads as one normal page. */
-.about, .experience, .education, .projects, .testimonials, .contact{
+.about, .experience, .education, .skills, .projects, .deliver, .contact{
   overflow:visible;
 }
 .page-title-card{
@@ -412,9 +416,9 @@ body.is-preloading .bg-orb{
 /* ---------- REVEAL ON SCROLL ---------- */
 .reveal{
   opacity:0;
-  transform:translateY(28px);
-  transition:opacity 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1);
-  transition-delay:calc(var(--stagger, 0) * 90ms);
+  transform:translateY(26px);
+  transition:opacity 0.9s cubic-bezier(.16,1,.3,1), transform 0.9s cubic-bezier(.16,1,.3,1);
+  transition-delay:calc(var(--stagger, 0) * 110ms);
 }
 .reveal.in-view{
   opacity:1;
@@ -510,7 +514,24 @@ body.is-preloading .bg-orb{
   -webkit-backdrop-filter:var(--glass-blur);
   box-shadow:0 30px 90px rgba(0,0,0,0.5);
   transform-style:preserve-3d;
-  transition:transform 0.4s ease-out;
+  transition:transform 0.45s ease-out, box-shadow 0.45s ease-out;
+}
+/* A gentle, one-time landing bounce on the whole hero card, timed to play right as
+   the preloader clears and the home page opens. The class is added and then removed
+   by script.js once the animation finishes, so it never lingers and never fights
+   with the pointer-tilt effect (which sets this same `transform` inline via JS). */
+.hero-inner.is-bouncing{
+  animation:heroInnerBounce 1.3s cubic-bezier(.16,1,.3,1);
+}
+@keyframes heroInnerBounce{
+  0%{transform:translateY(22px) scale(0.975);}
+  45%{transform:translateY(-7px) scale(1.012);}
+  65%{transform:translateY(3px) scale(0.996);}
+  82%{transform:translateY(-1px) scale(1.002);}
+  100%{transform:translateY(0) scale(1);}
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-inner.is-bouncing{animation:none;}
 }
 
 .status-badge{
@@ -528,8 +549,8 @@ body.is-preloading .bg-orb{
   transform:translateY(10px);
 }
 .hero-inner.is-revealed .status-badge{
-  animation:heroReveal 0.85s cubic-bezier(.16,1,.3,1) forwards;
-  animation-delay:0.08s;
+  animation:heroReveal 1.05s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.1s;
 }
 .status-dot{
   position:relative;
@@ -576,12 +597,12 @@ body.is-preloading .bg-orb{
    overshoot at the end is just a quick, gentle bounce as it settles/attaches into
    the home page — no travel, no font/size change, just a light landing wobble. */
 .hero-name.is-merging{
-  animation:heroNameMerge 0.62s cubic-bezier(.22,.68,.36,1) forwards;
+  animation:heroNameMerge 0.85s cubic-bezier(.16,1,.3,1) forwards;
 }
 @keyframes heroNameMerge{
   0%{opacity:0;filter:blur(8px);transform:scale(0.94);}
-  55%{opacity:1;filter:blur(0);transform:scale(1.035);}
-  78%{transform:scale(0.99);}
+  50%{opacity:1;filter:blur(0);transform:scale(1.03);}
+  72%{transform:scale(0.992);}
   100%{opacity:1;filter:blur(0);transform:scale(1);}
 }
 .hero-name .reveal-line:nth-child(2){
@@ -612,8 +633,8 @@ body.is-preloading .bg-orb{
   filter:blur(4px);
 }
 .hero-inner.is-revealed .hero-role{
-  animation:heroReveal 0.9s cubic-bezier(.16,1,.3,1) forwards;
-  animation-delay:0.16s;
+  animation:heroReveal 1.1s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.24s;
 }
 .hero-text{
   color:var(--muted);
@@ -626,12 +647,25 @@ body.is-preloading .bg-orb{
   filter:blur(4px);
 }
 .hero-inner.is-revealed .hero-text{
-  animation:heroReveal 0.9s cubic-bezier(.16,1,.3,1) forwards;
-  animation-delay:0.28s;
+  animation:heroReveal 1.1s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.4s;
 }
 .accent-text{
   color:var(--foam);
   font-weight:600;
+}
+/* Accent-colored inline link for use inside regular paragraph copy (distinct from
+   nav/button links, which have their own styling). */
+.text-link{
+  color:var(--accent-2);
+  text-decoration:underline;
+  text-decoration-color:rgba(34,211,238,0.4);
+  text-underline-offset:3px;
+  transition:color 0.3s ease, text-decoration-color 0.3s ease;
+}
+.text-link:hover{
+  color:var(--foam);
+  text-decoration-color:var(--accent-2);
 }
 @keyframes fadeIn{to{opacity:1;}}
 @keyframes heroReveal{
@@ -644,20 +678,20 @@ body.is-preloading .bg-orb{
   transform:translateY(12px);
 }
 .hero-inner.is-revealed .hero-actions{
-  animation:heroReveal 0.9s cubic-bezier(.16,1,.3,1) forwards;
-  animation-delay:0.36s;
+  animation:heroReveal 1.1s cubic-bezier(.16,1,.3,1) forwards;
+  animation-delay:0.52s;
 }
 .hero-cta{
   display:inline-flex;
   align-items:center;
-  gap:0.5rem;
+  gap:0.6rem;
   position:relative;
   overflow:hidden;
   padding:0.9rem 1.7rem;
   border-radius:10px;
   font-size:0.95rem;
   font-weight:500;
-  transition:background 0.35s ease, border-color 0.35s ease, transform 0.15s ease, box-shadow 0.3s ease, color 0.3s ease;
+  transition:background 0.35s ease, border-color 0.35s ease, transform 0.2s ease, box-shadow 0.3s ease, color 0.3s ease;
 }
 .hero-cta--primary{
   background:linear-gradient(135deg, var(--accent), var(--accent-soft));
@@ -666,14 +700,20 @@ body.is-preloading .bg-orb{
   box-shadow:0 10px 30px -8px rgba(139,92,246,0.6);
 }
 .hero-cta--primary:hover{
-  transform:translateY(-2px);
-  box-shadow:0 14px 36px -8px rgba(139,92,246,0.75);
+  transform:translateY(-3px);
+  box-shadow:0 16px 38px -8px rgba(139,92,246,0.8);
+}
+.hero-cta--primary:active{
+  transform:translateY(-1px);
 }
 .cta-icon{
-  width:16px;height:16px;
+  width:15px;height:15px;
+  flex-shrink:0;
   transition:transform 0.3s ease;
 }
-.hero-cta--primary:hover .cta-icon{transform:translateX(4px);}
+.hero-cta--primary:hover .cta-icon{
+  transform:scale(1.1);
+}
 .hero-cta::after{
   content:'';
   position:absolute;top:0;left:-60%;
@@ -685,15 +725,27 @@ body.is-preloading .bg-orb{
 }
 .hero-cta:hover::after{left:130%;}
 .hero-cta--ghost{
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--line);
-  color:var(--muted);
+  background:rgba(139,92,246,0.06);
+  border:1px solid rgba(139,92,246,0.35);
+  color:var(--foam);
 }
 .hero-cta--ghost:hover{
-  background:rgba(255,255,255,0.06);
+  background:rgba(139,92,246,0.14);
   color:var(--foam);
-  border-color:var(--foam);
+  border-color:var(--accent);
+  transform:translateY(-3px);
+  box-shadow:0 12px 30px -12px rgba(139,92,246,0.55);
+}
+.hero-cta--ghost:active{
+  transform:translateY(-1px);
+}
+.cta-icon--doc{
+  width:15px;height:15px;
+  color:var(--accent-2);
+}
+.hero-cta--ghost:hover .cta-icon--doc{
   transform:translateY(-2px);
+  color:var(--accent-2);
 }
 
 
@@ -712,16 +764,15 @@ body.is-preloading .bg-orb{
   backdrop-filter:var(--glass-blur);
   -webkit-backdrop-filter:var(--glass-blur);
   box-shadow:0 12px 40px rgba(0,0,0,0.4);
-  transition:transform 0.4s ease;
+  transition:transform 0.5s cubic-bezier(.16,1,.3,1), box-shadow 0.5s cubic-bezier(.16,1,.3,1);
 }
-.about-photo:hover .photo-frame{transform:translateY(-4px);}
+.about-photo:hover .photo-frame{transform:translateY(-5px);box-shadow:0 18px 50px rgba(0,0,0,0.45);}
 .photo-tag{
   margin-top:1rem;font-size:0.8rem;color:var(--muted);
   max-width:220px;
 }
-.about-lead{font-size:1.2rem;margin-bottom:1rem;color:var(--foam);}
-.about-copy p{color:var(--muted);margin-bottom:1.2rem;max-width:60ch;}
-.about-facts{list-style:none;margin-top:1.4rem;border-top:1px solid var(--line);}
+.about-lead{font-size:1.15rem;line-height:1.6;color:var(--foam);max-width:56ch;}
+.about-facts{list-style:none;margin-top:1.6rem;border-top:1px solid var(--line);}
 .about-facts li{
   display:flex;gap:1.2rem;
   padding:0.8rem 0;
@@ -729,34 +780,15 @@ body.is-preloading .bg-orb{
   color:var(--foam);
 }
 .about-facts li span{
-  width:130px;flex-shrink:0;color:var(--accent);font-size:0.85rem;
+  width:150px;flex-shrink:0;color:var(--accent);font-size:0.85rem;
 }
 
-.fun-facts{
-  margin-top:3.5rem;
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:1rem;
-}
-.fact-card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:1.3rem;
-  backdrop-filter:var(--glass-blur);
-  -webkit-backdrop-filter:var(--glass-blur);
-  box-shadow:0 8px 30px rgba(0,0,0,0.3);
-  transition:border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
-}
-.fact-card:hover{border-color:var(--accent-soft);background:var(--surface-2);transform:translateY(-3px);}
-.fact-card h4{color:var(--accent);font-size:0.9rem;margin-bottom:0.4rem;}
-.fact-card p{color:var(--muted);font-size:0.88rem;}
-
-/* ---------- TESTIMONIALS ---------- */
-.testimonial-grid{
+/* ---------- WHAT I CAN DELIVER ---------- */
+.deliver-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:1.2rem;
 }
-.testimonial-card{
+.deliver-card{
   background:var(--surface);
   border:1px solid var(--line);
   border-radius:14px;
@@ -764,24 +796,20 @@ body.is-preloading .bg-orb{
   backdrop-filter:var(--glass-blur);
   -webkit-backdrop-filter:var(--glass-blur);
   box-shadow:0 8px 30px rgba(0,0,0,0.3);
-  transition:border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  transition:border-color 0.45s cubic-bezier(.16,1,.3,1), transform 0.45s cubic-bezier(.16,1,.3,1), background 0.45s cubic-bezier(.16,1,.3,1), box-shadow 0.45s cubic-bezier(.16,1,.3,1);
 }
-.testimonial-card:hover{border-color:var(--accent-soft);background:var(--surface-2);transform:translateY(-3px);}
-.testimonial-quote{
-  color:var(--foam);
-  font-size:0.95rem;
-  line-height:1.6;
-  margin-bottom:1.2rem;
-}
-.testimonial-author{display:flex;flex-direction:column;gap:0.15rem;}
-.testimonial-name{color:var(--accent);font-size:0.88rem;font-weight:500;}
-.testimonial-role{color:var(--muted);font-size:0.8rem;}
-.focus-title{
+.deliver-card:hover{border-color:var(--accent-soft);background:var(--surface-2);transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,0.35);}
+.deliver-title{
   font-family:var(--font-display);
   color:var(--accent);
   font-size:1.05rem;
   font-weight:600;
   margin-bottom:0.7rem;
+}
+.deliver-text{
+  color:var(--muted);
+  font-size:0.95rem;
+  line-height:1.6;
 }
 
 /* ---------- EDUCATION & SKILLS ---------- */
@@ -854,10 +882,6 @@ body.is-preloading .bg-orb{
 }
 .cert-chip:hover{border-color:var(--accent);color:var(--foam);}
 
-.skills-heading{
-  font-family:var(--font-display);
-  font-size:1.4rem;margin-bottom:1.4rem;color:var(--foam);
-}
 .skills-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
   gap:1rem;
@@ -870,10 +894,10 @@ body.is-preloading .bg-orb{
   backdrop-filter:var(--glass-blur);
   -webkit-backdrop-filter:var(--glass-blur);
   box-shadow:0 8px 30px rgba(0,0,0,0.3);
-  transition:border-color 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  transition:border-color 0.45s cubic-bezier(.16,1,.3,1), transform 0.45s cubic-bezier(.16,1,.3,1), background 0.45s cubic-bezier(.16,1,.3,1), box-shadow 0.45s cubic-bezier(.16,1,.3,1);
   cursor:pointer;
 }
-.skill-card:hover{border-color:var(--accent-soft);background:var(--surface-2);transform:translateY(-3px);}
+.skill-card:hover{border-color:var(--accent-soft);background:var(--surface-2);transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,0.35);}
 .skill-toggle{
   width:100%;
   border:none;
@@ -899,7 +923,7 @@ body.is-preloading .bg-orb{
 }
 .skill-details{
   max-height:0;overflow:hidden;opacity:0;
-  transition:max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease;
+  transition:max-height 0.5s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, margin 0.4s ease;
 }
 .skill-card.is-open .skill-details{
   opacity:1;margin-top:0.8rem;
@@ -1044,12 +1068,13 @@ body.is-preloading .bg-orb{
   backdrop-filter:var(--glass-blur);
   -webkit-backdrop-filter:var(--glass-blur);
   box-shadow:0 8px 30px rgba(0,0,0,0.3);
-  transition:border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+  transition:border-color 0.45s cubic-bezier(.16,1,.3,1), background 0.45s cubic-bezier(.16,1,.3,1), transform 0.45s cubic-bezier(.16,1,.3,1), box-shadow 0.45s cubic-bezier(.16,1,.3,1);
 }
 .contact-card:hover{
   border-color:var(--accent);
   background:var(--surface-2);
-  transform:translateY(-3px);
+  transform:translateY(-4px);
+  box-shadow:0 14px 40px rgba(0,0,0,0.35);
 }
 .contact-icon{color:var(--accent);width:26px;height:26px;}
 .contact-icon svg{width:100%;height:100%;}
@@ -1116,7 +1141,7 @@ body.is-preloading .bg-orb{
   opacity:0;transform:translateY(14px);
   pointer-events:none;
   display:flex;align-items:center;justify-content:center;
-  transition:opacity 0.35s ease, transform 0.35s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  transition:opacity 0.5s cubic-bezier(.16,1,.3,1), transform 0.5s cubic-bezier(.16,1,.3,1), border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
   z-index:90;
 }
 .to-top svg{
@@ -1176,6 +1201,7 @@ body.is-preloading .bg-orb{
     transform:none;
   }
   .hero{padding:6rem 1.2rem 2.5rem;}
+  .page-no-hero{padding-top:6rem;}
   .hero-inner{padding:2.4rem 1.6rem;border-radius:20px;}
   .status-badge{
     width:100%;
