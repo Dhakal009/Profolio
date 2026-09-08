@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  (function(){
+    try{
+      var saved = localStorage.getItem('theme');
+      var theme = saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', theme);
+      var savedIntensity = localStorage.getItem('intensity');
+      if(savedIntensity){
+        document.documentElement.style.setProperty('--intensity', (parseInt(savedIntensity,10)/100));
+      }
+    }catch(e){}
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Projects | Bikash Dhakal</title>
@@ -64,7 +77,7 @@
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
     <div class="header-inner">
-      <a href="index.html#home" class="logo">B<span class="logo-dot">.</span>D</a>
+      <div class="logo-spacer" aria-hidden="true"></div>
       <nav class="top-nav" id="topNav" aria-label="Primary">
         <a href="index.html#home" class="nav-link">Home</a>
         <a href="index.html#about" class="nav-link">About</a>
@@ -74,8 +87,19 @@
         <a href="index.html#contact" class="nav-link">Contact</a>
       </nav>
       <div class="nav-actions">
-        <a href="projects.html" class="nav-cta nav-cta--highlight">Projects</a>
+        <a href="projects.html" class="nav-cta">Projects</a>
         <a href="index.html#contact" class="nav-cta">Let's talk</a>
+      </div>
+      <div class="theme-control">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.3M12 19.1v2.3M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.3A8.4 8.4 0 119.7 4a7 7 0 0010.3 10.3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="intensity-panel" id="intensityPanel">
+          <label for="intensitySlider">Display intensity <span id="intensityValue">100%</span></label>
+          <input type="range" id="intensitySlider" min="70" max="140" step="5" value="100" aria-label="Display intensity">
+          <p class="intensity-hint">Adjust brightness for better visibility in light or dark mode.</p>
+        </div>
       </div>
       <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="topNav">
         <span></span><span></span><span></span>
@@ -86,15 +110,290 @@
   <main id="pageMain" class="page-no-hero">
     <div class="content-stack" id="contentStack">
 
-      <!-- PROJECTS (placeholder — content coming soon) -->
+      <!-- PROJECTS -->
       <section id="main-content" class="section projects content-page is-current">
         <div class="section-inner">
           <div class="page-title-card">
             <h1 class="section-title">Projects</h1>
-            <p class="page-title-desc">This page is under construction — a full showcase of my work is coming soon.</p>
+            <p class="page-title-desc">A mix of full builds and smaller experiments. Click any card for screenshots and a look at how it's put together.</p>
           </div>
 
-          <div style="text-align:center;">
+          <div class="projects-showcase">
+
+            <!-- All images below are placeholders (picsum.photos, seeded so
+                 each project gets a distinct but consistent set). Swap each
+                 src for your own screenshot in assets/projects/<slug>/ when
+                 ready — everything else about the markup stays the same. -->
+
+            <!-- ============================================================
+                 FEATURED PROJECTS — .main-project-card
+                 Reusable component. To add one: duplicate everything from
+                 <article class="main-project-card"> to </article> and edit:
+                   - data-badge          → small label shown on the card + modal
+                   - .main-project-media img → cover image (put files in
+                     assets/projects/<slug>/ inside your portfolio folder)
+                   - h3 / .project-pitch → title + one-line pitch
+                   - .tag-row            → tech stack chips
+                   - a[data-role="github"] / a[data-role="demo"] → your links
+                   - <template class="project-detail-data"> → everything shown
+                     only in the modal: screenshots (.detail-gallery), the
+                     full write-up (.detail-desc) and the "how it works"
+                     breakdown (.detail-structure, reuses .highlight-item)
+                 The whole card is clickable and opens the shared modal;
+                 the GitHub/demo links inside it still navigate normally.
+                 ============================================================ -->
+            <div class="showcase-group">
+              <p class="showcase-group-label"><strong>Featured builds</strong> — the projects I'd point you to first</p>
+
+              <article class="main-project-card reveal" data-badge="Featured project">
+                <div class="main-project-media">
+                  <img src="https://picsum.photos/seed/shopkart-cover/900/600" alt="ShopKart storefront screenshot" loading="lazy">
+                </div>
+                <div class="main-project-content">
+                  <span class="project-badge">Featured project</span>
+                  <h3>ShopKart — MERN E-commerce Platform</h3>
+                  <p class="project-pitch">A full online store with cart, checkout and an admin dashboard for managing products, orders and inventory.</p>
+                  <div class="tag-row">
+                    <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Tailwind CSS</span><span>JWT</span>
+                  </div>
+                  <div class="project-actions">
+                    <a href="https://github.com/Dhakal009/shopkart" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                      <span>GitHub</span>
+                    </a>
+                    <a href="https://shopkart.bikashdhakal1.com.np" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <span>Live demo</span>
+                    </a>
+                    <button type="button" class="proj-link proj-link--view">
+                      <span>View details</span>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <template class="project-detail-data">
+                  <p class="detail-desc">ShopKart is a full-featured e-commerce platform built to practice the complete flow of a real online store: browsing and filtering products, a persistent cart, secure checkout, order history, and an admin dashboard for adding products and tracking orders. It's built as a MERN app with a clean separation between the public storefront and the protected admin area.</p>
+                  <div class="detail-structure">
+                    <div class="highlight-item"><h4>Frontend</h4><p>React with Tailwind CSS for the storefront UI, cart state and protected checkout flow.</p></div>
+                    <div class="highlight-item"><h4>Backend</h4><p>Node.js + Express REST API handling products, orders and users.</p></div>
+                    <div class="highlight-item"><h4>Database</h4><p>MongoDB with Mongoose models for products, orders, carts and users.</p></div>
+                    <div class="highlight-item"><h4>Auth &amp; payments</h4><p>JWT-based authentication with role-based access for the admin dashboard.</p></div>
+                  </div>
+                  <div class="detail-gallery">
+                    <img src="https://picsum.photos/seed/shopkart-1/900/600" alt="ShopKart product listing page">
+                    <img src="https://picsum.photos/seed/shopkart-2/900/600" alt="ShopKart checkout flow">
+                    <img src="https://picsum.photos/seed/shopkart-3/900/600" alt="ShopKart admin dashboard">
+                  </div>
+                </template>
+              </article>
+
+              <article class="main-project-card reveal" data-badge="Featured project">
+                <div class="main-project-media">
+                  <img src="https://picsum.photos/seed/devconnect-cover/900/600" alt="DevConnect feed screenshot" loading="lazy">
+                </div>
+                <div class="main-project-content">
+                  <span class="project-badge">Featured project</span>
+                  <h3>DevConnect — Developer Community Platform</h3>
+                  <p class="project-pitch">A social platform where developers share posts, follow each other and chat in real time.</p>
+                  <div class="tag-row">
+                    <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Socket.io</span><span>Tailwind CSS</span>
+                  </div>
+                  <div class="project-actions">
+                    <a href="https://github.com/Dhakal009/devconnect" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                      <span>GitHub</span>
+                    </a>
+                    <a href="https://devconnect.bikashdhakal1.com.np" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <span>Live demo</span>
+                    </a>
+                    <button type="button" class="proj-link proj-link--view">
+                      <span>View details</span>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <template class="project-detail-data">
+                  <p class="detail-desc">DevConnect is a small community platform for developers: a feed for text and code-snippet posts, follows, likes and comments, plus one-to-one chat over WebSockets. It was built to get comfortable with real-time features and structuring a larger Express API around multiple related resources.</p>
+                  <div class="detail-structure">
+                    <div class="highlight-item"><h4>Frontend</h4><p>React feed, profile pages and a chat UI built with Tailwind CSS.</p></div>
+                    <div class="highlight-item"><h4>Backend</h4><p>Express REST API plus a Socket.io layer for live messages and notifications.</p></div>
+                    <div class="highlight-item"><h4>Database</h4><p>MongoDB storing users, posts, follows and conversations.</p></div>
+                    <div class="highlight-item"><h4>Real-time</h4><p>Socket.io rooms per conversation, with online-status tracking.</p></div>
+                  </div>
+                  <div class="detail-gallery">
+                    <img src="https://picsum.photos/seed/devconnect-1/900/600" alt="DevConnect feed page">
+                    <img src="https://picsum.photos/seed/devconnect-2/900/600" alt="DevConnect chat interface">
+                    <img src="https://picsum.photos/seed/devconnect-3/900/600" alt="DevConnect profile page">
+                  </div>
+                </template>
+              </article>
+            </div>
+
+            <!-- ============================================================
+                 OTHER PROJECTS — .simple-project-card
+                 Reusable component. Duplicate an <article> block inside the
+                 grid and edit the same pieces as above (cover image, title,
+                 one-liner, links, tag-row is optional here, and the hidden
+                 <template class="project-detail-data"> for the modal).
+                 ============================================================ -->
+            <div class="showcase-group">
+              <p class="showcase-group-label"><strong>Other projects</strong> — smaller builds and experiments</p>
+
+              <div class="simple-projects-grid">
+
+                <article class="simple-project-card reveal" data-badge="Side project">
+                  <div class="simple-project-media">
+                    <img src="https://picsum.photos/seed/task-manager-cover/900/600" alt="Task Manager app screenshot" loading="lazy">
+                  </div>
+                  <div class="simple-project-content">
+                    <h4>Task Manager App</h4>
+                    <p>Kanban-style board for organizing daily tasks by status, with drag-and-drop and due dates.</p>
+                    <div class="tag-row"><span>React</span><span>Node.js</span><span>MongoDB</span></div>
+                    <div class="simple-project-links">
+                      <div class="simple-icon-links">
+                        <a href="https://github.com/Dhakal009/task-manager" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                        </a>
+                        <a href="https://task-manager.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                      </div>
+                      <button type="button" class="proj-link proj-link--view">
+                        <span>Details</span>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <template class="project-detail-data">
+                    <p class="detail-desc">A drag-and-drop task board split into To Do, In Progress and Done columns, with due dates and simple priority tags. Built to practice complex UI state in React alongside a small persistence layer.</p>
+                    <div class="detail-structure">
+                      <div class="highlight-item"><h4>Frontend</h4><p>React with the HTML5 drag-and-drop API for moving cards between columns.</p></div>
+                      <div class="highlight-item"><h4>Backend</h4><p>Node.js + Express API for storing boards, columns and tasks per user.</p></div>
+                    </div>
+                    <div class="detail-gallery">
+                      <img src="https://picsum.photos/seed/task-manager-1/900/600" alt="Task Manager board view">
+                      <img src="https://picsum.photos/seed/task-manager-2/900/600" alt="Task Manager task detail">
+                    </div>
+                  </template>
+                </article>
+
+                <article class="simple-project-card reveal" data-badge="Side project">
+                  <div class="simple-project-media">
+                    <img src="https://picsum.photos/seed/weather-dashboard-cover/900/600" alt="Weather Dashboard screenshot" loading="lazy">
+                  </div>
+                  <div class="simple-project-content">
+                    <h4>Weather Dashboard</h4>
+                    <p>Search any city for a live forecast, with saved locations and a 5-day outlook.</p>
+                    <div class="tag-row"><span>React</span><span>REST API</span></div>
+                    <div class="simple-project-links">
+                      <div class="simple-icon-links">
+                        <a href="https://github.com/Dhakal009/weather-dashboard" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                        </a>
+                        <a href="https://weather.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                      </div>
+                      <button type="button" class="proj-link proj-link--view">
+                        <span>Details</span>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <template class="project-detail-data">
+                    <p class="detail-desc">A weather lookup app that pulls live conditions and a 5-day forecast for any searched city, with a list of saved locations kept in local storage.</p>
+                    <div class="detail-structure">
+                      <div class="highlight-item"><h4>Frontend</h4><p>React with a debounced search and cached recent lookups.</p></div>
+                      <div class="highlight-item"><h4>Data</h4><p>A public weather REST API, called from the client with error and loading states.</p></div>
+                    </div>
+                    <div class="detail-gallery">
+                      <img src="https://picsum.photos/seed/weather-dashboard-1/900/600" alt="Weather Dashboard search view">
+                      <img src="https://picsum.photos/seed/weather-dashboard-2/900/600" alt="Weather Dashboard 5-day forecast">
+                    </div>
+                  </template>
+                </article>
+
+                <article class="simple-project-card reveal" data-badge="Side project">
+                  <div class="simple-project-media">
+                    <img src="https://picsum.photos/seed/blog-cms-cover/900/600" alt="Blog CMS screenshot" loading="lazy">
+                  </div>
+                  <div class="simple-project-content">
+                    <h4>Blog CMS</h4>
+                    <p>A minimal blogging platform with a markdown editor and an admin panel for publishing posts.</p>
+                    <div class="tag-row"><span>Next.js</span><span>MongoDB</span></div>
+                    <div class="simple-project-links">
+                      <div class="simple-icon-links">
+                        <a href="https://github.com/Dhakal009/blog-cms" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                        </a>
+                        <a href="https://blog-cms.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                      </div>
+                      <button type="button" class="proj-link proj-link--view">
+                        <span>Details</span>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <template class="project-detail-data">
+                    <p class="detail-desc">A lightweight content platform for writing and publishing posts in markdown, with a protected admin panel for drafts, editing and publishing — built while learning Next.js.</p>
+                    <div class="detail-structure">
+                      <div class="highlight-item"><h4>Frontend</h4><p>Next.js pages with server-side rendering for post pages.</p></div>
+                      <div class="highlight-item"><h4>Backend</h4><p>Next.js API routes talking to MongoDB for posts and authors.</p></div>
+                    </div>
+                    <div class="detail-gallery">
+                      <img src="https://picsum.photos/seed/blog-cms-1/900/600" alt="Blog CMS post view">
+                      <img src="https://picsum.photos/seed/blog-cms-2/900/600" alt="Blog CMS admin editor">
+                    </div>
+                  </template>
+                </article>
+
+                <article class="simple-project-card reveal" data-badge="Side project">
+                  <div class="simple-project-media">
+                    <img src="https://picsum.photos/seed/url-shortener-cover/900/600" alt="URL Shortener screenshot" loading="lazy">
+                  </div>
+                  <div class="simple-project-content">
+                    <h4>URL Shortener</h4>
+                    <p>Shortens long links and tracks click counts, with a simple public API.</p>
+                    <div class="tag-row"><span>Node.js</span><span>Express</span><span>MongoDB</span></div>
+                    <div class="simple-project-links">
+                      <div class="simple-icon-links">
+                        <a href="https://github.com/Dhakal009/url-shortener" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                        </a>
+                        <a href="https://short.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                      </div>
+                      <button type="button" class="proj-link proj-link--view">
+                        <span>Details</span>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <template class="project-detail-data">
+                    <p class="detail-desc">A small utility that turns long URLs into short, shareable links, with a redirect service and click-count tracking per link.</p>
+                    <div class="detail-structure">
+                      <div class="highlight-item"><h4>Backend</h4><p>Express API generating short codes and handling redirects.</p></div>
+                      <div class="highlight-item"><h4>Database</h4><p>MongoDB storing the original URL, short code and click count.</p></div>
+                    </div>
+                    <div class="detail-gallery">
+                      <img src="https://picsum.photos/seed/url-shortener-1/900/600" alt="URL Shortener home page">
+                      <img src="https://picsum.photos/seed/url-shortener-2/900/600" alt="URL Shortener click stats">
+                    </div>
+                  </template>
+                </article>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div style="text-align:center;margin-top:3rem;">
             <a href="index.html" class="hero-cta hero-cta--ghost magnetic">
               <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Back to Home</span>
@@ -129,10 +428,45 @@
     </svg>
   </button>
 
+  <!-- PROJECT DETAIL MODAL — single shared instance, populated per-card by
+       projects-modal.js from whichever card was clicked. -->
+  <div class="project-modal" id="projectModal" aria-hidden="true">
+    <div class="project-modal-backdrop" data-modal-close></div>
+    <div class="project-modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="project-modal-close" type="button" aria-label="Close details" data-modal-close>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+
+      <div class="modal-gallery">
+        <div class="modal-gallery-main">
+          <img id="modalGalleryImg" src="" alt="">
+          <button class="gallery-nav prev" type="button" data-gallery-prev aria-label="Previous screenshot">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="gallery-nav next" type="button" data-gallery-next aria-label="Next screenshot">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="modal-gallery-thumbs" id="modalThumbs"></div>
+      </div>
+
+      <div class="modal-body">
+        <span class="modal-badge" id="modalBadge"></span>
+        <h2 id="modalTitle"></h2>
+        <div class="tag-row" id="modalTags"></div>
+        <p class="modal-desc" id="modalDesc"></p>
+        <p class="modal-structure-title">How it's built</p>
+        <div class="modal-structure" id="modalStructure"></div>
+        <div class="modal-links" id="modalLinks"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- GSAP (animation engine) + ScrollTrigger & ScrollToPlugin -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
   <script src="script.js"></script>
+  <script src="projects-modal.js"></script>
 </body>
 </html>

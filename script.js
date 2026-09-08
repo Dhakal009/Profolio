@@ -2,6 +2,68 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ---------- THEME TOGGLE (light / dark) ---------- */
+(function initThemeToggle(){
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+
+  function updateLabel(theme){
+    toggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+  }
+
+  // the inline script in <head> already set data-theme before first paint;
+  // just make sure the button's label matches whatever theme is active.
+  updateLabel(root.getAttribute('data-theme') || 'dark');
+
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    updateLabel(next);
+    try { localStorage.setItem('theme', next); } catch (e) { /* private mode, etc. */ }
+
+    // Retrigger the CSS bounce/pulse animation on every switch.
+    toggle.classList.remove('theme-changed');
+    void toggle.offsetWidth; // force reflow so the class can be re-added cleanly
+    toggle.classList.add('theme-changed');
+  });
+
+  toggle.addEventListener('animationend', () => {
+    toggle.classList.remove('theme-changed');
+  });
+})();
+
+/* ---------- DISPLAY INTENSITY (brightness of the active light/dark theme) ---------- */
+(function initIntensityControl(){
+  const root = document.documentElement;
+  const panel = document.getElementById('intensityPanel');
+  const slider = document.getElementById('intensitySlider');
+  const valueLabel = document.getElementById('intensityValue');
+  if (!panel || !slider) return;
+
+  function applyIntensity(percent, persist){
+    root.style.setProperty('--intensity', percent / 100);
+    slider.value = percent;
+    slider.setAttribute('aria-valuenow', percent);
+    if (valueLabel) valueLabel.textContent = percent + '%';
+    if (persist) {
+      try { localStorage.setItem('intensity', percent); } catch (e) { /* private mode, etc. */ }
+    }
+  }
+
+  // Pick up whatever the pre-paint inline script already applied (or default 100).
+  let savedPercent = 100;
+  try {
+    const saved = localStorage.getItem('intensity');
+    if (saved) savedPercent = parseInt(saved, 10);
+  } catch (e) { /* private mode, etc. */ }
+  applyIntensity(savedPercent, false);
+
+  slider.addEventListener('input', () => {
+    applyIntensity(parseInt(slider.value, 10), true);
+  });
+})();
+
 /* ---------- PRELOADER → HERO NAME MERGE ----------
    The preloader opens with the name pinned to the EXACT spot the real hero heading
    occupies on screen (see positionPreloaderName() below) — not just centered in the
@@ -146,7 +208,7 @@ if (pageMain) {
 /* ---------- SMOOTH ANCHOR SCROLL (GSAP-powered) ---------- */
 const HEADER_OFFSET = 90;
 
-function smoothScrollTo(targetY, durationSeconds = 1.15){
+function smoothScrollTo(targetY, durationSeconds = 0.85){
   if (prefersReducedMotion) {
     window.scrollTo(0, targetY);
     return;
@@ -155,7 +217,7 @@ function smoothScrollTo(targetY, durationSeconds = 1.15){
     gsap.to(window, {
       duration: durationSeconds,
       scrollTo: { y: targetY, autoKill: true },
-      ease: 'power3.inOut'
+      ease: 'power2.out'
     });
   } else {
     // fallback: plain eased scroll if the CDN failed to load
@@ -182,7 +244,11 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
     e.preventDefault();
     const targetY = targetEl.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-    smoothScrollTo(Math.max(targetY, 0), 1.15);
+    // scale duration to distance so short hops feel snappy and long jumps
+    // (e.g. Projects -> Contact) don't drag on — capped at 0.85s either way
+    const distance = Math.abs(targetY - window.scrollY);
+    const duration = Math.min(0.85, Math.max(0.45, distance / 2200));
+    smoothScrollTo(Math.max(targetY, 0), duration);
     history.pushState(null, '', targetId);
   });
 });
