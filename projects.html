@@ -90,22 +90,27 @@
         <a href="projects.html" class="nav-cta">Projects</a>
         <a href="index.html#contact" class="nav-cta">Let's talk</a>
       </div>
-      <div class="theme-control">
-        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.3M12 19.1v2.3M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.3A8.4 8.4 0 119.7 4a7 7 0 0010.3 10.3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="intensity-panel" id="intensityPanel">
-          <label for="intensitySlider">Display intensity <span id="intensityValue">100%</span></label>
-          <input type="range" id="intensitySlider" min="70" max="140" step="5" value="100" aria-label="Display intensity">
-          <p class="intensity-hint">Adjust brightness for better visibility in light or dark mode.</p>
+      <div class="header-right">
+        <div class="theme-control">
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.3M12 19.1v2.3M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 14.3A8.4 8.4 0 119.7 4a7 7 0 0010.3 10.3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="intensity-panel" id="intensityPanel">
+            <label for="intensitySlider">Display intensity <span id="intensityValue">100%</span></label>
+            <input type="range" id="intensitySlider" min="70" max="140" step="5" value="100" aria-label="Display intensity">
+            <p class="intensity-hint">Adjust brightness for better visibility in light or dark mode.</p>
+          </div>
         </div>
+        <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="topNav">
+          <span></span><span></span><span></span>
+        </button>
       </div>
-      <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="topNav">
-        <span></span><span></span><span></span>
-      </button>
     </div>
   </header>
+
+  <!-- Dims the page behind the mobile menu and closes it on tap-outside -->
+  <div class="nav-overlay" id="navOverlay" aria-hidden="true"></div>
 
   <main id="pageMain" class="page-no-hero">
     <div class="content-stack" id="contentStack">

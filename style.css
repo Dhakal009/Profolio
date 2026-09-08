@@ -348,6 +348,24 @@ body.is-preloading .bg-orb{
 .menu-toggle.active span:nth-child(2){opacity:0;}
 .menu-toggle.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 
+/* ---------- MOBILE MENU BACKDROP ---------- */
+/* Dims the page and sits just below the centered nav panel; tapping it
+   closes the menu (handled in script.js). Hidden entirely above the
+   hamburger breakpoint. */
+.nav-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(5,5,10,0.55);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  opacity:0;
+  visibility:hidden;
+  transition:opacity 0.3s ease, visibility 0.3s;
+  z-index:140;
+}
+[data-theme="light"] .nav-overlay{background:rgba(30,25,45,0.32);}
+.nav-overlay.open{opacity:1;visibility:visible;}
+
 /* ---------- THEME TOGGLE ---------- */
 .theme-toggle{
   position:relative;
@@ -396,6 +414,12 @@ body.is-preloading .bg-orb{
 }
 
 /* ---------- DISPLAY INTENSITY CONTROL ---------- */
+/* Groups the theme control and hamburger together at the far right of the
+   header, on both desktop and mobile, instead of leaving the theme button
+   floating between the nav and the menu icon. */
+.header-right{
+  display:flex;align-items:center;gap:0.5rem;
+}
 .theme-control{position:relative;display:flex;align-items:center;}
 
 /* Hovering (or keyboard-focusing) the theme toggle reveals the intensity
@@ -983,6 +1007,14 @@ body.is-preloading .bg-orb{
 
 /* ---------- EDUCATION & SKILLS ---------- */
 /* ---------- EXPERIENCE (fresher / open-to-work status) ---------- */
+/* Compact variant: less outer padding, no forced min-height, tighter inner
+   spacing — so the whole section comfortably fits a single viewport instead
+   of needing its own scroll. */
+.section.experience{padding-top:5rem;padding-bottom:5rem;}
+.experience .content-page{min-height:auto;padding:3rem 0 2.2rem;}
+.experience .page-title-card{margin-bottom:1.6rem;}
+.experience .section-title{font-size:clamp(2.1rem,4vw,2.8rem);margin-bottom:0.5rem;}
+.experience .page-title-desc{margin:0 auto;}
 .experience-status-card{
   max-width:760px;
   margin:0 auto;
@@ -990,53 +1022,95 @@ body.is-preloading .bg-orb{
   background:var(--surface);
   border:1px solid var(--line);
   border-radius:20px;
-  padding:2.8rem 2.4rem;
+  padding:2rem 2.2rem;
   backdrop-filter:var(--glass-blur);
   -webkit-backdrop-filter:var(--glass-blur);
   box-shadow:0 20px 60px rgba(0,0,0,0.4);
 }
-.experience-status-card .status-badge{margin:0 auto 1.6rem;}
+.experience-status-card .status-badge{margin:0 auto 1.1rem;}
 .experience-status-card h3{
   font-family:var(--font-display);
-  font-size:clamp(1.3rem,2.6vw,1.7rem);
+  font-size:clamp(1.2rem,2.4vw,1.5rem);
   color:var(--foam);
-  margin-bottom:1rem;
-  line-height:1.35;
+  margin-bottom:0.7rem;
+  line-height:1.3;
 }
 .experience-status-card > p{
   color:var(--muted);
   max-width:58ch;
-  margin:0 auto 2.2rem;
-  line-height:1.7;
+  margin:0 auto 1.4rem;
+  line-height:1.6;
+  font-size:0.94rem;
 }
 .experience-highlights{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:1.2rem;
+  gap:1rem;
   text-align:left;
-  margin-bottom:2.2rem;
+  margin-bottom:1.5rem;
 }
 .highlight-item{
   background:rgba(255,255,255,0.03);
   border:1px solid var(--line);
   border-radius:12px;
-  padding:1.2rem;
+  padding:1rem 1.1rem;
 }
-.highlight-item h4{color:var(--accent);font-size:0.85rem;margin-bottom:0.5rem;}
-.highlight-item p{color:var(--muted);font-size:0.92rem;line-height:1.65;}
+.highlight-item h4{color:var(--accent);font-size:0.82rem;margin-bottom:0.4rem;}
+.highlight-item p{color:var(--muted);font-size:0.88rem;line-height:1.55;}
 
-.edu-timeline{margin-bottom:2rem;}
-.edu-item{
-  display:grid;grid-template-columns:160px 1fr;
-  gap:1.5rem;
-  padding:1.3rem 0;
-  border-top:1px solid var(--line);
-  transition:padding-left 0.35s ease;
+/* ---------- EDUCATION TIMELINE (modern card style) ---------- */
+.edu-timeline{
+  position:relative;
+  margin:0 auto 1rem;
+  max-width:700px;
+  padding-left:2.6rem;
 }
-.edu-item:hover{padding-left:0.4rem;}
-.edu-item:last-child{border-bottom:1px solid var(--line);}
-.edu-year{color:var(--accent);font-size:0.9rem;}
-.edu-body h3{font-family:var(--font-display);font-size:1.2rem;margin-bottom:0.2rem;}
-.edu-body p{color:var(--muted);font-size:0.95rem;}
+.edu-timeline::before{
+  content:"";
+  position:absolute;
+  left:0.5rem;top:0.4rem;bottom:0.4rem;
+  width:2px;
+  background:linear-gradient(var(--accent), var(--accent-2) 60%, transparent);
+  opacity:0.55;
+}
+.edu-item{
+  position:relative;
+  background:linear-gradient(150deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:1.4rem 1.6rem;
+  margin-bottom:1.1rem;
+  transition:transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.edu-item:last-child{margin-bottom:0;}
+.edu-item::before{
+  content:"";
+  position:absolute;
+  left:-2.11rem;top:1.7rem;
+  width:11px;height:11px;
+  border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 0 4px var(--bg), 0 0 0 7px rgba(139,92,246,0.3);
+}
+.edu-item:hover{
+  transform:translateX(5px);
+  border-color:var(--accent-soft);
+  background:linear-gradient(150deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  box-shadow:0 16px 40px rgba(0,0,0,0.35);
+}
+.edu-year{
+  display:inline-block;
+  font-size:0.76rem;
+  font-weight:600;
+  letter-spacing:0.03em;
+  color:var(--accent-2);
+  background:rgba(34,211,238,0.1);
+  border:1px solid rgba(34,211,238,0.25);
+  padding:0.3rem 0.8rem;
+  border-radius:999px;
+  margin-bottom:0.7rem;
+}
+.edu-body h3{font-family:var(--font-display);font-size:1.15rem;margin-bottom:0.3rem;}
+.edu-body p{color:var(--muted);font-size:0.92rem;line-height:1.55;}
 
 .cert-row{
   display:flex;flex-wrap:wrap;gap:0.7rem;
@@ -1347,19 +1421,36 @@ body.is-preloading .bg-orb{
 @media (max-width:700px){
   .site-header{padding:1.2rem 1.4rem;}
   .site-header.scrolled{padding:0.9rem 1.4rem;}
+  .nav-overlay{display:block;}
   .top-nav{
-    position:fixed;top:64px;right:1.4rem;
+    position:fixed;
+    top:50%;left:50%;
+    width:min(86%, 360px);
+    max-height:78vh;
+    overflow-y:auto;
     flex-direction:column;align-items:stretch;gap:0.4rem;
     background:var(--panel-strong);
     border:1px solid var(--line);
-    border-radius:16px;
-    padding:1rem;
+    border-radius:20px;
+    padding:1.6rem 1.4rem;
     backdrop-filter:var(--glass-blur);
     -webkit-backdrop-filter:var(--glass-blur);
-    display:none;
+    box-shadow:0 30px 80px rgba(0,0,0,0.55);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transform:translate(-50%,-50%) scale(0.94);
+    transition:opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    z-index:150;
+    display:flex;
   }
-  .top-nav.open{display:flex;}
-  .nav-link{border-radius:6px;text-align:left;}
+  .top-nav.open{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    transform:translate(-50%,-50%) scale(1);
+  }
+  .nav-link{border-radius:10px;text-align:center;padding:0.85rem 1rem;font-size:1rem;}
   .menu-toggle{display:flex;}
   .intensity-panel{right:-1.2rem;min-width:200px;}
   .section{padding:5.5rem 1.4rem;}
@@ -1385,7 +1476,9 @@ body.is-preloading .bg-orb{
     line-height:1.3;
   }
   .status-dot{width:7px;height:7px;}
-  .edu-item{grid-template-columns:1fr;gap:0.3rem;}
+  .edu-timeline{padding-left:1.8rem;}
+  .edu-item{padding:1.15rem 1.2rem;}
+  .edu-item::before{left:-1.51rem;}
   .page-title-card{margin-bottom:1.8rem;}
   .about-facts-grid{grid-template-columns:1fr;}
   .footer-top{flex-direction:column;align-items:flex-start;}
