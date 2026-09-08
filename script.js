@@ -275,6 +275,28 @@ function onScroll(){
 window.addEventListener('scroll', onScroll, { passive: true });
 updateProgress();
 
+/* ---------- NAV "Projects" BUTTON ----------
+   Hidden while the hero is on screen (the hero's own CTA already says "Projects"),
+   fades in once you scroll past the homepage. On the Projects page there's no hero
+   to scroll past — it IS the projects section — so it's shown right away and marked
+   "active" (solid purple) to flag where you currently are. */
+(function initProjectsNavCta(){
+  const cta = document.getElementById('navProjectsCta');
+  if (!cta) return;
+  const hero = document.getElementById('home');
+
+  if (!hero) {
+    cta.classList.add('is-visible', 'is-active');
+    return;
+  }
+
+  function toggleProjectsCta(){
+    cta.classList.toggle('is-visible', window.scrollY > hero.offsetHeight - 140);
+  }
+  window.addEventListener('scroll', toggleProjectsCta, { passive: true });
+  toggleProjectsCta();
+})();
+
 /* ---------- ACTIVE SECTION TRACKING (top navbar) ---------- */
 const sections = document.querySelectorAll('.section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
