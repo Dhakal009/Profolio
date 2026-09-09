@@ -342,15 +342,13 @@ body.is-preloading .bg-orb{
   transform:translateY(-1px);
 }
 
-/* The "Projects" nav button starts hidden over the hero (the hero's own CTA already
-   says "Projects") and fades in once you scroll past the homepage — see script.js.
-   On the Projects page itself there's no hero to scroll past, so JS marks it visible
-   and "active" right away, turning it solid purple to flag the current section. */
+/* Keep the Projects CTA visible in the navbar at all times so it behaves like a
+   permanent navigation action instead of appearing only after scrolling. */
 .nav-cta--projects{
-  opacity:0;
-  transform:translateY(-6px) scale(0.94);
-  pointer-events:none;
-  transition:background 0.3s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.35s ease, transform 0.35s ease;
+  opacity:1;
+  transform:translateY(0) scale(1);
+  pointer-events:auto;
+  transition:background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
 }
 .nav-cta--projects.is-visible{
   opacity:1;
