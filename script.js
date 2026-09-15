@@ -414,10 +414,9 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   });
 }
 
-/* ---------- HERO GLOW + TILT FOLLOWS POINTER ---------- */
+/* ---------- HERO GLOW FOLLOWS POINTER ---------- */
 const heroGlow = document.getElementById('heroGlow');
 const heroSection = document.getElementById('home');
-const heroInner = document.getElementById('heroInner');
 const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
 /* ---------- PAUSE HERO DECORATIVE ANIMATIONS WHEN OFF-SCREEN ---------- */
@@ -451,12 +450,6 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
       heroGlow.style.setProperty('--gy', `${y - rect.height * 0.3}px`);
     }
 
-    if (heroInner) {
-      const relX = (x / rect.width - 0.5) * 2;   // -1 to 1
-      const relY = (y / rect.height - 0.5) * 2;  // -1 to 1
-      const maxTilt = 4; // degrees
-      heroInner.style.transform = `rotateY(${relX * maxTilt}deg) rotateX(${relY * -maxTilt}deg)`;
-    }
   }
 
   heroSection.addEventListener('mousemove', (e) => {
@@ -467,16 +460,6 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
     }
   }, { passive: true });
 
-  heroSection.addEventListener('mouseenter', () => {
-    if (heroInner) heroInner.style.willChange = 'transform';
-  });
-
-  heroSection.addEventListener('mouseleave', () => {
-    if (heroInner) {
-      heroInner.style.transform = 'rotateY(0deg) rotateX(0deg)';
-      heroInner.style.willChange = 'auto';
-    }
-  });
 }
 
 /* ---------- MAGNETIC BUTTONS (GSAP quickTo) ---------- */
