@@ -81,32 +81,42 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   if (!preloader || !preloaderName || !heroName) {
     document.body.classList.remove('is-preloading');
-    // No preloader on this page (e.g. the Projects page) — open the header
-    // immediately rather than leaving it waiting on a sequence that never runs.
     document.body.classList.add('no-preloader', 'site-open');
     if (preloader) preloader.remove();
     if (heroInner) heroInner.classList.add('is-revealed');
     return;
   }
 
+  // Split each line of the preloader name into individual letter spans so each
+  // one can arrive on its own beat. The delay is the letter's index within its
+  // OWN line — since both lines have the same length, letter N of "Bikash" and
+  // letter N of "DHAKAL" land together, so the two words are typed in sync
+  // rather than one after the other.
+  const LETTER_STAGGER = 0.06; // seconds between successive letters
+  preloaderName.querySelectorAll('.preloader-line').forEach(line => {
+    const text = line.textContent;
+    line.textContent = '';
+    Array.from(text).forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'preloader-letter';
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      span.style.setProperty('--d', (i * LETTER_STAGGER) + 's');
+      line.appendChild(span);
+    });
+  });
+
   let merged = false;
 
-  // Point the preloader name at the hero heading's exact center. Centering both
-  // elements on the same point makes their (identical) text land in the same place
-  // even though their boxes are different widths (hero heading spans the full card;
-  // this one shrink-wraps to the text) — text-align:center does the rest.
   function positionPreloaderName(){
     if (merged) return;
     const heroRect = heroName.getBoundingClientRect();
     preloaderName.style.left = (heroRect.left + heroRect.width / 2) + 'px';
-    preloaderName.style.top = (heroRect.top + heroRect.height / 2) + 'px';
+    preloaderName.style.top  = (heroRect.top + heroRect.height / 2) + 'px';
   }
 
   positionPreloaderName();
-  preloaderName.classList.add('is-ready'); // now safe to fade in — it's in the right spot
+  preloaderName.classList.add('is-ready');
   window.addEventListener('resize', positionPreloaderName);
-  // Re-confirm once webfonts are actually loaded, in case the very first measurement
-  // was taken against a fallback font with slightly different metrics.
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(positionPreloaderName);
   }
@@ -141,7 +151,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   // ~1.8s, and the hairline beneath finishes drawing at ~2.45s. Handing off at
   // 2.5s means the name is fully set and held for a beat before it dissolves
   // into the hero heading — long enough to register, short enough not to stall.
-  const openDelay = prefersReducedMotion ? 150 : 2500;
+  const openDelay = prefersReducedMotion ? 150 : 1500;
   window.setTimeout(reveal, openDelay);
 })();
 
@@ -403,23 +413,195 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 }
 
-/* ---------- PAGE TITLE CARD MERGE (GSAP ScrollTrigger) ---------- */
-if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+/* ---------- PAGE TITLE CARDS: OPENING ANIMATION + SCROLL PARALLAX ----------
+   Each page opens with its name on its own full-viewport stage. Two effects
+   run on that element:
+
+     1. OPENING ANIMATION — an IntersectionObserver adds `.is-entering` every
+        time the card scrolls into view, which triggers the CSS keyframe
+        sequence (rise + unblur + letters settling). The class is removed once
+        the animation ends, so scrolling back up and returning to a section
+        replays the entrance rather than showing it only once.
+
+     2. PARALLAX — a scrubbed `y` runs from +56 to −36 across the card's
+        full pass through the viewport, so the name drifts on its own plane
+        while the content card below scrolls at normal speed. That mismatch
+        is what makes one page hand off to the next. */
+if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   gsap.utils.toArray('.page-title-card').forEach(card => {
     gsap.fromTo(card,
-      { y: 22, opacity: 0.75 },
+      { y: 56 },
       {
-        y: 0,
-        opacity: 1,
-        duration: 0.95,
-        ease: 'power2.out',
+        y: -36,
+        ease: 'none',
         scrollTrigger: {
           trigger: card,
-          start: 'top 85%',
-          toggleActions: 'play none none reverse'
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.5
         }
       }
     );
+  });
+} else if (!prefersReducedMotion) {
+  // Fallback: manual rAF parallax if GSAP failed to load.
+  const titleCards = document.querySelectorAll('.page-title-card');
+  function updateTitleParallax(){
+    const viewportH = window.innerHeight;
+    titleCards.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      const progress = 1 - (rect.top + rect.height) / (viewportH + rect.height);
+      const y = 56 - progress * 92;
+      card.style.transform = `translateY(${y}px)`;
+    });
+  }
+  window.addEventListener('scroll', () => requestAnimationFrame(updateTitleParallax), { passive: true });
+  updateTitleParallax();
+}
+
+/* ---------- TITLE CARD OPENING ANIMATION (replays on re-entry) ---------- */
+(function initTitleCardEntrance(){
+  const cards = document.querySelectorAll('.page-title-card');
+  if (!cards.length || prefersReducedMotion) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const card = entry.target;
+      if (entry.isIntersecting) {
+        // Restart the animation cleanly: remove first, force a reflow, then
+        // re-add so the browser treats it as a fresh keyframe run each time.
+        card.classList.remove('is-entering');
+        void card.offsetWidth;
+        card.classList.add('is-entering');
+      } else {
+        // Leaving the viewport clears the class so the next entry replays.
+        card.classList.remove('is-entering');
+      }
+    });
+  }, {
+    // Fire when ~35% of the card is on screen — late enough that the animation
+    // isn't already half-finished by the time the card is centered, early
+    // enough that it feels like it responds to your arrival.
+    threshold: 0.35
+  });
+
+  cards.forEach(card => observer.observe(card));
+})();
+
+/* ---------- TITLE MERGE (page title → content title) ----------
+   As a content card rises into view, the big transparent page title above it
+   DISSOLVES — split into individual letters, each of which blurs out, drifts
+   upward and fades in sequence. Simultaneously the smaller heading at the top
+   of the content card lands from oversized-blurred into its resting state, so
+   at the crossover point the two titles occupy the same visual size and the
+   eye reads the whole thing as one title dissolving INTO its destination
+   rather than two elements cross-fading.
+
+   The letter split is done here rather than in the HTML so the markup stays
+   clean and the effect gracefully falls back to a plain fade on browsers
+   without GSAP. */
+
+/* Wrap each non-space character of a title in its own span so it can dissolve
+   independently. Runs once per title and caches via a data attribute. */
+function splitTitleChars(titleEl){
+  if (titleEl.dataset.split === 'true') {
+    return titleEl.querySelectorAll('.tc-char');
+  }
+  const text = titleEl.textContent;
+  titleEl.textContent = '';
+  const frag = document.createDocumentFragment();
+  for (const ch of text){
+    if (ch === ' ' || ch === '\u00A0'){
+      const space = document.createElement('span');
+      space.className = 'tc-space';
+      space.textContent = '\u00A0';
+      frag.appendChild(space);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'tc-char';
+      span.textContent = ch;
+      frag.appendChild(span);
+    }
+  }
+  titleEl.appendChild(frag);
+  titleEl.dataset.split = 'true';
+  titleEl.classList.add('is-split');
+  return titleEl.querySelectorAll('.tc-char');
+}
+
+if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
+  gsap.utils.toArray('.section').forEach(section => {
+    const bigTitle   = section.querySelector('.page-title-card .section-title');
+    const bigDesc    = section.querySelector('.page-title-card .page-title-desc');
+    const smallTitle = section.querySelector('.content-title');
+    const contentPage = section.querySelector('.content-page');
+    if (!bigTitle || !smallTitle || !contentPage) return;
+
+    const chars = splitTitleChars(bigTitle);
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: contentPage,
+        // start: content card's top enters from the bottom of the viewport.
+        // end:   content card's top has climbed to 25% from the viewport top —
+        //        by which point the small title is well into the reader's view
+        //        and the merge is fully resolved.
+        start: 'top bottom',
+        end: 'top 25%',
+        scrub: 0.5
+      }
+    });
+
+    // 1) LETTER DISSOLVE — each character blurs out and drifts upward in
+    //    sequence from left to right. The stagger is what sells the dissolve:
+    //    a simultaneous fade reads as "the title disappeared", a staggered one
+    //    reads as "the title came apart". Slight scale-up makes the letters
+    //    feel like they're expanding into the air rather than shrinking away.
+    tl.to(chars, {
+      opacity: 0,
+      filter: 'blur(14px)',
+      y: -28,
+      scale: 1.18,
+      ease: 'power2.in',
+      stagger: {
+        each: 0.035,
+        from: 'start'
+      }
+    }, 0);
+
+    // 2) DESCRIPTION — fades with the title it belongs to, so the whole page
+    //    card is emptied of content by the time the content card lands.
+    if (bigDesc) {
+      tl.to(bigDesc, {
+        opacity: 0,
+        y: -14,
+        filter: 'blur(6px)',
+        ease: 'power1.in'
+      }, 0.05);
+    }
+
+    // 3) SMALL TITLE LANDS — starts oversized and blurred, settles into its
+    //    resting size and sharpens. The 0.18 lag lets the dissolve lead the
+    //    motion so the eye tracks "big title going away" before "small title
+    //    arriving" — the right order for a merge handoff.
+    tl.fromTo(smallTitle,
+      { scale: 2.4, opacity: 0, filter: 'blur(10px)', y: 0 },
+      {
+        scale: 1,
+        opacity: 1,
+        filter: 'blur(0px)',
+        ease: 'power2.out'
+      },
+      0.18
+    );
+  });
+} else if (!prefersReducedMotion) {
+  // No GSAP: skip both the split and the merge, just show the content titles
+  // at rest so the page reads normally.
+  document.querySelectorAll('.content-title').forEach(el => {
+    el.style.opacity = '1';
+    el.style.transform = 'none';
+    el.style.filter = 'none';
   });
 }
 
