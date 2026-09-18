@@ -20,16 +20,16 @@
 <meta name="description" content="A showcase of projects built by Bikash Dhakal, a full-stack web developer from Kathmandu, Nepal.">
 <meta name="author" content="Bikash Dhakal">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://bikashdhakal1.com.np/projects.html">
+<link rel="canonical" href="https://yourdemo.com/projects.html">
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://bikashdhakal1.com.np/projects.html">
+<meta property="og:url" content="https://yourdemo.com/projects.html">
 <meta property="og:title" content="Projects | Bikash Dhakal">
 <meta property="og:description" content="A showcase of projects built by Bikash Dhakal, a full-stack web developer from Kathmandu, Nepal.">
 <meta property="og:site_name" content="Bikash Dhakal">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://bikashdhakal1.com.np/og-image.jpg">
+<meta property="og:image" content="https://yourdemo.com/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Bikash Dhakal — Full-Stack Web Developer">
@@ -38,7 +38,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Projects | Bikash Dhakal">
 <meta name="twitter:description" content="A showcase of projects built by Bikash Dhakal, a full-stack web developer from Kathmandu, Nepal.">
-<meta name="twitter:image" content="https://bikashdhakal1.com.np/og-image.jpg">
+<meta name="twitter:image" content="https://yourdemo.com/og-image.jpg">
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,18 +51,18 @@
   "@context": "https://schema.org",
   "@type": "WebPage",
   "name": "Projects | Bikash Dhakal",
-  "url": "https://bikashdhakal1.com.np/projects.html",
+  "url": "https://yourdemo.com/projects.html",
   "isPartOf": {
     "@type": "WebSite",
     "name": "Bikash Dhakal",
-    "url": "https://bikashdhakal1.com.np/"
+    "url": "https://yourdemo.com/"
   },
   "about": { "@type": "Person", "name": "Bikash Dhakal" },
   "author": { "@type": "Person", "name": "Bikash Dhakal" }
 }
 </script>
 </head>
-<body>
+<body class="no-preloader">
 
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -76,21 +76,21 @@
 
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
-    <div class="header-inner">
+    <!-- The Projects page has no sections of its own to scroll between, so it
+         carries no section nav. Its only navigation is a single Home button,
+         grouped with the theme control on the right. -->
+    <div class="header-inner header-inner--minimal">
       <div class="logo-spacer" aria-hidden="true"></div>
-      <nav class="top-nav" id="topNav" aria-label="Primary">
-        <a href="index.html#home" class="nav-link">Home</a>
-        <a href="index.html#about" class="nav-link">About</a>
-        <a href="index.html#experience" class="nav-link">Experience</a>
-        <a href="index.html#education" class="nav-link">Education</a>
-        <a href="index.html#skills" class="nav-link">Skills</a>
-        <a href="index.html#contact" class="nav-link">Contact</a>
-      </nav>
-      <div class="nav-actions">
-        <a href="projects.html" class="nav-cta nav-cta--projects" id="navProjectsCta">Projects</a>
-        <a href="index.html#contact" class="nav-cta">Let's talk</a>
-      </div>
       <div class="header-right">
+        <a href="index.html" class="nav-home">
+          <span class="nav-cta-icon glass-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3.6 10.4L12 3.6l8.4 6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5.6 9.2V19a1.2 1.2 0 001.2 1.2h10.4A1.2 1.2 0 0018.4 19V9.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-cta-label">Home</span>
+        </a>
         <div class="theme-control">
           <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.3M12 19.1v2.3M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -102,15 +102,9 @@
             <p class="intensity-hint">Adjust brightness for better visibility in light or dark mode.</p>
           </div>
         </div>
-        <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="topNav">
-          <span></span><span></span><span></span>
-        </button>
       </div>
     </div>
   </header>
-
-  <!-- Dims the page behind the mobile menu and closes it on tap-outside -->
-  <div class="nav-overlay" id="navOverlay" aria-hidden="true"></div>
 
   <main id="pageMain" class="page-no-hero">
     <div class="content-stack" id="contentStack">
@@ -152,21 +146,21 @@
 
               <article class="main-project-card reveal" data-badge="Featured project">
                 <div class="main-project-media">
-                  <img src="https://picsum.photos/seed/shopkart-cover/900/600" alt="ShopKart storefront screenshot" loading="lazy">
+                  <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                 </div>
                 <div class="main-project-content">
                   <span class="project-badge">Featured project</span>
-                  <h3>ShopKart — MERN E-commerce Platform</h3>
-                  <p class="project-pitch">A full online store with cart, checkout and an admin dashboard for managing products, orders and inventory.</p>
+                  <h3>Project One</h3>
+                  <p class="project-pitch">A short one-line pitch describing what this project does.</p>
                   <div class="tag-row">
                     <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Tailwind CSS</span><span>JWT</span>
                   </div>
                   <div class="project-actions">
-                    <a href="https://github.com/Dhakal009/shopkart" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/yourusername/project-name" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
                       <span>GitHub</span>
                     </a>
-                    <a href="https://shopkart.bikashdhakal1.com.np" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://yourdemo.com" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <span>Live demo</span>
                     </a>
@@ -174,38 +168,38 @@
                 </div>
 
                 <template class="project-detail-data">
-                  <p class="detail-desc">ShopKart is a full-featured e-commerce platform built to practice the complete flow of a real online store: browsing and filtering products, a persistent cart, secure checkout, order history, and an admin dashboard for adding products and tracking orders. It's built as a MERN app with a clean separation between the public storefront and the protected admin area.</p>
+                  <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does, the problem it solves, and what makes it interesting.</p>
                   <div class="detail-structure">
-                    <div class="highlight-item"><h4>Frontend</h4><p>React with Tailwind CSS for the storefront UI, cart state and protected checkout flow.</p></div>
-                    <div class="highlight-item"><h4>Backend</h4><p>Node.js + Express REST API handling products, orders and users.</p></div>
-                    <div class="highlight-item"><h4>Database</h4><p>MongoDB with Mongoose models for products, orders, carts and users.</p></div>
-                    <div class="highlight-item"><h4>Auth &amp; payments</h4><p>JWT-based authentication with role-based access for the admin dashboard.</p></div>
+                    <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                    <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                    <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
+                    <div class="highlight-item"><h4>Auth &amp; payments</h4><p>Describe how authentication and authorization work.</p></div>
                   </div>
                   <div class="detail-gallery">
-                    <img src="https://picsum.photos/seed/shopkart-1/900/600" alt="ShopKart product listing page">
-                    <img src="https://picsum.photos/seed/shopkart-2/900/600" alt="ShopKart checkout flow">
-                    <img src="https://picsum.photos/seed/shopkart-3/900/600" alt="ShopKart admin dashboard">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                   </div>
                 </template>
               </article>
 
               <article class="main-project-card reveal" data-badge="Featured project">
                 <div class="main-project-media">
-                  <img src="https://picsum.photos/seed/devconnect-cover/900/600" alt="DevConnect feed screenshot" loading="lazy">
+                  <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                 </div>
                 <div class="main-project-content">
                   <span class="project-badge">Featured project</span>
-                  <h3>DevConnect — Developer Community Platform</h3>
-                  <p class="project-pitch">A social platform where developers share posts, follow each other and chat in real time.</p>
+                  <h3>Project Two</h3>
+                  <p class="project-pitch">A short one-line pitch describing what this project does.</p>
                   <div class="tag-row">
                     <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Socket.io</span><span>Tailwind CSS</span>
                   </div>
                   <div class="project-actions">
-                    <a href="https://github.com/Dhakal009/devconnect" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://github.com/yourusername/project-name" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
                       <span>GitHub</span>
                     </a>
-                    <a href="https://devconnect.bikashdhakal1.com.np" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
+                    <a href="https://yourdemo.com" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <span>Live demo</span>
                     </a>
@@ -213,17 +207,17 @@
                 </div>
 
                 <template class="project-detail-data">
-                  <p class="detail-desc">DevConnect is a small community platform for developers: a feed for text and code-snippet posts, follows, likes and comments, plus one-to-one chat over WebSockets. It was built to get comfortable with real-time features and structuring a larger Express API around multiple related resources.</p>
+                  <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does, the problem it solves, and what makes it interesting.</p>
                   <div class="detail-structure">
-                    <div class="highlight-item"><h4>Frontend</h4><p>React feed, profile pages and a chat UI built with Tailwind CSS.</p></div>
-                    <div class="highlight-item"><h4>Backend</h4><p>Express REST API plus a Socket.io layer for live messages and notifications.</p></div>
-                    <div class="highlight-item"><h4>Database</h4><p>MongoDB storing users, posts, follows and conversations.</p></div>
-                    <div class="highlight-item"><h4>Real-time</h4><p>Socket.io rooms per conversation, with online-status tracking.</p></div>
+                    <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                    <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                    <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
+                    <div class="highlight-item"><h4>Real-time</h4><p>Describe any real-time or special features here.</p></div>
                   </div>
                   <div class="detail-gallery">
-                    <img src="https://picsum.photos/seed/devconnect-1/900/600" alt="DevConnect feed page">
-                    <img src="https://picsum.photos/seed/devconnect-2/900/600" alt="DevConnect chat interface">
-                    <img src="https://picsum.photos/seed/devconnect-3/900/600" alt="DevConnect profile page">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                   </div>
                 </template>
               </article>
@@ -243,128 +237,128 @@
 
                 <article class="simple-project-card reveal" data-badge="Side project">
                   <div class="simple-project-media">
-                    <img src="https://picsum.photos/seed/task-manager-cover/900/600" alt="Task Manager app screenshot" loading="lazy">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                   </div>
                   <div class="simple-project-content">
-                    <h4>Task Manager App</h4>
-                    <p>Kanban-style board for organizing daily tasks by status, with drag-and-drop and due dates.</p>
+                    <h4>Project Three</h4>
+                    <p>A short one-line description of this project.</p>
                     <div class="tag-row"><span>React</span><span>Node.js</span><span>MongoDB</span></div>
                     <div class="simple-project-links">
                       <div class="simple-icon-links">
-                        <a href="https://github.com/Dhakal009/task-manager" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
                         </a>
-                        <a href="https://task-manager.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </a>
                       </div>
                     </div>
                   </div>
                   <template class="project-detail-data">
-                    <p class="detail-desc">A drag-and-drop task board split into To Do, In Progress and Done columns, with due dates and simple priority tags. Built to practice complex UI state in React alongside a small persistence layer.</p>
+                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
                     <div class="detail-structure">
-                      <div class="highlight-item"><h4>Frontend</h4><p>React with the HTML5 drag-and-drop API for moving cards between columns.</p></div>
-                      <div class="highlight-item"><h4>Backend</h4><p>Node.js + Express API for storing boards, columns and tasks per user.</p></div>
+                      <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                      <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
                     </div>
                     <div class="detail-gallery">
-                      <img src="https://picsum.photos/seed/task-manager-1/900/600" alt="Task Manager board view">
-                      <img src="https://picsum.photos/seed/task-manager-2/900/600" alt="Task Manager task detail">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                     </div>
                   </template>
                 </article>
 
                 <article class="simple-project-card reveal" data-badge="Side project">
                   <div class="simple-project-media">
-                    <img src="https://picsum.photos/seed/weather-dashboard-cover/900/600" alt="Weather Dashboard screenshot" loading="lazy">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                   </div>
                   <div class="simple-project-content">
-                    <h4>Weather Dashboard</h4>
-                    <p>Search any city for a live forecast, with saved locations and a 5-day outlook.</p>
+                    <h4>Project Four</h4>
+                    <p>A short one-line description of this project.</p>
                     <div class="tag-row"><span>React</span><span>REST API</span></div>
                     <div class="simple-project-links">
                       <div class="simple-icon-links">
-                        <a href="https://github.com/Dhakal009/weather-dashboard" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
                         </a>
-                        <a href="https://weather.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </a>
                       </div>
                     </div>
                   </div>
                   <template class="project-detail-data">
-                    <p class="detail-desc">A weather lookup app that pulls live conditions and a 5-day forecast for any searched city, with a list of saved locations kept in local storage.</p>
+                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
                     <div class="detail-structure">
-                      <div class="highlight-item"><h4>Frontend</h4><p>React with a debounced search and cached recent lookups.</p></div>
-                      <div class="highlight-item"><h4>Data</h4><p>A public weather REST API, called from the client with error and loading states.</p></div>
+                      <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                      <div class="highlight-item"><h4>Data</h4><p>Describe the data source and how it is used.</p></div>
                     </div>
                     <div class="detail-gallery">
-                      <img src="https://picsum.photos/seed/weather-dashboard-1/900/600" alt="Weather Dashboard search view">
-                      <img src="https://picsum.photos/seed/weather-dashboard-2/900/600" alt="Weather Dashboard 5-day forecast">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                     </div>
                   </template>
                 </article>
 
                 <article class="simple-project-card reveal" data-badge="Side project">
                   <div class="simple-project-media">
-                    <img src="https://picsum.photos/seed/blog-cms-cover/900/600" alt="Blog CMS screenshot" loading="lazy">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                   </div>
                   <div class="simple-project-content">
-                    <h4>Blog CMS</h4>
-                    <p>A minimal blogging platform with a markdown editor and an admin panel for publishing posts.</p>
+                    <h4>Project Five</h4>
+                    <p>A short one-line description of this project.</p>
                     <div class="tag-row"><span>Next.js</span><span>MongoDB</span></div>
                     <div class="simple-project-links">
                       <div class="simple-icon-links">
-                        <a href="https://github.com/Dhakal009/blog-cms" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
                         </a>
-                        <a href="https://blog-cms.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </a>
                       </div>
                     </div>
                   </div>
                   <template class="project-detail-data">
-                    <p class="detail-desc">A lightweight content platform for writing and publishing posts in markdown, with a protected admin panel for drafts, editing and publishing — built while learning Next.js.</p>
+                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
                     <div class="detail-structure">
-                      <div class="highlight-item"><h4>Frontend</h4><p>Next.js pages with server-side rendering for post pages.</p></div>
-                      <div class="highlight-item"><h4>Backend</h4><p>Next.js API routes talking to MongoDB for posts and authors.</p></div>
+                      <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                      <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
                     </div>
                     <div class="detail-gallery">
-                      <img src="https://picsum.photos/seed/blog-cms-1/900/600" alt="Blog CMS post view">
-                      <img src="https://picsum.photos/seed/blog-cms-2/900/600" alt="Blog CMS admin editor">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                     </div>
                   </template>
                 </article>
 
                 <article class="simple-project-card reveal" data-badge="Side project">
                   <div class="simple-project-media">
-                    <img src="https://picsum.photos/seed/url-shortener-cover/900/600" alt="URL Shortener screenshot" loading="lazy">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                   </div>
                   <div class="simple-project-content">
-                    <h4>URL Shortener</h4>
-                    <p>Shortens long links and tracks click counts, with a simple public API.</p>
+                    <h4>Project Six</h4>
+                    <p>A short one-line description of this project.</p>
                     <div class="tag-row"><span>Node.js</span><span>Express</span><span>MongoDB</span></div>
                     <div class="simple-project-links">
                       <div class="simple-icon-links">
-                        <a href="https://github.com/Dhakal009/url-shortener" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
                         </a>
-                        <a href="https://short.bikashdhakal1.com.np" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
                           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </a>
                       </div>
                     </div>
                   </div>
                   <template class="project-detail-data">
-                    <p class="detail-desc">A small utility that turns long URLs into short, shareable links, with a redirect service and click-count tracking per link.</p>
+                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
                     <div class="detail-structure">
-                      <div class="highlight-item"><h4>Backend</h4><p>Express API generating short codes and handling redirects.</p></div>
-                      <div class="highlight-item"><h4>Database</h4><p>MongoDB storing the original URL, short code and click count.</p></div>
+                      <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                      <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
                     </div>
                     <div class="detail-gallery">
-                      <img src="https://picsum.photos/seed/url-shortener-1/900/600" alt="URL Shortener home page">
-                      <img src="https://picsum.photos/seed/url-shortener-2/900/600" alt="URL Shortener click stats">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                     </div>
                   </template>
                 </article>

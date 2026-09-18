@@ -122,11 +122,20 @@
         <a href="#skills" class="nav-link">Skills</a>
         <a href="#contact" class="nav-link">Contact</a>
       </nav>
-      <div class="nav-actions">
-        <a href="projects.html" class="nav-cta nav-cta--projects" id="navProjectsCta">Projects</a>
-        <a href="#contact" class="nav-cta">Let's talk</a>
-      </div>
       <div class="header-right">
+        <!-- The site's primary destination: solid accent fill + slow halo, the
+             only button on the page that isn't glass. -->
+        <a href="projects.html" class="nav-cta nav-cta--projects" id="navProjectsCta">
+          <span class="nav-cta-icon glass-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7.5" height="7.5" rx="1.8" stroke="currentColor" stroke-width="1.8"/>
+              <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" stroke="currentColor" stroke-width="1.8"/>
+              <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" stroke="currentColor" stroke-width="1.8"/>
+              <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" stroke="currentColor" stroke-width="1.8"/>
+            </svg>
+          </span>
+          <span class="nav-cta-label">Projects</span>
+        </a>
         <div class="theme-control">
           <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme">
             <svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.6v2.3M12 19.1v2.3M4.3 4.3l1.6 1.6M18.1 18.1l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.3 19.7l1.6-1.6M18.1 5.9l1.6-1.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -189,8 +198,7 @@
           <span>View Resume</span>
         </a>
       </div>
-
-
+    </div>
   </section>
 
   <div class="content-stack" id="contentStack">

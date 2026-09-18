@@ -81,6 +81,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 
   if (!preloader || !preloaderName || !heroName) {
     document.body.classList.remove('is-preloading');
+    // No preloader on this page (e.g. the Projects page) — open the header
+    // immediately rather than leaving it waiting on a sequence that never runs.
+    document.body.classList.add('no-preloader', 'site-open');
     if (preloader) preloader.remove();
     if (heroInner) heroInner.classList.add('is-revealed');
     return;
@@ -112,6 +115,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     merged = true;
     window.removeEventListener('resize', positionPreloaderName);
     document.body.classList.remove('is-preloading');
+    // Drives the staggered header/nav entrance in the motion layer of style.css,
+    // which is timed to land just after the hero card has settled.
+    document.body.classList.add('site-open');
     heroName.classList.add('is-merging');
     if (heroInner) {
       heroInner.classList.add('is-revealed');
@@ -127,12 +133,15 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
     preloader.classList.add('is-hidden');
     preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
-    window.setTimeout(() => preloader.remove(), 1000); // safety net
+    window.setTimeout(() => preloader.remove(), 1400); // safety net
   }
 
-  // Let the preloader's own opening animation finish, plus a short beat so the name
-  // is actually readable, before the minimal merge/cross-fade kicks in.
-  const openDelay = prefersReducedMotion ? 150 : 1000;
+  // Timed against the preloader's own CSS sequence, which is now a real
+  // presentation rather than a flash: line one lands at ~1.5s, line two at
+  // ~1.8s, and the hairline beneath finishes drawing at ~2.45s. Handing off at
+  // 2.5s means the name is fully set and held for a beat before it dissolves
+  // into the hero heading — long enough to register, short enough not to stall.
+  const openDelay = prefersReducedMotion ? 150 : 2500;
   window.setTimeout(reveal, openDelay);
 })();
 
@@ -473,8 +482,10 @@ if (hasFinePointer && !prefersReducedMotion) {
         const rect = btn.getBoundingClientRect();
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
-        xTo(x * 0.12);
-        yTo(y * 0.25);
+        // Gentler than before: the hero buttons are physically larger now, and
+        // the same multipliers on a bigger target read as wobble rather than pull.
+        xTo(x * 0.14);
+        yTo(y * 0.18);
       });
       btn.addEventListener('mouseleave', () => {
         xTo(0);
@@ -486,7 +497,7 @@ if (hasFinePointer && !prefersReducedMotion) {
         const rect = btn.getBoundingClientRect();
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
-        btn.style.transform = `translate(${x * 0.12}px, ${y * 0.25}px)`;
+        btn.style.transform = `translate(${x * 0.14}px, ${y * 0.18}px)`;
       });
       btn.addEventListener('mouseleave', () => {
         btn.style.transform = 'translate(0, 0)';
