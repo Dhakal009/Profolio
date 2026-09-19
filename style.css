@@ -363,6 +363,11 @@ body.menu-open .theme-control{
   transition: opacity 0.25s ease;
 }
 
+.header-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  max-width:1240px;margin:0 auto;
+}
+
 /* ---------- WORDMARK ---------- */
 .site-mark{
   display:inline-flex;align-items:center;justify-content:center;
@@ -1942,46 +1947,45 @@ body.menu-open .theme-control{
   /* Nav pill is desktop-only; the mobile nav panel doesn't use it. */
   .nav-pill{display:none;}
 
-  /* ---------- MOBILE NAV PANEL ----------
-     Fixed-positioned and centered on the viewport. The blur comes from the
-     overlay behind it, not this element — one full-screen blur is far cheaper
-     than two stacked ones. Links are hidden and offset by default, then
-     staggered into place when the panel opens, so the panel composes rather
-     than appearing as a static block. */
+   /* ---------- MOBILE NAV PANEL ----------
+     Positioned with viewport units (vh/vw) rather than percentages so it
+     always centers on the actual screen, regardless of what containing
+     block any ancestor creates. background opacity raised so the panel
+     reads as a panel sitting on top of the blur, not as the blur itself. */
   .top-nav{
-    position:fixed;
-    top:50%;
-    left:50%;
-    width:min(88%, 340px);
-    max-height:78vh;
-    overflow-y:auto;
-    flex-direction:column;
-    align-items:stretch;
-    gap:0.4rem;
-    background:rgba(8,8,12,0.78);
-    border:1px solid var(--line);
-    border-top:1px solid rgba(139,92,246,0.45);
-    border-radius:22px;
-    padding:1.6rem 1.4rem;
-    box-shadow:0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-    transform:translate(-50%,-50%) scale(0.9);
+    position: fixed;
+    top: 50vh;
+    left: 50vw;
+    width: min(88vw, 340px);
+    max-height: 78vh;
+    overflow-y: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+    background: rgba(8,8,12,0.94);
+    border: 1px solid var(--line);
+    border-top: 1px solid rgba(139,92,246,0.45);
+    border-radius: 22px;
+    padding: 1.6rem 1.4rem;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.9);
     transition:
       opacity 0.28s ease,
       transform 0.38s cubic-bezier(.16,1,.3,1),
       visibility 0.28s;
-    z-index:150;
-    display:flex;
+    z-index: 150;
+    display: flex;
   }
-  [data-theme="light"] .top-nav{background:rgba(255,255,255,0.88);}
+  [data-theme="light"] .top-nav{background:rgba(255,255,255,0.96);}
 
   .top-nav.open{
-    opacity:1;
-    visibility:visible;
-    pointer-events:auto;
-    transform:translate(-50%,-50%) scale(1);
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   .top-nav .nav-link{
