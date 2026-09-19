@@ -139,13 +139,16 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
-/* ---------- SCROLL PROGRESS BAR ---------- */
+/* ---------- SCROLL PROGRESS BAR ----------
+   Written as a transform scaleX instead of animating `width`, so the browser
+   never has to recompute layout on each scroll frame. This was one of the
+   biggest sources of janky scrolling on mobile. */
 const progressBar = document.getElementById('progressBar');
 function updateProgress(){
   const scrollTop = window.scrollY;
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-  progressBar.style.width = pct + '%';
+  const pct = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
+  progressBar.style.transform = 'scaleX(' + pct + ')';
 }
 
 /* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
@@ -313,23 +316,21 @@ function updateNavPill(){
   const isFirstPlace = !nav.classList.contains('is-ready');
 
   if (isFirstPlace){
-    // First placement: no animation, snap into place, then mark ready so the
-    // pill fades in (via CSS opacity) at the right spot.
+    // First placement: snap into place without animating, then mark ready
+    // so the pill fades in (via CSS opacity) at the right spot.
     navPillEl.style.transition = 'none';
     navPillEl.style.left   = targetLeft   + 'px';
     navPillEl.style.top    = targetTop    + 'px';
     navPillEl.style.width  = targetWidth  + 'px';
     navPillEl.style.height = targetHeight + 'px';
-    // Force a layout so the browser commits the un-animated values.
     void navPillEl.getBoundingClientRect();
     nav.classList.add('is-ready');
-    // Restore the transition for all future moves.
     navPillEl.style.transition = '';
     return;
   }
 
-  // Subsequent moves: let the CSS transition carry it, mismatch durations
-  // and all — that's what produces the liquid stretch.
+  // Subsequent moves: the CSS transition carries it — mismatched durations
+  // and all — which is what produces the liquid stretch.
   navPillEl.style.left   = targetLeft   + 'px';
   navPillEl.style.top    = targetTop    + 'px';
   navPillEl.style.width  = targetWidth  + 'px';
@@ -338,13 +339,10 @@ function updateNavPill(){
 
 /* ---------- ACTIVE SECTION TRACKING (top navbar) ----------
    The old implementation used threshold: 0.5, which only fires for sections
-   that are at least half-visible in the viewport. Long sections like
-   Experience (with the status card) never reach that, so their nav link never
-   highlighted. The fix is to observe a thin horizontal band near the middle
-   of the viewport (via rootMargin) rather than a percentage of the section —
-   whichever section is passing through that band wins the active state, and
-   sections with no matching nav link (like #deliver) simply don't clear the
-   previous one. */
+   that are at least half-visible in the viewport. Long sections never reach
+   that, so their nav link never highlighted. The fix is to observe a thin
+   horizontal band near the middle of the viewport (via rootMargin) rather
+   than a percentage of the section. */
 const sections = document.querySelectorAll('.section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
 const contentPages = document.querySelectorAll('.content-page');
@@ -359,15 +357,12 @@ const sectionObserver = new IntersectionObserver((entries) => {
     updateNavPill();
   });
 }, {
-  // A ~5% tall trigger band centred slightly above the viewport middle.
   rootMargin: '-45% 0px -50% 0px',
   threshold: 0
 });
 
 sections.forEach(section => sectionObserver.observe(section));
 
-// Position the pill once the DOM and fonts are ready, and on any resize
-// (width of links changes with font and viewport width).
 window.addEventListener('load', updateNavPill);
 window.addEventListener('resize', updateNavPill);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateNavPill);
@@ -387,7 +382,11 @@ if (contentPages.length) {
   contentPages.forEach(page => pageObserver.observe(page));
 }
 
-/* ---------- PARALLAX EFFECT ---------- */
+/* ---------- PARALLAX EFFECT ----------
+   On mobile a tight numeric scrub is cheaper than an interpolated one: the
+   tween still tracks the scroll but does less catch-up work per frame. */
+const scrubValue = window.innerWidth <= 700 ? true : 0.4;
+
 if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   gsap.utils.toArray('[data-parallax]').forEach(el => {
     const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
@@ -401,7 +400,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
           trigger: el,
           start: 'top bottom',
           end: 'bottom top',
-          scrub: 0.4
+          scrub: scrubValue
         }
       }
     );
@@ -472,7 +471,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
           trigger: card,
           start: 'top bottom',
           end: 'bottom top',
-          scrub: 0.5
+          scrub: scrubValue
         }
       }
     );
@@ -685,6 +684,11 @@ if (menuToggle) {
     menuToggle.classList.add('active');
     menuToggle.setAttribute('aria-expanded', 'true');
     if (navOverlay) navOverlay.classList.add('open');
+    // Tells CSS to remove backdrop-filter from the header, so the fixed-positioned
+    // .top-nav inside it is positioned against the viewport again rather than
+    // against the header's filter containing block. Without this the menu ends
+    // up somewhere between the header and the middle of the screen after scroll.
+    document.body.classList.add('menu-open');
     document.body.style.overflow = 'hidden';
   }
 
@@ -693,6 +697,7 @@ if (menuToggle) {
     menuToggle.classList.remove('active');
     menuToggle.setAttribute('aria-expanded', 'false');
     if (navOverlay) navOverlay.classList.remove('open');
+    document.body.classList.remove('menu-open');
     document.body.style.overflow = '';
   }
 

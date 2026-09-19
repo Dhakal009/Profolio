@@ -15,9 +15,6 @@
   --intensity:1;
   --font-display:'Fraunces', serif;
   --font-name:'Major Mono Display', monospace;
-  /* Hero name: the site's original display font (Major Mono Display).
-     One size + line-height shared by the preloader name and the hero name so
-     the hand-off between them stays pixel-identical. */
   --font-script:var(--font-name);
   --name-size:clamp(3.1rem, 9.4vw, 7rem);
   --name-lh:0.96;
@@ -26,13 +23,7 @@
   --frame-fill:linear-gradient(165deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03) 60%);
   --frame-line:rgba(255,255,255,0.18);
 
-  /* ---- GLASS ICON SYSTEM ----
-     One shared recipe for every icon chip on the site (nav, facts, skills,
-     contact, socials, theme toggle, back-to-top). Three stacked layers make
-     the "glass" read as an object rather than a flat tinted square:
-       1. a soft accent tint underneath (so the icon has its own light)
-       2. a top-left sheen gradient (the highlight on the pane)
-       3. an inset top hairline (the lit edge where the pane catches light) */
+  /* ---- GLASS ICON SYSTEM ---- */
   --gi-tint:radial-gradient(130% 130% at 22% 4%, rgba(139,92,246,0.34), rgba(34,211,238,0.12) 54%, rgba(139,92,246,0) 82%);
   --gi-sheen:linear-gradient(158deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 42%, rgba(255,255,255,0) 68%);
   --gi-border:rgba(255,255,255,0.18);
@@ -40,16 +31,11 @@
   --gi-shadow:0 8px 20px -10px rgba(0,0,0,0.75);
   --gi-icon:#e9e6ff;
 
-  /* ---- MOTION ----
-     A single easing curve used everywhere so every animation on the page feels
-     like it belongs to the same system. */
+  /* ---- MOTION ---- */
   --ease-out:cubic-bezier(.16,1,.3,1);
   --ease-soft:cubic-bezier(.22,.61,.36,1);
 }
 
-/* Applied to the root element (not body) so it doesn't turn body into a new
-   containing block for position:fixed descendants (header, orbs, to-top button)
-   — that would break their fixed positioning relative to the viewport. */
 html{
   filter:brightness(var(--intensity));
   transition:filter 0.25s ease;
@@ -69,8 +55,6 @@ html{
   --accent-2:#0891b2;
   --panel-strong:rgba(255,255,255,0.75);
   --orb-opacity:0.45;
-  /* Light mode needs the opposite treatment: the sheen has to darken rather than
-     lighten, and the glyph itself needs real contrast against a pale panel. */
   --gi-tint:radial-gradient(130% 130% at 22% 4%, rgba(124,58,237,0.20), rgba(8,145,178,0.10) 54%, rgba(124,58,237,0) 82%);
   --gi-sheen:linear-gradient(158deg, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.35) 40%, rgba(255,255,255,0) 70%);
   --gi-border:rgba(20,18,35,0.16);
@@ -93,8 +77,6 @@ body{
   background:var(--bg);
   color:var(--foam);
   font-family:var(--font-body);
-  /* Base body size nudged up from the browser default so the whole type scale
-     below sits a step larger without every rule needing its own bump. */
   font-size:1.03rem;
   line-height:1.7;
   -webkit-font-smoothing:antialiased;
@@ -135,17 +117,9 @@ img{max-width:100%;display:block;}
   font-weight:600;
   transition:top 0.25s ease;
 }
-.skip-link:focus{
-  top:1rem;
-}
+.skip-link:focus{top:1rem;}
 
-/* ---------- PRELOADER (name-only splash before the site reveals) ----------
-   Font/size/weight match the real hero heading exactly. Position is matched too —
-   not just "centered on screen" but pinned by JS (see positionPreloaderName() in
-   script.js) to the EXACT on-screen spot the hero heading occupies, so the two
-   never visually jump between two different places. It only starts fading in once
-   it's been positioned (via the .is-ready class), so there's no flash at the wrong
-   spot first. */
+/* ---------- PRELOADER ---------- */
 .preloader{
   position:fixed;
   inset:0;
@@ -156,11 +130,6 @@ img{max-width:100%;display:block;}
 }
 .preloader-name{
   position:fixed;
-  /* left/top get set to the hero heading's exact center point by JS; this pair
-     centers the element itself ON that point regardless of the two elements'
-     differing box widths (the hero heading's box is much wider — full card width —
-     while this one shrink-wraps to the text, but centering both on the same point
-     makes the actual glyphs land in the same place either way). */
   left:50%;
   top:50%;
   transform:translate(-50%,-50%) translateY(10px);
@@ -174,25 +143,12 @@ img{max-width:100%;display:block;}
   filter:blur(0);
   transition:filter 1.1s cubic-bezier(.16,1,.3,1), opacity 1.1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1);
 }
-/* The parent just becomes present; the two lines below carry the actual
-   entrance, one after the other, so the name is *written* rather than simply
-   faded in. */
-.preloader-name.is-ready{
-  animation:preloaderIn 0.3s ease forwards;
-}
+.preloader-name.is-ready{animation:preloaderIn 0.3s ease forwards;}
 @keyframes preloaderIn{
   to{opacity:1;transform:translate(-50%,-50%) translateY(0);}
 }
 
-/* ---------- PRELOADER NAME: letter-by-letter entrance ----------
-   Each letter is its own inline-block span (split by JS at load), so it can
-   arrive on its own beat. Letters are paired by index across the two lines —
-   B & D arrive together, then i & H, then k & A, and so on — so the two words
-   are *typed* in sync rather than one after the other. */
-.preloader-line{
-  display:block;
-  position:relative;
-}
+.preloader-line{display:block;position:relative;}
 
 .preloader-letter{
   display:inline-block;
@@ -202,20 +158,13 @@ img{max-width:100%;display:block;}
   will-change:transform, opacity, filter;
   backface-visibility:hidden;
 }
-
-/* --d is the per-letter arrival delay, set inline by JS (index × stagger). */
 .preloader-name.is-ready .preloader-letter{
   animation:preloaderLetterIn 0.5s cubic-bezier(.16,1,.3,1) var(--d, 0s) forwards;
 }
-
 @keyframes preloaderLetterIn{
   60%{opacity:1;filter:blur(0);}
   to{opacity:1;transform:translateY(0);filter:blur(0);}
 }
-
-/* Accent ("DHAKAL") letters carry the shimmering gradient — per letter so it
-   renders inside each letter's own paint context, clean through the entrance
-   transforms. */
 .preloader-line--accent .preloader-letter{
   background:linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-soft), var(--accent));
   background-size:300% auto;
@@ -225,20 +174,13 @@ img{max-width:100%;display:block;}
   -webkit-text-fill-color:transparent;
   animation:preloaderGradient 5s linear infinite;
 }
-/* Accent letters carry BOTH the entrance and the gradient on one list. */
 .preloader-name.is-ready .preloader-line--accent .preloader-letter{
   animation:
     preloaderLetterIn 0.5s cubic-bezier(.16,1,.3,1) var(--d, 0s) forwards,
     preloaderGradient 5s linear infinite;
 }
+@keyframes preloaderGradient{to{background-position:300% center;}}
 
-@keyframes preloaderGradient{
-  to{background-position:300% center;}
-}
-
-/* A hairline that draws itself under the name once both lines have landed,
-   then retracts as the preloader hands off. It gives the hold a purpose —
-   something is finishing, rather than the screen just waiting. */
 .preloader-name::after{
   content:"";
   position:absolute;
@@ -260,10 +202,6 @@ img{max-width:100%;display:block;}
   .preloader-name::after{display:none;}
   .preloader-line--accent .preloader-letter{animation:none !important;}
 }
-/* The moment the merge starts: the name softens out of focus right where it already
-   is (no movement, no scaling — same font, same size, same exact spot) while the
-   backdrop beneath it fades away at the same time, so the hero name can gently come
-   into focus in that identical spot underneath. */
 .preloader.is-hidden{
   opacity:0;
   visibility:hidden;
@@ -280,36 +218,23 @@ img{max-width:100%;display:block;}
   opacity:0;
   transition:width 0.6s cubic-bezier(.16,1,.3,1), opacity 0.4s ease;
 }
-/* Everything else stays invisible (but still loaded/laid out) until the preloader clears,
-   so the existing hero entrance animation plays right as the site becomes visible. */
 body.is-preloading{overflow:hidden;height:100vh;}
 body.is-preloading .site-header,
 body.is-preloading .bg-orb,
 body.is-preloading #pageMain,
 body.is-preloading .progress-bar,
-body.is-preloading .to-top{
-  opacity:0;
-}
-body.is-preloading .site-header{
-  transform:translateY(-16px);
-}
-body.is-preloading .progress-bar{
-  transform:scaleX(0.6);
-}
+body.is-preloading .to-top{opacity:0;}
+body.is-preloading .site-header{transform:translateY(-16px);}
+body.is-preloading .progress-bar{transform:scaleX(0.6);}
 #pageMain,
-.to-top{
-  transition:opacity 1.15s cubic-bezier(.16,1,.3,1) 0.1s;
-}
+.to-top{transition:opacity 1.15s cubic-bezier(.16,1,.3,1) 0.1s;}
 @media (prefers-reduced-motion: reduce){
   .preloader{transition:none;}
   .preloader-name{animation:none;opacity:1;}
-  .preloader-name .preloader-letter{
-    animation:none !important;
-    opacity:1;transform:none;filter:none;
-  }
+  .preloader-name .preloader-letter{animation:none !important;opacity:1;transform:none;filter:none;}
 }
 
-/* ---------- AMBIENT BACKGROUND GLOW (black gradient backdrop) ---------- */
+/* ---------- AMBIENT BACKGROUND GLOW ---------- */
 .bg-orb{
   position:fixed;
   border-radius:50%;
@@ -319,9 +244,7 @@ body.is-preloading .progress-bar{
   transform:scale(1);
   transition:opacity 1.2s cubic-bezier(.16,1,.3,1) 0.1s, transform 1.3s cubic-bezier(.16,1,.3,1) 0.1s;
 }
-body.is-preloading .bg-orb{
-  transform:scale(1.1);
-}
+body.is-preloading .bg-orb{transform:scale(1.1);}
 .bg-orb-1{
   width:520px;height:520px;
   top:-140px;left:-120px;
@@ -340,31 +263,31 @@ body.is-preloading .bg-orb{
   background:radial-gradient(circle, var(--accent-soft), transparent 70%);
   opacity:calc(0.25 * var(--orb-opacity));
 }
-
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
   html{scroll-behavior:auto;}
   .reveal{opacity:1 !important;transform:none !important;}
 }
 
-/* ---------- SCROLL PROGRESS ---------- */
+/* ---------- SCROLL PROGRESS ----------
+   Full width bar, animated with transform: scaleX() so the browser never has
+   to recompute layout on each scroll frame. This was one of the main sources
+   of janky scrolling on mobile. */
 .progress-bar{
   position:fixed;top:0;left:0;
-  height:2px;width:0%;
+  height:2px;
+  width:100%;
   background:var(--accent);
   z-index:200;
   transform-origin:0% 50%;
-  transform:scaleX(1);
-  transition:width 0.1s linear, opacity 0.7s cubic-bezier(.16,1,.3,1) 0.05s, transform 0.7s cubic-bezier(.16,1,.3,1) 0.05s;
+  transform:scaleX(0);
+  transition:opacity 0.7s cubic-bezier(.16,1,.3,1) 0.05s, transform 0.7s cubic-bezier(.16,1,.3,1) 0.05s;
+  will-change:transform;
 }
 
-/* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
-#pageMain.bounce-top{
-  animation:bounceTop 1.05s cubic-bezier(.22,1,.36,1);
-}
-#pageMain.bounce-bottom{
-  animation:bounceBottom 1.05s cubic-bezier(.22,1,.36,1);
-}
+/* ---------- EDGE BOUNCE ---------- */
+#pageMain.bounce-top{animation:bounceTop 1.05s cubic-bezier(.22,1,.36,1);}
+#pageMain.bounce-bottom{animation:bounceBottom 1.05s cubic-bezier(.22,1,.36,1);}
 @keyframes bounceTop{
   0%{transform:translateY(0);}
   22%{transform:translateY(54px);}
@@ -407,6 +330,16 @@ body.is-preloading .bg-orb{
   -webkit-backdrop-filter:var(--glass-blur) saturate(1.4);
   box-shadow:0 18px 44px -28px rgba(0,0,0,0.65);
 }
+
+/* CRITICAL FIX: backdrop-filter creates a containing block for any
+   position:fixed descendant — which traps .top-nav inside the header instead
+   of letting it center on the viewport. When the mobile menu opens we strip
+   the header's filter; the overlay covers it anyway, so we lose nothing. */
+body.menu-open .site-header{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
 .header-inner{
   display:flex;align-items:center;justify-content:space-between;
   max-width:1240px;margin:0 auto;
@@ -476,13 +409,10 @@ body.is-preloading .bg-orb{
 }
 
 /* ---------- NAV PILL (liquid flowing indicator) ----------
-   A single shared pill that slides between nav links. Its left/top/width/height
-   are set by JS from the active link's bounding box. The trick that makes it
-   read as *liquid* rather than a sliding block is the deliberate mismatch in
-   transition durations — `left` takes longer than `width`, so as the pill
-   travels it briefly elongates in the direction of motion, then contracts
-   back to the target link's shape as it settles. Combined with the heavy
-   spring overshoot curve, it reads as a droplet poured between links. */
+   A single shared pill that slides between nav links. The liquid feel comes
+   from intentionally mismatched transition durations: `left` is slower than
+   `width`, so mid-travel the pill briefly elongates in the direction of
+   motion before contracting into the target link's shape. */
 .nav-pill{
   position:absolute;
   top:0;
@@ -519,9 +449,6 @@ body.is-preloading .bg-orb{
 }
 .nav-link:hover{color:var(--foam);transform:translateY(-1px);}
 
-/* Active link loses its own fill — the pill underneath carries it, so the
-   background appears to *flow* from one link to the next instead of
-   cross-fading between two stacked rectangles. */
 .nav-link.active{
   color:#fff;
   background:none;
@@ -529,8 +456,7 @@ body.is-preloading .bg-orb{
 }
 .nav-link.active:hover{color:#fff;transform:none;}
 
-/* Fallback: if JS hasn't yet marked the nav ready (or JS failed), the active
-   link falls back to painting its own accent fill so the state is never lost. */
+/* Fallback: if JS hasn't marked the nav ready, active link paints itself. */
 .top-nav:not(.is-ready) .nav-link.active{
   background-color:var(--accent);
   background-image:linear-gradient(135deg, var(--accent-soft), var(--accent) 55%, var(--accent-2) 145%);
@@ -574,7 +500,6 @@ body.is-preloading .bg-orb{
   --gi-glyph:15px;
 }
 
-/* ---------- PROJECTS: the site's loudest control ---------- */
 .nav-cta--projects{
   opacity:1;
   pointer-events:auto;
@@ -667,19 +592,22 @@ body.is-preloading .bg-orb{
 .menu-toggle.active span:nth-child(2){opacity:0;}
 .menu-toggle.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 
-/* ---------- MOBILE MENU BACKDROP ---------- */
+/* ---------- MOBILE MENU BACKDROP ----------
+   The overlay carries the whole-screen blur for the mobile menu, so the
+   panel itself doesn't need its own backdrop-filter. One full-screen blur
+   is dramatically cheaper to composite than two stacked ones. */
 .nav-overlay{
   display:none;
   position:fixed;inset:0;
   background:rgba(5,5,10,0.55);
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(18px) saturate(1.3);
+  -webkit-backdrop-filter:blur(18px) saturate(1.3);
   opacity:0;
   visibility:hidden;
-  transition:opacity 0.3s ease, visibility 0.3s;
+  transition:opacity 0.32s ease, visibility 0.32s;
   z-index:140;
 }
-[data-theme="light"] .nav-overlay{background:rgba(30,25,45,0.32);}
+[data-theme="light"] .nav-overlay{background:rgba(30,25,45,0.38);}
 .nav-overlay.open{opacity:1;visibility:visible;}
 
 /* ---------- GLASS ICON CHIP (shared component) ---------- */
@@ -882,10 +810,7 @@ body.is-preloading .bg-orb{
   font-size:0.72rem;color:var(--muted);margin:0.55rem 0 0;line-height:1.4;
 }
 
-/* ---------- SECTION BASE ----------
-   Tightened top padding (was 8rem) so the page title card doesn't push the
-   first real content too far down; the title card itself now supplies the
-   visual "air" that used to come from this padding. */
+/* ---------- SECTION BASE ---------- */
 .section{
   position:relative;
   padding:6rem 3rem 7rem;
@@ -922,10 +847,7 @@ body.is-preloading .bg-orb{
   padding:0 clamp(1.4rem, 4.5vw, 3.8rem);
 }
 .content-page.is-current,
-.content-page.in-view{
-  opacity:1;
-  transform:none;
-}
+.content-page.in-view{opacity:1;transform:none;}
 .content-page.is-current{border-color:rgba(139,92,246,0.45);}
 .section-title{
   font-family:var(--font-display);
@@ -939,11 +861,7 @@ body.is-preloading .bg-orb{
 }
 .section-sub{color:var(--muted);margin-bottom:2.5rem;max-width:62ch;}
 
-/* ---------- PAGE TITLE CARD ----------
-   The big transparent stage each page opens with. Bottom margin was 2.4rem
-   and top was 6rem — reduced the top to 0 (the section above supplies the
-   spacing) and the bottom grown to 3.5rem so the description has room to
-   breathe before the content card starts. */
+/* ---------- PAGE TITLE CARD ---------- */
 .page-title-card{
   position:relative;
   isolation:isolate;
@@ -954,7 +872,7 @@ body.is-preloading .bg-orb{
   width:80vw;
   height:80vh;
   min-height:420px;
-  margin:0 auto 6.5rem;
+  margin:0 auto 5.5rem;      /* space between title card and content card */
   padding:3rem clamp(1.6rem, 5vw, 4rem);
   text-align:center;
   background:transparent;
@@ -965,9 +883,7 @@ body.is-preloading .bg-orb{
   will-change:transform, opacity;
 }
 
-/* ---------- CONTENT CARD TITLE ----------
-   The landing point for the merge animation. Pre-merge state is
-   oversized/blurred/invisible; GSAP animates it down. */
+/* ---------- CONTENT CARD TITLE ---------- */
 .content-title{
   font-family:var(--font-display);
   font-size:clamp(1.8rem, 3.2vw, 2.4rem);
@@ -1007,26 +923,21 @@ body.is-preloading .bg-orb{
   white-space:pre;
   pointer-events:none;
 }
-.page-title-card .section-title.is-split{
-  letter-spacing:0;
-}
+.page-title-card .section-title.is-split{letter-spacing:0;}
 @media (prefers-reduced-motion: reduce){
   .tc-char{will-change:auto;}
 }
 
 /* ---------- PAGE TITLE CARD: big display name ----------
-   Bottom margin was 1.4rem — bumped to 2.8rem so the description sits well
-   clear of the title's descenders. */
+   Wide margin under the title gives the description its own breathing space
+   and reinforces the sequential feel of the two-part entrance animation. */
 .page-title-card .section-title{
   font-size:clamp(3.8rem, 10vw, 8rem);
   line-height:0.98;
   letter-spacing:-0.012em;
-  margin:0 0 1.8rem;
+  margin:0 0 4.2rem;
 }
 
-/* The description under the big title — given a slightly looser line-height
-   and a whisper of letter-spacing so it reads as its own element rather than
-   as a continuation of the display line above it. */
 .page-title-desc,
 .page-title-card .section-sub{
   color:var(--muted);
@@ -1053,7 +964,7 @@ body.is-preloading .bg-orb{
 .page-title-card.is-entering .page-title-desc,
 .page-title-card.is-entering .section-sub{
   animation:titleCardInFade 1.25s var(--ease-out) forwards;
-  animation-delay:0.42s;   /* was 0.22s — a longer beat between title and copy */
+  animation-delay:0.42s;
 }
 
 @keyframes titleCardIn{
@@ -1063,10 +974,7 @@ body.is-preloading .bg-orb{
     transform:translateY(26px);
     letter-spacing:0.12em;
   }
-  55%{
-    opacity:1;
-    filter:blur(0);
-  }
+  55%{opacity:1;filter:blur(0);}
   100%{
     opacity:1;
     filter:blur(0);
@@ -1075,13 +983,13 @@ body.is-preloading .bg-orb{
   }
 }
 
-/* ---------- LONG TITLES ("What I Can Deliver") ---------- */
 .page-title-card .section-title.is-long{
   font-size:clamp(2.6rem, 6.5vw, 5rem);
   line-height:1.05;
   max-width:14ch;
   margin-left:auto;
   margin-right:auto;
+  margin-bottom:3.2rem;
   letter-spacing:-0.01em;
 }
 .page-title-card:has(.section-title.is-long) .page-title-desc,
@@ -1103,9 +1011,6 @@ body.is-preloading .bg-orb{
   }
 }
 
-/* The description's own entrance: rises a touch further than the display
-   title so the two elements feel composed in sequence, then settles with a
-   subtle letter-spacing relax to mirror the display title's behaviour. */
 @keyframes titleCardInFade{
   0%{opacity:0;filter:blur(8px);transform:translateY(26px);letter-spacing:0.02em;}
   55%{opacity:1;filter:blur(0);}
@@ -1128,9 +1033,7 @@ body.is-preloading .bg-orb{
   .page-title-card{height:min(80vh, 720px);}
 }
 @media (max-width:900px){
-  .page-title-card{
-    width:92vw;
-  }
+  .page-title-card{width:92vw;}
   .page-title-card .section-title{font-size:clamp(3rem, 12vw, 5.6rem);}
 }
 @media (max-width:700px){
@@ -1138,10 +1041,13 @@ body.is-preloading .bg-orb{
     width:100%;
     height:auto;
     min-height:52vh;
-    margin:0 auto 2.2rem;
+    margin:0 auto 3.2rem;
     padding:2.6rem 1.4rem;
   }
-  .page-title-card .section-title{font-size:clamp(2.6rem, 14vw, 4.2rem);}
+  .page-title-card .section-title{
+    font-size:clamp(2.6rem, 14vw, 4.2rem);
+    margin-bottom:2.4rem;
+  }
   .page-title-desc,
   .page-title-card .section-sub{font-size:1rem;}
 }
@@ -1230,9 +1136,7 @@ body.is-preloading .bg-orb{
 .hero:not(.in-view) .hero-blob{animation-play-state:paused;}
 @media (prefers-reduced-motion: reduce){.hero-blob{animation:none;}}
 
-.hero-inner.is-bouncing{
-  animation:heroInnerBounce 1.65s var(--ease-out);
-}
+.hero-inner.is-bouncing{animation:heroInnerBounce 1.65s var(--ease-out);}
 @keyframes heroInnerBounce{
   0%{transform:translateY(28px) scale(0.968);}
   42%{transform:translateY(-9px) scale(1.014);}
@@ -1348,9 +1252,7 @@ body.is-preloading .bg-orb{
   86%{transform:scale(1.004);}
   100%{opacity:1;filter:blur(0);transform:scale(1);}
 }
-.hero-name .reveal-line:nth-child(2){
-  color:var(--accent-2);
-}
+.hero-name .reveal-line:nth-child(2){color:var(--accent-2);}
 .hero-role{
   font-family:var(--font-body);
   font-weight:600;
@@ -1382,10 +1284,7 @@ body.is-preloading .bg-orb{
   animation:heroReveal 1.2s var(--ease-out) forwards;
   animation-delay:0.78s;
 }
-.accent-text{
-  color:var(--foam);
-  font-weight:600;
-}
+.accent-text{color:var(--foam);font-weight:600;}
 .text-link{
   color:var(--accent-2);
   text-decoration:underline;
@@ -1630,16 +1529,9 @@ body.is-preloading .bg-orb{
   background:var(--surface-2);
 }
 .fact-card--wide{grid-column:1 / -1;}
-.fact-icon{
-  --gi-size:38px;
-  --gi-radius:12px;
-  --gi-glyph:18px;
-}
+.fact-icon{--gi-size:38px;--gi-radius:12px;--gi-glyph:18px;}
 .fact-text{display:flex;flex-direction:column;gap:0.2rem;}
-.fact-label{
-  font-size:0.8rem;color:var(--muted);
-  letter-spacing:0.01em;
-}
+.fact-label{font-size:0.8rem;color:var(--muted);letter-spacing:0.01em;}
 .fact-value{font-size:1rem;color:var(--foam);font-weight:500;line-height:1.4;}
 
 /* ---------- WHAT I CAN DELIVER ---------- */
@@ -1665,11 +1557,7 @@ body.is-preloading .bg-orb{
   font-weight:600;
   margin-bottom:0.7rem;
 }
-.deliver-text{
-  color:var(--muted);
-  font-size:0.95rem;
-  line-height:1.6;
-}
+.deliver-text{color:var(--muted);font-size:0.95rem;line-height:1.6;}
 
 /* ---------- EXPERIENCE ---------- */
 .section.experience{padding-top:5rem;padding-bottom:5rem;}
@@ -1772,9 +1660,7 @@ body.is-preloading .bg-orb{
 .edu-body h3{font-family:var(--font-display);font-size:1.28rem;margin-bottom:0.35rem;}
 .edu-body p{color:var(--muted);font-size:0.98rem;line-height:1.6;}
 
-.cert-row{
-  display:flex;flex-wrap:wrap;gap:0.7rem;
-}
+.cert-row{display:flex;flex-wrap:wrap;gap:0.7rem;}
 .cert-chip{
   font-size:0.8rem;color:var(--muted);
   border:1px solid var(--line);
@@ -1811,22 +1697,14 @@ body.is-preloading .bg-orb{
   padding:0;
   text-align:left;
 }
-.skill-icon{
-  --gi-size:40px;
-  --gi-radius:12px;
-  --gi-glyph:19px;
-}
+.skill-icon{--gi-size:40px;--gi-radius:12px;--gi-glyph:19px;}
 .skill-card h4{color:var(--foam);font-size:1.05rem;font-weight:600;margin:0;}
-.skill-summary{
-  color:var(--muted);font-size:0.97rem;margin:0.85rem 0 0;line-height:1.6;
-}
+.skill-summary{color:var(--muted);font-size:0.97rem;margin:0.85rem 0 0;line-height:1.6;}
 .skill-details{
   max-height:0;overflow:hidden;opacity:0;
   transition:max-height 0.5s cubic-bezier(.16,1,.3,1), opacity 0.4s ease, margin 0.4s ease;
 }
-.skill-card.is-open .skill-details{
-  opacity:1;margin-top:0.8rem;
-}
+.skill-card.is-open .skill-details{opacity:1;margin-top:0.8rem;}
 .skill-details p{color:var(--muted);font-size:0.95rem;line-height:1.72;margin:0;}
 
 /* ---------- PROJECTS ---------- */
@@ -1839,13 +1717,8 @@ body.is-preloading .bg-orb{
   margin:0 auto;
   padding:1rem 3rem 2rem;
 }
-.project-viewport{
-  overflow:hidden;
-  border-radius:16px;
-}
-.project-track{
-  display:flex;
-}
+.project-viewport{overflow:hidden;border-radius:16px;}
+.project-track{display:flex;}
 .project-card{
   flex:0 0 100%;
   width:100%;
@@ -1866,10 +1739,7 @@ body.is-preloading .bg-orb{
   transform:scale(1.08);
   transition:opacity 0.6s ease, transform 0.7s cubic-bezier(.22,1,.36,1);
 }
-.project-card.active .project-img{
-  opacity:1;
-  transform:scale(1);
-}
+.project-card.active .project-img{opacity:1;transform:scale(1);}
 .project-body{padding:2.2rem 2.4rem 2.4rem;}
 .project-body h3{font-family:var(--font-display);font-size:1.6rem;margin-bottom:0.4rem;display:inline-block;}
 .project-role{
@@ -1898,10 +1768,7 @@ body.is-preloading .bg-orb{
   transform:translateY(18px);
   transition:opacity 0.5s ease, transform 0.5s cubic-bezier(.22,1,.36,1);
 }
-.project-card.active .project-body > *{
-  opacity:1;
-  transform:translateY(0);
-}
+.project-card.active .project-body > *{opacity:1;transform:translateY(0);}
 .project-card.active .project-body h3{transition-delay:0.1s;}
 .project-card.active .project-body .project-role{transition-delay:0.18s;}
 .project-card.active .project-body p{transition-delay:0.26s;}
@@ -1929,15 +1796,8 @@ body.is-preloading .bg-orb{
 .project-nav svg{width:20px;height:20px;}
 .project-nav.prev{left:-1.6rem;}
 .project-nav.next{right:-1.6rem;}
-.project-nav.visible{
-  opacity:1;
-  pointer-events:auto;
-}
-.project-nav:hover{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:#fff;
-}
+.project-nav.visible{opacity:1;pointer-events:auto;}
+.project-nav:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
 .project-nav.prev.visible:hover{transform:translateY(-50%) translateX(-3px);}
 .project-nav.next.visible:hover{transform:translateY(-50%) translateX(3px);}
 .project-nav.visible:active{transform:translateY(-50%) scale(0.9);}
@@ -1979,10 +1839,7 @@ body.is-preloading .bg-orb{
   --gi-glyph:22px;
   margin-bottom:0.35rem;
 }
-.contact-label{
-  color:var(--muted);font-size:0.86rem;
-  letter-spacing:0.01em;
-}
+.contact-label{color:var(--muted);font-size:0.86rem;letter-spacing:0.01em;}
 .contact-value{color:var(--foam);font-size:1rem;font-weight:500;word-break:break-word;}
 
 .social-links-row{
@@ -1991,11 +1848,7 @@ body.is-preloading .bg-orb{
   gap:0.8rem;
   margin-top:1.6rem;
 }
-.social-icon-link{
-  --gi-size:44px;
-  --gi-radius:50%;
-  --gi-glyph:19px;
-}
+.social-icon-link{--gi-size:44px;--gi-radius:50%;--gi-glyph:19px;}
 @media (max-width:700px){
   .social-links-row{justify-content:center;}
 }
@@ -2068,54 +1921,84 @@ body.is-preloading .bg-orb{
   .theme-toggle{--gi-size:38px;--gi-glyph:17px;margin-left:0.35rem;}
   .nav-overlay{display:block;}
 
-  /* The nav pill is a desktop-only flourish — the nav becomes a vertical
-     panel here, so the pill is retired and the active link carries its own
-     fill instead. */
+  /* Nav pill is desktop-only; the mobile nav panel doesn't use it. */
   .nav-pill{display:none;}
 
+  /* ---------- MOBILE NAV PANEL ----------
+     Fixed-positioned and centered on the viewport. The blur comes from the
+     overlay behind it, not this element — one full-screen blur is far cheaper
+     than two stacked ones. Links are hidden and offset by default, then
+     staggered into place when the panel opens, so the panel composes rather
+     than appearing as a static block. */
   .top-nav{
     position:fixed;
-    top:50%;left:50%;
-    width:min(86%, 360px);
+    top:50%;
+    left:50%;
+    width:min(88%, 340px);
     max-height:78vh;
     overflow-y:auto;
-    flex-direction:column;align-items:stretch;gap:0.4rem;
-    background:var(--panel-strong);
+    flex-direction:column;
+    align-items:stretch;
+    gap:0.4rem;
+    background:rgba(8,8,12,0.78);
     border:1px solid var(--line);
-    border-top:1px solid rgba(139,92,246,0.4);
-    border-radius:20px;
+    border-top:1px solid rgba(139,92,246,0.45);
+    border-radius:22px;
     padding:1.6rem 1.4rem;
-    backdrop-filter:var(--glass-blur);
-    -webkit-backdrop-filter:var(--glass-blur);
-    box-shadow:0 30px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+    box-shadow:0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
     opacity:0;
     visibility:hidden;
     pointer-events:none;
-    transform:translate(-50%,-50%) scale(0.94);
-    transition:opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+    transform:translate(-50%,-50%) scale(0.9);
+    transition:
+      opacity 0.28s ease,
+      transform 0.38s cubic-bezier(.16,1,.3,1),
+      visibility 0.28s;
     z-index:150;
     display:flex;
   }
+  [data-theme="light"] .top-nav{background:rgba(255,255,255,0.88);}
+
   .top-nav.open{
     opacity:1;
     visibility:visible;
     pointer-events:auto;
     transform:translate(-50%,-50%) scale(1);
   }
-  .nav-link{border-radius:10px;text-align:center;padding:0.85rem 1rem;font-size:1rem;}
-  /* Mobile active fallback — pill is hidden, so the link paints itself. */
+
+  .top-nav .nav-link{
+    border-radius:12px;
+    text-align:center;
+    padding:0.9rem 1rem;
+    font-size:1.05rem;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity 0.34s var(--ease-out), transform 0.34s var(--ease-out),
+               color 0.25s ease, background 0.25s ease;
+  }
+  .top-nav.open .nav-link{
+    opacity:1;
+    transform:translateY(0);
+  }
+  /* nth-child(1) is the .nav-pill span, so links start at 2. */
+  .top-nav.open .nav-link:nth-child(2){transition-delay:0.08s;}
+  .top-nav.open .nav-link:nth-child(3){transition-delay:0.12s;}
+  .top-nav.open .nav-link:nth-child(4){transition-delay:0.16s;}
+  .top-nav.open .nav-link:nth-child(5){transition-delay:0.20s;}
+  .top-nav.open .nav-link:nth-child(6){transition-delay:0.24s;}
+  .top-nav.open .nav-link:nth-child(7){transition-delay:0.28s;}
+
+  /* On mobile the pill is hidden, so the active link paints itself. */
   .nav-link.active,
   .top-nav:not(.is-ready) .nav-link.active{
     background-color:var(--accent);
     background-image:linear-gradient(135deg, var(--accent-soft), var(--accent) 55%, var(--accent-2) 145%);
     box-shadow:0 6px 18px -8px rgba(139,92,246,0.9), inset 0 1px 0 rgba(255,255,255,0.3);
+    color:#fff;
   }
 
   .menu-toggle{display:flex;}
   .intensity-panel{right:-1.2rem;min-width:200px;}
-
-  /* Section padding tightened further on mobile — the reduced page-title
-     top margin already supplies what little air is needed. */
   .section{padding:4.5rem 1.4rem 5.5rem;}
   .content-stack{margin-top:0;padding-bottom:1rem;}
   .content-page{
@@ -2151,7 +2034,7 @@ body.is-preloading .bg-orb{
   .edu-timeline{padding-left:1.8rem;}
   .edu-item{padding:1.15rem 1.2rem;}
   .edu-item::before{left:-1.51rem;}
-  .page-title-card{margin-bottom:1.8rem;}
+  .page-title-card{margin-bottom:3.2rem;}
   .about-facts-grid{grid-template-columns:1fr;}
   .footer-top{flex-direction:column;align-items:flex-start;}
   .to-top{right:1.2rem;bottom:1.2rem;}
@@ -2176,19 +2059,107 @@ body.is-preloading .bg-orb{
   .nav-home{padding:0.3rem;border-radius:50%;}
 }
 
-/* ---------- MOBILE / TOUCH PERFORMANCE ---------- */
+/* ---------- MOBILE / TOUCH PERFORMANCE ----------
+   backdrop-filter and filter:blur() are the two most expensive things this
+   page asks the GPU to do, and infinite decorative animations keep the
+   compositor busy forever. On touch devices we cut all three aggressively.
+   Layout and content are unchanged — only the paint cost drops. */
 @media (max-width:700px), (hover:none){
-  :root{--glass-blur:blur(10px);}
-  .bg-orb{filter:blur(60px);}
-  .hero-name .reveal-line:nth-child(2){
-    animation:none;
+  :root{--glass-blur:blur(8px);}
+
+  /* Background orbs — shrink blur, stop drift. */
+  .bg-orb{filter:blur(40px);}
+  .bg-orb-1,.bg-orb-2,.bg-orb-3{animation:none;}
+
+  /* Hero blobs — same treatment. */
+  .hero-blob{filter:blur(36px);animation:none;}
+  .hero-code-card{animation:none;}
+  .nav-cta--projects{animation:none;}
+
+  /* Strip backdrop-filter from every panel/card/chip. The blur is kept only
+     on the nav overlay (where it does real work) — that one full-screen blur
+     is far cheaper than a dozen small ones on cards. */
+  .hero-inner,
+  .content-page,
+  .fact-card,
+  .deliver-card,
+  .skill-card,
+  .contact-card,
+  .project-card,
+  .main-project-card,
+  .simple-project-card,
+  .to-top,
+  .theme-toggle,
+  .glass-icon,
+  .fact-icon,
+  .skill-icon,
+  .contact-icon,
+  .social-icon-link,
+  .nav-cta,
+  .nav-home,
+  .edu-item,
+  .experience-status-card,
+  .intensity-panel,
+  .project-modal-panel,
+  .photo-frame,
+  .photo-tag,
+  .project-nav{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
   }
+
+  /* will-change forces a permanent compositor layer. On mobile we only want
+     layers for things that actually animate every frame — which, after the
+     changes above, is nothing in this list. */
+  .bg-orb,
+  .hero-blob,
+  .hero-glow,
+  .page-title-card,
+  [data-parallax],
+  .tc-char{
+    will-change:auto;
+  }
+
+  /* Icon drop-shadows are a separate blur pass per glyph. Invisible at
+     phone pixel densities, so drop them. */
+  .glass-icon svg,
+  .fact-icon svg,
+  .skill-icon svg,
+  .contact-icon svg,
+  .social-icon-link svg,
+  .theme-toggle svg,
+  .to-top svg{
+    filter:none;
+  }
+
+  /* Simpler hero shadow. */
+  .hero-inner{box-shadow:0 18px 40px -26px rgba(0,0,0,0.7);}
+
+  /* Purely decorative infinite loops — off. */
+  .hero-name .reveal-line:nth-child(2){animation:none;}
+  .status-dot::after{animation:none;opacity:0.85;}
+
+  /* Hover-only specular sweeps: no trigger on touch, so remove them entirely
+     to keep the pseudo-elements out of the paint tree. */
+  .nav-cta::after,
+  .nav-home::after,
+  .hero-cta::before,
+  .glass-icon::before,
+  .fact-icon::before,
+  .skill-icon::before,
+  .contact-icon::before,
+  .social-icon-link::before,
+  .theme-toggle::before,
+  .to-top::before{
+    display:none;
+  }
+
+  .progress-bar{transition:none;}
 }
 
 /* ============================================================
    PROJECT SHOWCASE — reusable card components (projects.html)
    ============================================================ */
-
 .projects-showcase{max-width:960px;margin:0 auto;}
 .showcase-group{margin-bottom:3.2rem;}
 .showcase-group:last-child{margin-bottom:0;}
