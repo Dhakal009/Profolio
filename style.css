@@ -335,38 +335,32 @@ body.is-preloading .bg-orb{transform:scale(1.1);}
    position:fixed descendant — which traps .top-nav inside the header instead
    of letting it center on the viewport. When the mobile menu opens we strip
    the header's filter; the overlay covers it anyway, so we lose nothing. */
+/* When the mobile menu is open: the header must (a) sit above the overlay,
+   (b) lose any transform so it stops acting as a containing block for the
+   fixed-positioned .top-nav inside it, and (c) drop its backdrop-filter for
+   the same reason. The overlay already covers the header's own content, so
+   none of this is visible. */
 body.menu-open .site-header{
-  /* The header creates a stacking context (z-index:100). Its child menu
-     panel therefore can never paint above the overlay at z-index:140 no
-     matter what its own z-index is. Raising the header's context is the
-     only thing that frees the menu to sit above the blur. */
   z-index: 200;
+  transform: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-/* When scrolled, the header has a background panel; hide it while the menu
-   is open so we don't see a bar floating on top of the blur. */
+/* With the header's panel suppressed, hide its floating furniture so the
+   menu is the only focus. The burger stays visible so it can close the menu. */
 body.menu-open .site-header.scrolled{
   background: transparent;
   border-image: none;
   border-bottom-color: transparent;
   box-shadow: none;
 }
-
-/* Fade the header's non-burger furniture so the menu is the sole focus.
-   The burger stays visible — it's how you close the menu. */
 body.menu-open .nav-cta,
 body.menu-open .nav-home,
 body.menu-open .theme-control{
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease;
-}
-
-.header-inner{
-  display:flex;align-items:center;justify-content:space-between;
-  max-width:1240px;margin:0 auto;
 }
 
 /* ---------- WORDMARK ---------- */
