@@ -45,7 +45,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Major+Mono+Display&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 
-<!-- Structured data: ties this page back to the same Person identity as the homepage. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -76,9 +75,6 @@
 
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
-    <!-- The Projects page has no sections of its own to scroll between, so it
-         carries no section nav. Its only navigation is a single Home button,
-         grouped with the theme control on the right. -->
     <div class="header-inner header-inner--minimal">
       <div class="logo-spacer" aria-hidden="true"></div>
       <div class="header-right">
@@ -109,270 +105,265 @@
   <main id="pageMain" class="page-no-hero">
     <div class="content-stack" id="contentStack">
 
-      <!-- PROJECTS -->
-      <section id="main-content" class="section projects content-page is-current">
-        <div class="section-inner">
-          <div class="page-title-card">
-            <h1 class="section-title">Projects</h1>
-            <p class="page-title-desc">A mix of full builds and smaller experiments. Click any card for screenshots and a look at how it's put together.</p>
-          </div>
+      <!-- PROJECTS
+           Restructured to match the pattern every homepage section uses:
+             .section
+               .page-title-card        (big transparent title stage)
+               .content-page           (the actual content card)
+                 .section-inner
+                   .content-title      (the merge target)
+                   ...the showcase...
+           This is what makes the title→content merge animation and the reduced
+           top spacing behave correctly on this page. -->
+      <section id="main-content" class="section projects">
+        <div class="page-title-card">
+          <h1 class="section-title">Projects</h1>
+          <p class="page-title-desc">A mix of full builds and smaller experiments. Click any card for screenshots and a look at how it's put together.</p>
+        </div>
 
-          <div class="projects-showcase">
+        <div class="content-page">
+          <div class="section-inner">
+            <h2 class="content-title">Projects</h2>
 
-            <!-- All images below are placeholders (picsum.photos, seeded so
-                 each project gets a distinct but consistent set). Swap each
-                 src for your own screenshot in assets/projects/<slug>/ when
-                 ready — everything else about the markup stays the same. -->
+            <div class="projects-showcase">
 
-            <!-- ============================================================
-                 FEATURED PROJECTS — .main-project-card
-                 Reusable component. To add one: duplicate everything from
-                 <article class="main-project-card"> to </article> and edit:
-                   - data-badge          → small label shown on the card + modal
-                   - .main-project-media img → cover image (put files in
-                     assets/projects/<slug>/ inside your portfolio folder)
-                   - h3 / .project-pitch → title + one-line pitch
-                   - .tag-row            → tech stack chips
-                   - a[data-role="github"] / a[data-role="demo"] → your links
-                   - <template class="project-detail-data"> → everything shown
-                     only in the modal: screenshots (.detail-gallery), the
-                     full write-up (.detail-desc) and the "how it works"
-                     breakdown (.detail-structure, reuses .highlight-item)
-                 The whole card is clickable and opens the shared modal;
-                 the GitHub/demo links inside it still navigate normally.
-                 ============================================================ -->
-            <div class="showcase-group">
-              <p class="showcase-group-label"><strong>Featured builds</strong> — the projects I'd point you to first</p>
+              <!-- All images below are placeholders (placehold.co). Swap each
+                   src for your own screenshot in assets/projects/<slug>/ when
+                   ready — everything else about the markup stays the same. -->
 
-              <article class="main-project-card reveal" data-badge="Featured project">
-                <div class="main-project-media">
-                  <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
-                </div>
-                <div class="main-project-content">
-                  <span class="project-badge">Featured project</span>
-                  <h3>Project One</h3>
-                  <p class="project-pitch">A short one-line pitch describing what this project does.</p>
-                  <div class="tag-row">
-                    <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Tailwind CSS</span><span>JWT</span>
-                  </div>
-                  <div class="project-actions">
-                    <a href="https://github.com/yourusername/project-name" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
-                      <span>GitHub</span>
-                    </a>
-                    <a href="https://yourdemo.com" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                      <span>Live demo</span>
-                    </a>
-                  </div>
-                </div>
+              <!-- ============================================================
+                   FEATURED PROJECTS — .main-project-card
+                   ============================================================ -->
+              <div class="showcase-group">
+                <p class="showcase-group-label"><strong>Featured builds</strong> — the projects I'd point you to first</p>
 
-                <template class="project-detail-data">
-                  <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does, the problem it solves, and what makes it interesting.</p>
-                  <div class="detail-structure">
-                    <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
-                    <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
-                    <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
-                    <div class="highlight-item"><h4>Auth &amp; payments</h4><p>Describe how authentication and authorization work.</p></div>
-                  </div>
-                  <div class="detail-gallery">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                  </div>
-                </template>
-              </article>
-
-              <article class="main-project-card reveal" data-badge="Featured project">
-                <div class="main-project-media">
-                  <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
-                </div>
-                <div class="main-project-content">
-                  <span class="project-badge">Featured project</span>
-                  <h3>Project Two</h3>
-                  <p class="project-pitch">A short one-line pitch describing what this project does.</p>
-                  <div class="tag-row">
-                    <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Socket.io</span><span>Tailwind CSS</span>
-                  </div>
-                  <div class="project-actions">
-                    <a href="https://github.com/yourusername/project-name" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
-                      <span>GitHub</span>
-                    </a>
-                    <a href="https://yourdemo.com" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                      <span>Live demo</span>
-                    </a>
-                  </div>
-                </div>
-
-                <template class="project-detail-data">
-                  <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does, the problem it solves, and what makes it interesting.</p>
-                  <div class="detail-structure">
-                    <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
-                    <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
-                    <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
-                    <div class="highlight-item"><h4>Real-time</h4><p>Describe any real-time or special features here.</p></div>
-                  </div>
-                  <div class="detail-gallery">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                  </div>
-                </template>
-              </article>
-            </div>
-
-            <!-- ============================================================
-                 OTHER PROJECTS — .simple-project-card
-                 Reusable component. Duplicate an <article> block inside the
-                 grid and edit the same pieces as above (cover image, title,
-                 one-liner, links, tag-row is optional here, and the hidden
-                 <template class="project-detail-data"> for the modal).
-                 ============================================================ -->
-            <div class="showcase-group">
-              <p class="showcase-group-label"><strong>Other projects</strong> — smaller builds and experiments</p>
-
-              <div class="simple-projects-grid">
-
-                <article class="simple-project-card reveal" data-badge="Side project">
-                  <div class="simple-project-media">
+                <article class="main-project-card reveal" data-badge="Featured project">
+                  <div class="main-project-media">
                     <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
                   </div>
-                  <div class="simple-project-content">
-                    <h4>Project Three</h4>
-                    <p>A short one-line description of this project.</p>
-                    <div class="tag-row"><span>React</span><span>Node.js</span><span>MongoDB</span></div>
-                    <div class="simple-project-links">
-                      <div class="simple-icon-links">
-                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
-                        </a>
-                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </a>
-                      </div>
+                  <div class="main-project-content">
+                    <span class="project-badge">Featured project</span>
+                    <h3>Project One</h3>
+                    <p class="project-pitch">A short one-line pitch describing what this project does.</p>
+                    <div class="tag-row">
+                      <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Tailwind CSS</span><span>JWT</span>
+                    </div>
+                    <div class="project-actions">
+                      <a href="https://github.com/yourusername/project-name" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                        <span>GitHub</span>
+                      </a>
+                      <a href="https://yourdemo.com" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>Live demo</span>
+                      </a>
                     </div>
                   </div>
+
                   <template class="project-detail-data">
-                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
+                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does, the problem it solves, and what makes it interesting.</p>
                     <div class="detail-structure">
                       <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
-                      <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
-                    </div>
-                    <div class="detail-gallery">
-                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    </div>
-                  </template>
-                </article>
-
-                <article class="simple-project-card reveal" data-badge="Side project">
-                  <div class="simple-project-media">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
-                  </div>
-                  <div class="simple-project-content">
-                    <h4>Project Four</h4>
-                    <p>A short one-line description of this project.</p>
-                    <div class="tag-row"><span>React</span><span>REST API</span></div>
-                    <div class="simple-project-links">
-                      <div class="simple-icon-links">
-                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
-                        </a>
-                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <template class="project-detail-data">
-                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
-                    <div class="detail-structure">
-                      <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
-                      <div class="highlight-item"><h4>Data</h4><p>Describe the data source and how it is used.</p></div>
-                    </div>
-                    <div class="detail-gallery">
-                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    </div>
-                  </template>
-                </article>
-
-                <article class="simple-project-card reveal" data-badge="Side project">
-                  <div class="simple-project-media">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
-                  </div>
-                  <div class="simple-project-content">
-                    <h4>Project Five</h4>
-                    <p>A short one-line description of this project.</p>
-                    <div class="tag-row"><span>Next.js</span><span>MongoDB</span></div>
-                    <div class="simple-project-links">
-                      <div class="simple-icon-links">
-                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
-                        </a>
-                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <template class="project-detail-data">
-                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
-                    <div class="detail-structure">
-                      <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
-                      <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
-                    </div>
-                    <div class="detail-gallery">
-                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
-                    </div>
-                  </template>
-                </article>
-
-                <article class="simple-project-card reveal" data-badge="Side project">
-                  <div class="simple-project-media">
-                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
-                  </div>
-                  <div class="simple-project-content">
-                    <h4>Project Six</h4>
-                    <p>A short one-line description of this project.</p>
-                    <div class="tag-row"><span>Node.js</span><span>Express</span><span>MongoDB</span></div>
-                    <div class="simple-project-links">
-                      <div class="simple-icon-links">
-                        <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
-                        </a>
-                        <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
-                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  <template class="project-detail-data">
-                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
-                    <div class="detail-structure">
                       <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
                       <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
+                      <div class="highlight-item"><h4>Auth &amp; payments</h4><p>Describe how authentication and authorization work.</p></div>
                     </div>
                     <div class="detail-gallery">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                       <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                       <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
                     </div>
                   </template>
                 </article>
 
+                <article class="main-project-card reveal" data-badge="Featured project">
+                  <div class="main-project-media">
+                    <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
+                  </div>
+                  <div class="main-project-content">
+                    <span class="project-badge">Featured project</span>
+                    <h3>Project Two</h3>
+                    <p class="project-pitch">A short one-line pitch describing what this project does.</p>
+                    <div class="tag-row">
+                      <span>React</span><span>Node.js</span><span>Express</span><span>MongoDB</span><span>Socket.io</span><span>Tailwind CSS</span>
+                    </div>
+                    <div class="project-actions">
+                      <a href="https://github.com/yourusername/project-name" data-role="github" class="proj-link" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                        <span>GitHub</span>
+                      </a>
+                      <a href="https://yourdemo.com" data-role="demo" class="proj-link" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <span>Live demo</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  <template class="project-detail-data">
+                    <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does, the problem it solves, and what makes it interesting.</p>
+                    <div class="detail-structure">
+                      <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                      <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                      <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
+                      <div class="highlight-item"><h4>Real-time</h4><p>Describe any real-time or special features here.</p></div>
+                    </div>
+                    <div class="detail-gallery">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                    </div>
+                  </template>
+                </article>
               </div>
+
+              <!-- ============================================================
+                   OTHER PROJECTS — .simple-project-card
+                   ============================================================ -->
+              <div class="showcase-group">
+                <p class="showcase-group-label"><strong>Other projects</strong> — smaller builds and experiments</p>
+
+                <div class="simple-projects-grid">
+
+                  <article class="simple-project-card reveal" data-badge="Side project">
+                    <div class="simple-project-media">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
+                    </div>
+                    <div class="simple-project-content">
+                      <h4>Project Three</h4>
+                      <p>A short one-line description of this project.</p>
+                      <div class="tag-row"><span>React</span><span>Node.js</span><span>MongoDB</span></div>
+                      <div class="simple-project-links">
+                        <div class="simple-icon-links">
+                          <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                          </a>
+                          <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <template class="project-detail-data">
+                      <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
+                      <div class="detail-structure">
+                        <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                        <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                      </div>
+                      <div class="detail-gallery">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      </div>
+                    </template>
+                  </article>
+
+                  <article class="simple-project-card reveal" data-badge="Side project">
+                    <div class="simple-project-media">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
+                    </div>
+                    <div class="simple-project-content">
+                      <h4>Project Four</h4>
+                      <p>A short one-line description of this project.</p>
+                      <div class="tag-row"><span>React</span><span>REST API</span></div>
+                      <div class="simple-project-links">
+                        <div class="simple-icon-links">
+                          <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                          </a>
+                          <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <template class="project-detail-data">
+                      <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
+                      <div class="detail-structure">
+                        <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                        <div class="highlight-item"><h4>Data</h4><p>Describe the data source and how it is used.</p></div>
+                      </div>
+                      <div class="detail-gallery">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      </div>
+                    </template>
+                  </article>
+
+                  <article class="simple-project-card reveal" data-badge="Side project">
+                    <div class="simple-project-media">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
+                    </div>
+                    <div class="simple-project-content">
+                      <h4>Project Five</h4>
+                      <p>A short one-line description of this project.</p>
+                      <div class="tag-row"><span>Next.js</span><span>MongoDB</span></div>
+                      <div class="simple-project-links">
+                        <div class="simple-icon-links">
+                          <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                          </a>
+                          <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <template class="project-detail-data">
+                      <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
+                      <div class="detail-structure">
+                        <div class="highlight-item"><h4>Frontend</h4><p>Describe the frontend stack and what it handles.</p></div>
+                        <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                      </div>
+                      <div class="detail-gallery">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      </div>
+                    </template>
+                  </article>
+
+                  <article class="simple-project-card reveal" data-badge="Side project">
+                    <div class="simple-project-media">
+                      <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder" loading="lazy">
+                    </div>
+                    <div class="simple-project-content">
+                      <h4>Project Six</h4>
+                      <p>A short one-line description of this project.</p>
+                      <div class="tag-row"><span>Node.js</span><span>Express</span><span>MongoDB</span></div>
+                      <div class="simple-project-links">
+                        <div class="simple-icon-links">
+                          <a href="https://github.com/yourusername/project-name" data-role="github" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.2c0 4.49 2.87 8.3 6.84 9.64.5.1.68-.22.68-.5 0-.24-.01-1.04-.01-1.88-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.9-.63.07-.62.07-.62 1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.28 2.75 1.05a9.3 9.3 0 015 0c1.9-1.33 2.74-1.05 2.74-1.05.56 1.41.2 2.46.1 2.72.65.71 1.03 1.62 1.03 2.74 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.5A10.02 10.02 0 0022 12.2C22 6.58 17.52 2 12 2z" fill="currentColor"/></svg>
+                          </a>
+                          <a href="https://yourdemo.com" data-role="demo" class="simple-icon-link" target="_blank" rel="noopener noreferrer" aria-label="Live demo">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17L17 7M17 7H9M17 7v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <template class="project-detail-data">
+                      <p class="detail-desc">This is a placeholder description for this project. Replace this text with a full write-up covering what the project does and how it works.</p>
+                      <div class="detail-structure">
+                        <div class="highlight-item"><h4>Backend</h4><p>Describe the backend stack and what it handles.</p></div>
+                        <div class="highlight-item"><h4>Database</h4><p>Describe the database and how data is modeled.</p></div>
+                      </div>
+                      <div class="detail-gallery">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                        <img src="https://placehold.co/900x600/e5e5e5/999999?text=Project+Image" alt="Project image placeholder">
+                      </div>
+                    </template>
+                  </article>
+
+                </div>
+              </div>
+
             </div>
 
-          </div>
+            <div style="text-align:center;margin-top:3rem;">
+              <a href="index.html" class="hero-cta hero-cta--ghost magnetic">
+                <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>Back to Home</span>
+              </a>
+            </div>
 
-          <div style="text-align:center;margin-top:3rem;">
-            <a href="index.html" class="hero-cta hero-cta--ghost magnetic">
-              <svg class="cta-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span>Back to Home</span>
-            </a>
           </div>
         </div>
       </section>
@@ -403,8 +394,7 @@
     </svg>
   </button>
 
-  <!-- PROJECT DETAIL MODAL — single shared instance, populated per-card by
-       projects-modal.js from whichever card was clicked. -->
+  <!-- PROJECT DETAIL MODAL -->
   <div class="project-modal" id="projectModal" aria-hidden="true">
     <div class="project-modal-backdrop" data-modal-close></div>
     <div class="project-modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -437,7 +427,6 @@
     </div>
   </div>
 
-  <!-- GSAP (animation engine) + ScrollTrigger & ScrollToPlugin -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>

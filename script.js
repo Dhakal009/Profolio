@@ -12,8 +12,6 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     toggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
   }
 
-  // the inline script in <head> already set data-theme before first paint;
-  // just make sure the button's label matches whatever theme is active.
   updateLabel(root.getAttribute('data-theme') || 'dark');
 
   toggle.addEventListener('click', () => {
@@ -22,9 +20,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     updateLabel(next);
     try { localStorage.setItem('theme', next); } catch (e) { /* private mode, etc. */ }
 
-    // Retrigger the CSS bounce/pulse animation on every switch.
     toggle.classList.remove('theme-changed');
-    void toggle.offsetWidth; // force reflow so the class can be re-added cleanly
+    void toggle.offsetWidth;
     toggle.classList.add('theme-changed');
   });
 
@@ -33,7 +30,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   });
 })();
 
-/* ---------- DISPLAY INTENSITY (brightness of the active light/dark theme) ---------- */
+/* ---------- DISPLAY INTENSITY ---------- */
 (function initIntensityControl(){
   const root = document.documentElement;
   const panel = document.getElementById('intensityPanel');
@@ -51,7 +48,6 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
   }
 
-  // Pick up whatever the pre-paint inline script already applied (or default 100).
   let savedPercent = 100;
   try {
     const saved = localStorage.getItem('intensity');
@@ -64,15 +60,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
   });
 })();
 
-/* ---------- PRELOADER → HERO NAME MERGE ----------
-   The preloader opens with the name pinned to the EXACT spot the real hero heading
-   occupies on screen (see positionPreloaderName() below) — not just centered in the
-   viewport. After a short beat, it softly dissolves — fades and loses focus right
-   where it already sits — while the real hero heading (identical font, size, text,
-   and now identical position) comes into focus in that same spot at the same
-   moment. No movement, no scaling, nothing flying across the screen: just a quick,
-   minimal cross-fade so the two hand off as one continuous name sitting in one
-   continuous place, rather than feeling like two separate animations. */
+/* ---------- PRELOADER → HERO NAME MERGE ---------- */
 (function initPreloaderMerge(){
   const preloader = document.getElementById('preloader');
   const preloaderName = document.getElementById('preloaderName');
@@ -84,15 +72,11 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     document.body.classList.add('no-preloader', 'site-open');
     if (preloader) preloader.remove();
     if (heroInner) heroInner.classList.add('is-revealed');
+    if (heroInner && heroInner.closest('.hero')) heroInner.closest('.hero').classList.add('is-revealed');
     return;
   }
 
-  // Split each line of the preloader name into individual letter spans so each
-  // one can arrive on its own beat. The delay is the letter's index within its
-  // OWN line — since both lines have the same length, letter N of "Bikash" and
-  // letter N of "DHAKAL" land together, so the two words are typed in sync
-  // rather than one after the other.
-  const LETTER_STAGGER = 0.06; // seconds between successive letters
+  const LETTER_STAGGER = 0.06;
   preloaderName.querySelectorAll('.preloader-line').forEach(line => {
     const text = line.textContent;
     line.textContent = '';
@@ -125,15 +109,11 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     merged = true;
     window.removeEventListener('resize', positionPreloaderName);
     document.body.classList.remove('is-preloading');
-    // Drives the staggered header/nav entrance in the motion layer of style.css,
-    // which is timed to land just after the hero card has settled.
     document.body.classList.add('site-open');
     heroName.classList.add('is-merging');
     if (heroInner) {
       heroInner.classList.add('is-revealed');
-      // Gentle, one-time landing bounce on the whole hero card as the page opens.
-      // Removed again once it finishes so it never lingers over the pointer-tilt
-      // effect, which also animates `transform` (via inline styles) on this element.
+      if (heroInner.closest('.hero')) heroInner.closest('.hero').classList.add('is-revealed');
       heroInner.classList.add('is-bouncing');
       heroInner.addEventListener('animationend', function onBounceEnd(e){
         if (e.animationName !== 'heroInnerBounce') return;
@@ -143,14 +123,9 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
     }
     preloader.classList.add('is-hidden');
     preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
-    window.setTimeout(() => preloader.remove(), 1400); // safety net
+    window.setTimeout(() => preloader.remove(), 1400);
   }
 
-  // Timed against the preloader's own CSS sequence, which is now a real
-  // presentation rather than a flash: line one lands at ~1.5s, line two at
-  // ~1.8s, and the hairline beneath finishes drawing at ~2.45s. Handing off at
-  // 2.5s means the name is fully set and held for a beat before it dissolves
-  // into the hero heading — long enough to register, short enough not to stall.
   const openDelay = prefersReducedMotion ? 150 : 1500;
   window.setTimeout(reveal, openDelay);
 })();
@@ -159,11 +134,8 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 const hasGSAP = typeof gsap !== 'undefined';
 if (hasGSAP && typeof ScrollTrigger !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 if (hasGSAP && typeof ScrollToPlugin !== 'undefined') gsap.registerPlugin(ScrollToPlugin);
-if (hasGSAP && prefersReducedMotion) gsap.globalTimeline.timeScale(20); // near-instant, but still resolves promises/callbacks correctly
+if (hasGSAP && prefersReducedMotion) gsap.globalTimeline.timeScale(20);
 if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
-  // Mobile browsers fire resize repeatedly as the address bar shows/hides while scrolling;
-  // without this, ScrollTrigger recalculates every trigger position on each one of those,
-  // which is a common source of scroll jank on phones.
   ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
@@ -215,7 +187,7 @@ if (pageMain) {
   }, { passive: true });
   window.addEventListener('touchmove', (e) => {
     const currentY = e.touches[0].clientY;
-    const delta = edgeTouchStartY - currentY; // positive = finger moving up (scrolling down)
+    const delta = edgeTouchStartY - currentY;
     if (isAtTop() && delta < -6) {
       triggerBounce('top');
     } else if (isAtBottom() && delta > 6) {
@@ -224,7 +196,7 @@ if (pageMain) {
   }, { passive: true });
 }
 
-/* ---------- SMOOTH ANCHOR SCROLL (GSAP-powered) ---------- */
+/* ---------- SMOOTH ANCHOR SCROLL ---------- */
 const HEADER_OFFSET = 90;
 
 function smoothScrollTo(targetY, durationSeconds = 0.85){
@@ -239,7 +211,6 @@ function smoothScrollTo(targetY, durationSeconds = 0.85){
       ease: 'power2.out'
     });
   } else {
-    // fallback: plain eased scroll if the CDN failed to load
     const startY = window.scrollY;
     const distance = targetY - startY;
     const startTime = performance.now();
@@ -263,12 +234,18 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
 
     e.preventDefault();
     const targetY = targetEl.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
-    // scale duration to distance so short hops feel snappy and long jumps
-    // (e.g. Projects -> Contact) don't drag on — capped at 0.85s either way
     const distance = Math.abs(targetY - window.scrollY);
     const duration = Math.min(0.85, Math.max(0.45, distance / 2200));
     smoothScrollTo(Math.max(targetY, 0), duration);
     history.pushState(null, '', targetId);
+
+    // Update the active link + liquid pill the moment it's clicked, so the
+    // indicator starts flowing immediately rather than waiting for the
+    // IntersectionObserver to catch up mid-scroll.
+    if (link.classList.contains('nav-link')) {
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l === link));
+      updateNavPill();
+    }
   });
 });
 
@@ -294,9 +271,7 @@ function onScroll(){
 window.addEventListener('scroll', onScroll, { passive: true });
 updateProgress();
 
-/* ---------- NAV "Projects" BUTTON ----------
-   Keep the Projects CTA visible in the navbar at all times and highlight it on the
-   dedicated projects page. */
+/* ---------- NAV "Projects" BUTTON ---------- */
 (function initProjectsNavCta(){
   const cta = document.getElementById('navProjectsCta');
   if (!cta) return;
@@ -306,23 +281,97 @@ updateProgress();
   cta.classList.toggle('is-active', isProjectsPage);
 })();
 
-/* ---------- ACTIVE SECTION TRACKING (top navbar) ---------- */
+/* ---------- NAV PILL (liquid flowing indicator) ----------
+   Positions a shared element behind whichever nav link is currently active.
+   The liquid feel comes from the CSS transition's intentionally mismatched
+   durations: `left` is slower than `width`, so mid-travel the pill briefly
+   elongates in the direction of motion before contracting into the target
+   link's shape. The heavy overshoot curve gives it the pourable weight. */
+const navPillEl = document.querySelector('.nav-pill');
+
+function updateNavPill(){
+  if (!navPillEl) return;
+  const nav = navPillEl.parentElement;
+  if (!nav) return;
+  if (window.innerWidth <= 700) return;
+
+  const active = nav.querySelector('.nav-link.active');
+  if (!active) return;
+
+  const navStyle = getComputedStyle(nav);
+  const borderLeft = parseFloat(navStyle.borderLeftWidth) || 0;
+  const borderTop  = parseFloat(navStyle.borderTopWidth)  || 0;
+
+  const navRect  = nav.getBoundingClientRect();
+  const linkRect = active.getBoundingClientRect();
+
+  const targetLeft   = linkRect.left - navRect.left - borderLeft;
+  const targetTop    = linkRect.top  - navRect.top  - borderTop;
+  const targetWidth  = linkRect.width;
+  const targetHeight = linkRect.height;
+
+  const isFirstPlace = !nav.classList.contains('is-ready');
+
+  if (isFirstPlace){
+    // First placement: no animation, snap into place, then mark ready so the
+    // pill fades in (via CSS opacity) at the right spot.
+    navPillEl.style.transition = 'none';
+    navPillEl.style.left   = targetLeft   + 'px';
+    navPillEl.style.top    = targetTop    + 'px';
+    navPillEl.style.width  = targetWidth  + 'px';
+    navPillEl.style.height = targetHeight + 'px';
+    // Force a layout so the browser commits the un-animated values.
+    void navPillEl.getBoundingClientRect();
+    nav.classList.add('is-ready');
+    // Restore the transition for all future moves.
+    navPillEl.style.transition = '';
+    return;
+  }
+
+  // Subsequent moves: let the CSS transition carry it, mismatch durations
+  // and all — that's what produces the liquid stretch.
+  navPillEl.style.left   = targetLeft   + 'px';
+  navPillEl.style.top    = targetTop    + 'px';
+  navPillEl.style.width  = targetWidth  + 'px';
+  navPillEl.style.height = targetHeight + 'px';
+}
+
+/* ---------- ACTIVE SECTION TRACKING (top navbar) ----------
+   The old implementation used threshold: 0.5, which only fires for sections
+   that are at least half-visible in the viewport. Long sections like
+   Experience (with the status card) never reach that, so their nav link never
+   highlighted. The fix is to observe a thin horizontal band near the middle
+   of the viewport (via rootMargin) rather than a percentage of the section —
+   whichever section is passing through that band wins the active state, and
+   sections with no matching nav link (like #deliver) simply don't clear the
+   previous one. */
 const sections = document.querySelectorAll('.section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
 const contentPages = document.querySelectorAll('.content-page');
 
 const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.getAttribute('id');
-      navLinks.forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
-      });
-    }
+    if (!entry.isIntersecting) return;
+    const id = entry.target.getAttribute('id');
+    const match = Array.from(navLinks).find(l => l.getAttribute('href') === `#${id}`);
+    if (!match) return;                 // sections without a nav counterpart (e.g. #deliver)
+    navLinks.forEach(l => l.classList.toggle('active', l === match));
+    updateNavPill();
   });
-}, { threshold: 0.5 });
+}, {
+  // A ~5% tall trigger band centred slightly above the viewport middle.
+  rootMargin: '-45% 0px -50% 0px',
+  threshold: 0
+});
 
 sections.forEach(section => sectionObserver.observe(section));
+
+// Position the pill once the DOM and fonts are ready, and on any resize
+// (width of links changes with font and viewport width).
+window.addEventListener('load', updateNavPill);
+window.addEventListener('resize', updateNavPill);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(updateNavPill);
+requestAnimationFrame(updateNavPill);
 
 /* ---------- CONTENT PAGE ACTIVE TRANSITION ---------- */
 if (contentPages.length) {
@@ -338,7 +387,7 @@ if (contentPages.length) {
   contentPages.forEach(page => pageObserver.observe(page));
 }
 
-/* ---------- PARALLAX EFFECT (GSAP ScrollTrigger scrub) ---------- */
+/* ---------- PARALLAX EFFECT ---------- */
 if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   gsap.utils.toArray('[data-parallax]').forEach(el => {
     const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
@@ -358,7 +407,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
     );
   });
 } else if (!prefersReducedMotion) {
-  // fallback: manual rAF parallax if the GSAP CDN failed to load
   const parallaxEls = document.querySelectorAll('[data-parallax]');
   function updateParallax(){
     const viewportH = window.innerHeight;
@@ -376,7 +424,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   updateParallax();
 }
 
-/* ---------- REVEAL ON SCROLL (GSAP ScrollTrigger.batch, staggered) ---------- */
+/* ---------- REVEAL ON SCROLL ---------- */
 if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   gsap.set('.reveal', { opacity: 0, y: 28 });
 
@@ -392,7 +440,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
     })
   });
 } else {
-  // fallback: IntersectionObserver + CSS transition if the GSAP CDN failed to load
   const parentCounters = new Map();
   document.querySelectorAll('.reveal').forEach(el => {
     const parent = el.parentElement;
@@ -413,20 +460,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 }
 
-/* ---------- PAGE TITLE CARDS: OPENING ANIMATION + SCROLL PARALLAX ----------
-   Each page opens with its name on its own full-viewport stage. Two effects
-   run on that element:
-
-     1. OPENING ANIMATION — an IntersectionObserver adds `.is-entering` every
-        time the card scrolls into view, which triggers the CSS keyframe
-        sequence (rise + unblur + letters settling). The class is removed once
-        the animation ends, so scrolling back up and returning to a section
-        replays the entrance rather than showing it only once.
-
-     2. PARALLAX — a scrubbed `y` runs from +56 to −36 across the card's
-        full pass through the viewport, so the name drifts on its own plane
-        while the content card below scrolls at normal speed. That mismatch
-        is what makes one page hand off to the next. */
+/* ---------- PAGE TITLE CARDS: PARALLAX ---------- */
 if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   gsap.utils.toArray('.page-title-card').forEach(card => {
     gsap.fromTo(card,
@@ -444,7 +478,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
     );
   });
 } else if (!prefersReducedMotion) {
-  // Fallback: manual rAF parallax if GSAP failed to load.
   const titleCards = document.querySelectorAll('.page-title-card');
   function updateTitleParallax(){
     const viewportH = window.innerHeight;
@@ -459,7 +492,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   updateTitleParallax();
 }
 
-/* ---------- TITLE CARD OPENING ANIMATION (replays on re-entry) ---------- */
+/* ---------- TITLE CARD OPENING ANIMATION ---------- */
 (function initTitleCardEntrance(){
   const cards = document.querySelectorAll('.page-title-card');
   if (!cards.length || prefersReducedMotion) return;
@@ -468,41 +501,19 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
     entries.forEach(entry => {
       const card = entry.target;
       if (entry.isIntersecting) {
-        // Restart the animation cleanly: remove first, force a reflow, then
-        // re-add so the browser treats it as a fresh keyframe run each time.
         card.classList.remove('is-entering');
         void card.offsetWidth;
         card.classList.add('is-entering');
       } else {
-        // Leaving the viewport clears the class so the next entry replays.
         card.classList.remove('is-entering');
       }
     });
-  }, {
-    // Fire when ~35% of the card is on screen — late enough that the animation
-    // isn't already half-finished by the time the card is centered, early
-    // enough that it feels like it responds to your arrival.
-    threshold: 0.35
-  });
+  }, { threshold: 0.35 });
 
   cards.forEach(card => observer.observe(card));
 })();
 
-/* ---------- TITLE MERGE (page title → content title) ----------
-   As a content card rises into view, the big transparent page title above it
-   DISSOLVES — split into individual letters, each of which blurs out, drifts
-   upward and fades in sequence. Simultaneously the smaller heading at the top
-   of the content card lands from oversized-blurred into its resting state, so
-   at the crossover point the two titles occupy the same visual size and the
-   eye reads the whole thing as one title dissolving INTO its destination
-   rather than two elements cross-fading.
-
-   The letter split is done here rather than in the HTML so the markup stays
-   clean and the effect gracefully falls back to a plain fade on browsers
-   without GSAP. */
-
-/* Wrap each non-space character of a title in its own span so it can dissolve
-   independently. Runs once per title and caches via a data attribute. */
+/* ---------- TITLE MERGE (page title → content title) ---------- */
 function splitTitleChars(titleEl){
   if (titleEl.dataset.split === 'true') {
     return titleEl.querySelectorAll('.tc-char');
@@ -542,21 +553,12 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: contentPage,
-        // start: content card's top enters from the bottom of the viewport.
-        // end:   content card's top has climbed to 25% from the viewport top —
-        //        by which point the small title is well into the reader's view
-        //        and the merge is fully resolved.
         start: 'top bottom',
         end: 'top 25%',
         scrub: 0.5
       }
     });
 
-    // 1) LETTER DISSOLVE — each character blurs out and drifts upward in
-    //    sequence from left to right. The stagger is what sells the dissolve:
-    //    a simultaneous fade reads as "the title disappeared", a staggered one
-    //    reads as "the title came apart". Slight scale-up makes the letters
-    //    feel like they're expanding into the air rather than shrinking away.
     tl.to(chars, {
       opacity: 0,
       filter: 'blur(14px)',
@@ -569,8 +571,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
       }
     }, 0);
 
-    // 2) DESCRIPTION — fades with the title it belongs to, so the whole page
-    //    card is emptied of content by the time the content card lands.
     if (bigDesc) {
       tl.to(bigDesc, {
         opacity: 0,
@@ -580,10 +580,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
       }, 0.05);
     }
 
-    // 3) SMALL TITLE LANDS — starts oversized and blurred, settles into its
-    //    resting size and sharpens. The 0.18 lag lets the dissolve lead the
-    //    motion so the eye tracks "big title going away" before "small title
-    //    arriving" — the right order for a merge handoff.
     tl.fromTo(smallTitle,
       { scale: 2.4, opacity: 0, filter: 'blur(10px)', y: 0 },
       {
@@ -596,8 +592,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
     );
   });
 } else if (!prefersReducedMotion) {
-  // No GSAP: skip both the split and the merge, just show the content titles
-  // at rest so the page reads normally.
   document.querySelectorAll('.content-title').forEach(el => {
     el.style.opacity = '1';
     el.style.transform = 'none';
@@ -610,7 +604,6 @@ const heroGlow = document.getElementById('heroGlow');
 const heroSection = document.getElementById('home');
 const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
-/* ---------- PAUSE HERO DECORATIVE ANIMATIONS WHEN OFF-SCREEN ---------- */
 if (heroSection) {
   const heroVisibilityObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -635,12 +628,9 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
     const y = clientY - rect.top;
 
     if (heroGlow) {
-      // Offsets from the glow's default anchor (50%/30% of the section), so the
-      // element only ever animates via `transform` — never `left`/`top`.
       heroGlow.style.setProperty('--gx', `${x - rect.width / 2}px`);
       heroGlow.style.setProperty('--gy', `${y - rect.height * 0.3}px`);
     }
-
   }
 
   heroSection.addEventListener('mousemove', (e) => {
@@ -650,10 +640,9 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
       requestAnimationFrame(applyHeroPointerEffect);
     }
   }, { passive: true });
-
 }
 
-/* ---------- MAGNETIC BUTTONS (GSAP quickTo) ---------- */
+/* ---------- MAGNETIC BUTTONS ---------- */
 if (hasFinePointer && !prefersReducedMotion) {
   document.querySelectorAll('.magnetic').forEach(btn => {
     if (hasGSAP) {
@@ -664,8 +653,6 @@ if (hasFinePointer && !prefersReducedMotion) {
         const rect = btn.getBoundingClientRect();
         const x = e.clientX - rect.left - rect.width / 2;
         const y = e.clientY - rect.top - rect.height / 2;
-        // Gentler than before: the hero buttons are physically larger now, and
-        // the same multipliers on a bigger target read as wobble rather than pull.
         xTo(x * 0.14);
         yTo(y * 0.18);
       });
@@ -674,7 +661,6 @@ if (hasFinePointer && !prefersReducedMotion) {
         yTo(0);
       });
     } else {
-      // fallback: direct style assignment if the GSAP CDN failed to load
       btn.addEventListener('mousemove', (e) => {
         const rect = btn.getBoundingClientRect();
         const x = e.clientX - rect.left - rect.width / 2;
@@ -806,8 +792,7 @@ if (projectCarousel && projectTrack) {
   nextBtn.addEventListener('click', goNext);
   renderSlide();
 
-  // reveal prev/next buttons only when the pointer is near that edge
-  const EDGE_ZONE = 0.28; // fraction of carousel width counted as "edge"
+  const EDGE_ZONE = 0.28;
 
   projectCarousel.addEventListener('mousemove', (e) => {
     const rect = projectCarousel.getBoundingClientRect();
@@ -822,14 +807,12 @@ if (projectCarousel && projectTrack) {
     nextBtn.classList.remove('visible');
   });
 
-  // keyboard support when the carousel has focus
   projectCarousel.setAttribute('tabindex', '0');
   projectCarousel.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowLeft') goPrev();
     if (e.key === 'ArrowRight') goNext();
   });
 
-  // basic touch swipe support
   let touchStartX = 0;
   projectTrack.addEventListener('touchstart', (e) => {
     touchStartX = e.touches[0].clientX;

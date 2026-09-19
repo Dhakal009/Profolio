@@ -15,7 +15,16 @@
   --intensity:1;
   --font-display:'Fraunces', serif;
   --font-name:'Major Mono Display', monospace;
-  --font-body:'Work Sans', sans-serif;
+  /* Hero name: the site's original display font (Major Mono Display).
+     One size + line-height shared by the preloader name and the hero name so
+     the hand-off between them stays pixel-identical. */
+  --font-script:var(--font-name);
+  --name-size:clamp(3.1rem, 9.4vw, 7rem);
+  --name-lh:0.96;
+
+  /* ---- HERO GLASS (double-frame card) ---- */
+  --frame-fill:linear-gradient(165deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03) 60%);
+  --frame-line:rgba(255,255,255,0.18);
 
   /* ---- GLASS ICON SYSTEM ----
      One shared recipe for every icon chip on the site (nav, facts, skills,
@@ -68,6 +77,8 @@ html{
   --gi-edge:rgba(255,255,255,0.95);
   --gi-shadow:0 8px 20px -12px rgba(40,25,80,0.45);
   --gi-icon:#3a2a6b;
+  --frame-fill:linear-gradient(165deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5) 60%);
+  --frame-line:rgba(20,18,35,0.14);
 }
 [data-theme="light"] .content-page{
   background:linear-gradient(150deg, rgba(20,18,35,0.045), rgba(20,18,35,0.018));
@@ -153,10 +164,10 @@ img{max-width:100%;display:block;}
   left:50%;
   top:50%;
   transform:translate(-50%,-50%) translateY(10px);
-  font-family:var(--font-name);
+  font-family:var(--font-script);
   font-weight:700;
-  font-size:clamp(3rem, 9vw, 6.4rem);
-  line-height:0.98;
+  font-size:var(--name-size);
+  line-height:var(--name-lh);
   text-align:center;
   color:var(--foam);
   opacity:0;
@@ -178,7 +189,6 @@ img{max-width:100%;display:block;}
    arrive on its own beat. Letters are paired by index across the two lines —
    B & D arrive together, then i & H, then k & A, and so on — so the two words
    are *typed* in sync rather than one after the other. */
-/* ---------- PRELOADER NAME: letter-by-letter entrance ---------- */
 .preloader-line{
   display:block;
   position:relative;
@@ -349,18 +359,12 @@ body.is-preloading .bg-orb{
 }
 
 /* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
-/* will-change is applied only while the bounce animation is running (see script.js) —
-   keeping it on permanently would force the whole page content onto its own GPU
-   layer at all times, which is a big chunk of the "laggy" feeling on lower-end devices. */
 #pageMain.bounce-top{
   animation:bounceTop 1.05s cubic-bezier(.22,1,.36,1);
 }
 #pageMain.bounce-bottom{
   animation:bounceBottom 1.05s cubic-bezier(.22,1,.36,1);
 }
-/* A fuller spring decay — pull, overshoot, and settle through several
-   diminishing oscillations instead of one correction — reads as a springier,
-   more premium rubber-band rather than a single snap-back. */
 @keyframes bounceTop{
   0%{transform:translateY(0);}
   22%{transform:translateY(54px);}
@@ -391,17 +395,12 @@ body.is-preloading .bg-orb{
   padding:1.5rem 3rem;
   background:transparent;
   border-bottom:1px solid transparent;
-  /* backdrop-filter is only ever toggled on/off (via .scrolled below), never
-     transitioned — animating a blur filter every frame is one of the most expensive
-     things a browser can paint, and this toggle doesn't need to be smooth to look good. */
   transition:background 0.45s ease, border-color 0.45s ease, padding 0.45s ease, box-shadow 0.45s ease, opacity 0.9s cubic-bezier(.16,1,.3,1) 0.08s, transform 0.9s cubic-bezier(.16,1,.3,1) 0.08s;
   transform:translateY(0);
 }
 .site-header.scrolled{
   padding:0.9rem 3rem;
   background:var(--panel-strong);
-  /* A hairline that fades from transparent at the edges is quieter than a flat
-     line — it reads as a lit edge on the glass rather than a ruled-off divider. */
   border-image:linear-gradient(90deg, transparent, var(--line) 18%, var(--line) 82%, transparent) 1;
   border-bottom:1px solid var(--line);
   backdrop-filter:var(--glass-blur) saturate(1.4);
@@ -413,10 +412,7 @@ body.is-preloading .bg-orb{
   max-width:1240px;margin:0 auto;
 }
 
-/* ---------- WORDMARK ----------
-   A small monogram badge fills the space a logo-less header used to leave
-   empty. Same glass material as the rest of the header furniture, with a
-   gradient-lit glyph so it reads as the site's one fixed anchor point. */
+/* ---------- WORDMARK ---------- */
 .site-mark{
   display:inline-flex;align-items:center;justify-content:center;
   width:44px;height:44px;flex-shrink:0;
@@ -468,22 +464,78 @@ body.is-preloading .bg-orb{
   -webkit-backdrop-filter:var(--glass-blur) saturate(1.4);
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 14px 38px -16px rgba(0,0,0,0.55);
 }
+@media (min-width:701px){
+  .top-nav::before{
+    content:"";
+    position:absolute;inset:-6px;
+    border-radius:999px;
+    border:1px solid color-mix(in srgb, var(--foam) 11%, transparent);
+    box-shadow:0 0 44px -14px color-mix(in srgb, var(--accent-2) 55%, transparent);
+    pointer-events:none;
+  }
+}
+
+/* ---------- NAV PILL (liquid flowing indicator) ----------
+   A single shared pill that slides between nav links. Its left/top/width/height
+   are set by JS from the active link's bounding box. The trick that makes it
+   read as *liquid* rather than a sliding block is the deliberate mismatch in
+   transition durations — `left` takes longer than `width`, so as the pill
+   travels it briefly elongates in the direction of motion, then contracts
+   back to the target link's shape as it settles. Combined with the heavy
+   spring overshoot curve, it reads as a droplet poured between links. */
+.nav-pill{
+  position:absolute;
+  top:0;
+  left:0;
+  height:0;
+  width:0;
+  border-radius:999px;
+  background-color:var(--accent);
+  background-image:linear-gradient(135deg, var(--accent-soft), var(--accent) 55%, var(--accent-2) 145%);
+  box-shadow:
+    0 6px 18px -8px rgba(139,92,246,0.9),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  z-index:0;
+  pointer-events:none;
+  opacity:0;
+  transition:
+    left   0.62s cubic-bezier(.34,1.42,.5,1),
+    width  0.48s cubic-bezier(.34,1.42,.5,1),
+    top    0.45s cubic-bezier(.34,1.42,.5,1),
+    height 0.42s cubic-bezier(.34,1.42,.5,1),
+    opacity 0.4s ease;
+  will-change:left, width;
+}
+.top-nav.is-ready .nav-pill{opacity:1;}
+
 .nav-link{
   position:relative;
-  font-size:0.9rem;font-weight:500;letter-spacing:0.01em;
+  z-index:1;
+  font-size:0.92rem;font-weight:500;letter-spacing:0.01em;
   color:var(--muted);
   padding:0.55rem 1.05rem;
   border-radius:999px;
-  transition:color 0.3s ease, background 0.35s var(--ease-out), box-shadow 0.35s ease, transform 0.3s var(--ease-out);
+  transition:color 0.35s ease, transform 0.3s var(--ease-out);
 }
-.nav-link:hover{color:var(--foam);background:rgba(255,255,255,0.07);transform:translateY(-1px);}
+.nav-link:hover{color:var(--foam);transform:translateY(-1px);}
+
+/* Active link loses its own fill — the pill underneath carries it, so the
+   background appears to *flow* from one link to the next instead of
+   cross-fading between two stacked rectangles. */
 .nav-link.active{
   color:#fff;
+  background:none;
+  box-shadow:none;
+}
+.nav-link.active:hover{color:#fff;transform:none;}
+
+/* Fallback: if JS hasn't yet marked the nav ready (or JS failed), the active
+   link falls back to painting its own accent fill so the state is never lost. */
+.top-nav:not(.is-ready) .nav-link.active{
   background-color:var(--accent);
   background-image:linear-gradient(135deg, var(--accent-soft), var(--accent) 55%, var(--accent-2) 145%);
   box-shadow:0 6px 18px -8px rgba(139,92,246,0.9), inset 0 1px 0 rgba(255,255,255,0.3);
 }
-.nav-link.active:hover{color:#fff;transform:none;}
 
 .nav-actions{
   display:flex;align-items:center;gap:0.8rem;
@@ -506,8 +558,6 @@ body.is-preloading .bg-orb{
              border-color 0.35s ease, color 0.3s ease;
 }
 .nav-cta:hover{transform:translateY(-2px);border-color:rgba(139,92,246,0.5);}
-/* A thin diagonal shine that sweeps across the pill on hover — the kind of
-   light-catching detail that reads as polished rather than flat-colored. */
 .nav-cta::after{
   content:"";position:absolute;top:0;left:-60%;width:35%;height:100%;
   background:linear-gradient(115deg, transparent, rgba(255,255,255,0.4), transparent);
@@ -518,19 +568,13 @@ body.is-preloading .bg-orb{
 .nav-cta:hover::after{left:130%;}
 @media (prefers-reduced-motion: reduce){.nav-cta::after{display:none;}}
 
-/* The small glass chip that carries the button's icon — same material as every
-   other icon on the site, just sized down to sit inside a pill. */
 .nav-cta-icon{
   --gi-size:30px;
   --gi-radius:50%;
   --gi-glyph:15px;
 }
 
-/* ---------- PROJECTS: the site's loudest control ----------
-   This is the one button on the whole site with a solid accent fill, an outer
-   glow and a slow breathing halo. Everything else — hero buttons, nav links,
-   icon chips — is glass, so this reads as the single primary destination
-   without needing to be any bigger than its neighbours. */
+/* ---------- PROJECTS: the site's loudest control ---------- */
 .nav-cta--projects{
   opacity:1;
   pointer-events:auto;
@@ -552,7 +596,6 @@ body.is-preloading .bg-orb{
   color:#fff;
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.55);
 }
-/* A slow halo rather than a hard shadow: it draws the eye without flashing. */
 @keyframes navCtaGlow{
   0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,0.4), 0 10px 26px -12px rgba(139,92,246,0.9), 0 0 0 0 rgba(139,92,246,0.35);}
   50%{box-shadow:inset 0 1px 0 rgba(255,255,255,0.4), 0 14px 32px -12px rgba(139,92,246,1), 0 0 0 7px rgba(139,92,246,0.06);}
@@ -566,8 +609,6 @@ body.is-preloading .bg-orb{
     0 18px 38px -12px rgba(139,92,246,1);
 }
 .nav-cta--projects.is-visible{opacity:1;pointer-events:auto;}
-/* On the Projects page itself the button is the current location, so it drops
-   the glow and reads as a static "you are here" state. */
 .nav-cta--projects.is-active{
   animation:none;
   background-image:
@@ -575,9 +616,7 @@ body.is-preloading .bg-orb{
     linear-gradient(115deg, var(--accent-soft), var(--accent) 80%);
 }
 
-/* ---------- HOME BUTTON (Projects page header) ----------
-   The Projects page has no section nav to scroll through, so its only
-   navigation is a single Home button sitting beside the theme control. */
+/* ---------- HOME BUTTON (Projects page header) ---------- */
 .nav-home{
   display:inline-flex;align-items:center;gap:0.55rem;
   position:relative;
@@ -616,8 +655,6 @@ body.is-preloading .bg-orb{
 .nav-home:hover::after{left:130%;}
 @media (prefers-reduced-motion: reduce){.nav-home::after{display:none;}}
 .nav-home:hover .nav-cta-icon{transform:translateX(-2px);}
-/* Projects page header: no section nav, so the right-hand group carries
-   everything and the hamburger is unnecessary. */
 .header-inner--minimal{justify-content:space-between;}
 .header-inner--minimal .menu-toggle{display:none !important;}
 @media (max-width:700px){
@@ -631,9 +668,6 @@ body.is-preloading .bg-orb{
 .menu-toggle.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 
 /* ---------- MOBILE MENU BACKDROP ---------- */
-/* Dims the page and sits just below the centered nav panel; tapping it
-   closes the menu (handled in script.js). Hidden entirely above the
-   hamburger breakpoint. */
 .nav-overlay{
   display:none;
   position:fixed;inset:0;
@@ -648,13 +682,7 @@ body.is-preloading .bg-orb{
 [data-theme="light"] .nav-overlay{background:rgba(30,25,45,0.32);}
 .nav-overlay.open{opacity:1;visibility:visible;}
 
-/* ---------- GLASS ICON CHIP (shared component) ----------
-   Every icon container on the site — navbar, about facts, skills, contact
-   cards, socials, theme toggle, back-to-top — is the same physical object:
-   a small pane of tinted glass with a lit top edge and a sheen falling from
-   the top-left. Defining it once here (rather than five slightly-different
-   inline treatments) is what makes the icons read as a deliberate set.
-   Size and corner radius are per-use knobs: --gi-size / --gi-radius. */
+/* ---------- GLASS ICON CHIP (shared component) ---------- */
 .glass-icon,
 .fact-icon,
 .skill-icon,
@@ -686,9 +714,6 @@ body.is-preloading .bg-orb{
              border-color 0.4s var(--ease-out),
              color 0.35s var(--ease-out);
 }
-/* The specular streak. It sits above the tint but below the glyph (z-index on
-   the svg), and slides across on hover so the glass looks like it catches a
-   moving light rather than just changing color. */
 .glass-icon::before,
 .fact-icon::before,
 .skill-icon::before,
@@ -718,8 +743,6 @@ body.is-preloading .bg-orb{
   z-index:1;
   width:var(--gi-glyph, 52%);
   height:var(--gi-glyph, 52%);
-  /* A faint drop shadow under the glyph lifts it off the glass, which is the
-     single biggest readability win on the light theme. */
   filter:drop-shadow(0 1px 1px rgba(0,0,0,0.28));
 }
 [data-theme="light"] .glass-icon svg,
@@ -732,8 +755,6 @@ body.is-preloading .bg-orb{
   filter:drop-shadow(0 1px 1px rgba(255,255,255,0.75));
 }
 
-/* Hover: the pane lifts slightly, the edge picks up the accent, and the
-   specular streak sweeps across. */
 .glass-icon:hover,
 .social-icon-link:hover,
 .theme-toggle:hover,
@@ -790,14 +811,11 @@ body.is-preloading .bg-orb{
   width:19px;height:19px;
   transition:transform 0.5s cubic-bezier(.34,1.56,.64,1), opacity 0.3s ease;
 }
-/* Sun/moon cross-fade with a quarter-turn rotation instead of an instant swap. */
 .theme-toggle .icon-sun{opacity:1;transform:rotate(0deg) scale(1);}
 .theme-toggle .icon-moon{opacity:0;transform:rotate(-90deg) scale(0.4);}
 [data-theme="light"] .theme-toggle .icon-sun{opacity:0;transform:rotate(90deg) scale(0.4);}
 [data-theme="light"] .theme-toggle .icon-moon{opacity:1;transform:rotate(0deg) scale(1);}
 
-/* Short bounce + accent-colored pulse ring, triggered from JS the moment the
-   theme actually switches, so the button visibly reacts to the change. */
 @keyframes theme-toggle-bounce{
   0%{transform:scale(1);}
   35%{transform:scale(0.8) rotate(-8deg);}
@@ -817,17 +835,11 @@ body.is-preloading .bg-orb{
 }
 
 /* ---------- DISPLAY INTENSITY CONTROL ---------- */
-/* Groups the theme control and hamburger together at the far right of the
-   header, on both desktop and mobile, instead of leaving the theme button
-   floating between the nav and the menu icon. */
 .header-right{
   display:flex;align-items:center;gap:0.5rem;
 }
 .theme-control{position:relative;display:flex;align-items:center;}
 
-/* Hovering (or keyboard-focusing) the theme toggle reveals the intensity
-   panel — no separate button needed. A small invisible bridge area above
-   the panel keeps it open while the pointer travels from button to panel. */
 .theme-control::after{
   content:"";
   position:absolute;
@@ -870,16 +882,19 @@ body.is-preloading .bg-orb{
   font-size:0.72rem;color:var(--muted);margin:0.55rem 0 0;line-height:1.4;
 }
 
-/* ---------- SECTION BASE ---------- */
+/* ---------- SECTION BASE ----------
+   Tightened top padding (was 8rem) so the page title card doesn't push the
+   first real content too far down; the title card itself now supplies the
+   visual "air" that used to come from this padding. */
 .section{
   position:relative;
-  padding:8rem 3rem;
+  padding:6rem 3rem 7rem;
   overflow:hidden;
   scroll-margin-top:104px;
 }
 .section-inner{max-width:1020px;margin:0 auto;}
 
-/* ---------- CONTENT STACK (About, Education, Projects, Contact) ---------- */
+/* ---------- CONTENT STACK ---------- */
 .content-stack{
   position:relative;
   z-index:2;
@@ -887,13 +902,13 @@ body.is-preloading .bg-orb{
   padding-bottom:2rem;
 }
 .page-no-hero{
-  padding-top:7rem;
+  padding-top:5rem;
 }
 .content-page{
   width:min(74%, 1100px);
   min-height:66vh;
   margin:0 auto 2.4rem;
-  padding:3.4rem 0 3.2rem;   /* was 5.2rem 0 3.2rem — title no longer lives here */
+  padding:3.4rem 0 3.2rem;
   background:linear-gradient(150deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
   border:1px solid var(--line);
   border-radius:24px;
@@ -925,17 +940,10 @@ body.is-preloading .bg-orb{
 .section-sub{color:var(--muted);margin-bottom:2.5rem;max-width:62ch;}
 
 /* ---------- PAGE TITLE CARD ----------
-   Each page opens with its name in its OWN full card — sized to ~80% of the
-   viewport in both dimensions. The card is now TRANSPARENT: no panel, no
-   border, no glass — it's simply a full-viewport stage that the name sits in.
-   The name itself is the entire visual element, which is why it can carry a
-   much larger type size than a normal heading without feeling crowded.
-
-   The opening animation (see .is-entering below) plays each time the card
-   scrolls into view: the name rises, unblurs, and the letters spread to their
-   natural spacing — the same "typeset rather than animated" cue used on the
-   preloader. The parallax (script.js) then keeps the card drifting on its own
-   plane as you scroll. */
+   The big transparent stage each page opens with. Bottom margin was 2.4rem
+   and top was 6rem — reduced the top to 0 (the section above supplies the
+   spacing) and the bottom grown to 3.5rem so the description has room to
+   breathe before the content card starts. */
 .page-title-card{
   position:relative;
   isolation:isolate;
@@ -946,7 +954,7 @@ body.is-preloading .bg-orb{
   width:80vw;
   height:80vh;
   min-height:420px;
-  margin:6rem auto 2.4rem;
+  margin:0 auto 6.5rem;
   padding:3rem clamp(1.6rem, 5vw, 4rem);
   text-align:center;
   background:transparent;
@@ -958,14 +966,8 @@ body.is-preloading .bg-orb{
 }
 
 /* ---------- CONTENT CARD TITLE ----------
-   Every content card now opens with its own smaller heading — the landing
-   point for the merge. The big title in the transparent title card above
-   shrinks toward this element's size and cross-fades into it as the content
-   card scrolls into view (see the merge timeline in script.js).
-
-   Pre-merge state: hidden, oversized, blurred — the same visual size as the
-   big title above it, but invisible. GSAP animates these values down to the
-   resting state as the card rises. */
+   The landing point for the merge animation. Pre-merge state is
+   oversized/blurred/invisible; GSAP animates it down. */
 .content-title{
   font-family:var(--font-display);
   font-size:clamp(1.8rem, 3.2vw, 2.4rem);
@@ -980,17 +982,12 @@ body.is-preloading .bg-orb{
   transform:scale(2.6);
   filter:blur(10px);
 }
-
-/* Long titles ("What I Can Deliver") need a smaller resting size so they
-   don't crowd the content card — matches the .is-long treatment on the
-   page title. */
 .content-title.is-long{
   font-size:clamp(1.5rem, 2.6vw, 2rem);
   max-width:16ch;
   margin-left:auto;
   margin-right:auto;
 }
-
 @media (prefers-reduced-motion: reduce){
   .content-title{
     opacity:1 !important;
@@ -999,60 +996,48 @@ body.is-preloading .bg-orb{
   }
 }
 
-/* ---------- TITLE DISSOLVE (letter spans created by JS) ----------
-   Before the merge plays, JS splits the big page title into one span per
-   character so each letter can dissolve on its own. Splitting is what turns
-   a plain fade into a *dissolve* — the title visibly comes apart rather than
-   simply dimming, which is what makes it read as dissolving INTO the content
-   title below rather than just leaving the screen.
-
-   display:inline-block is required for transforms to apply, but it costs the
-   font its built-in kerning pairs — acceptable for a title that's dissolving,
-   and the letter-spacing:0 override prevents any residual spacing left over
-   from the parent's opening animation. */
+/* ---------- TITLE DISSOLVE ---------- */
 .tc-char{
   display:inline-block;
   will-change:transform, opacity, filter;
-  /* Backface-visibility keeps the blur crisp on Safari during transform */
   backface-visibility:hidden;
 }
 .tc-space{
   display:inline-block;
   white-space:pre;
-  /* Spaces never animate — they're structural, not part of the dissolve */
   pointer-events:none;
 }
 .page-title-card .section-title.is-split{
   letter-spacing:0;
 }
-
 @media (prefers-reduced-motion: reduce){
   .tc-char{will-change:auto;}
 }
 
-/* The name carries the whole card. Large, airy, and the only thing on screen. */
+/* ---------- PAGE TITLE CARD: big display name ----------
+   Bottom margin was 1.4rem — bumped to 2.8rem so the description sits well
+   clear of the title's descenders. */
 .page-title-card .section-title{
   font-size:clamp(3.8rem, 10vw, 8rem);
   line-height:0.98;
   letter-spacing:-0.012em;
-  margin:0 0 1.4rem;
+  margin:0 0 1.8rem;
 }
 
+/* The description under the big title — given a slightly looser line-height
+   and a whisper of letter-spacing so it reads as its own element rather than
+   as a continuation of the display line above it. */
 .page-title-desc,
 .page-title-card .section-sub{
   color:var(--muted);
   font-size:clamp(1.05rem, 1.8vw, 1.35rem);
-  line-height:1.6;
+  line-height:1.75;
   max-width:46ch;
   margin:0 auto;
+  letter-spacing:0.005em;
 }
 
-/* ---------- OPENING ANIMATION ----------
-   Applied by IntersectionObserver (see script.js) each time the card enters
-   the viewport — NOT a one-shot reveal, so scrolling back up and returning to
-   a section replays the entrance. Two elements move in sequence: the title
-   first, the description a beat later, so the card is *composed* rather than
-   simply faded in. */
+/* ---------- OPENING ANIMATION ---------- */
 .page-title-card .section-title,
 .page-title-card .page-title-desc,
 .page-title-card .section-sub{
@@ -1067,8 +1052,8 @@ body.is-preloading .bg-orb{
 }
 .page-title-card.is-entering .page-title-desc,
 .page-title-card.is-entering .section-sub{
-  animation:titleCardIn 1.05s var(--ease-out) forwards;
-  animation-delay:0.22s;
+  animation:titleCardInFade 1.25s var(--ease-out) forwards;
+  animation-delay:0.42s;   /* was 0.22s — a longer beat between title and copy */
 }
 
 @keyframes titleCardIn{
@@ -1076,9 +1061,6 @@ body.is-preloading .bg-orb{
     opacity:0;
     filter:blur(10px);
     transform:translateY(26px);
-    /* Letters start slightly wide and tighten as they settle — the same
-       typographic cue the preloader uses, so the page names feel written
-       rather than just animated. */
     letter-spacing:0.12em;
   }
   55%{
@@ -1093,40 +1075,19 @@ body.is-preloading .bg-orb{
   }
 }
 
-/* The description is not a display face, so it doesn't get the letter-spacing
-   trick — it just rises and unblurs. Kept separate so the animation above can
-   stay tuned for large display type without over-spacing the smaller copy. */
-.page-title-card.is-entering .page-title-desc,
-.page-title-card.is-entering .section-sub{
-  animation-name:titleCardInFade;
-}
-
-/* ---------- LONG TITLES ("What I Can Deliver") ----------
-   A four-word title at the large display clamp crowds the 80vw card and, worse,
-   the letter-spacing ramp in the opening animation pushes its visual center
-   around as it settles. Long titles get their own scale + a max-width so they
-   break onto two clean lines and land dead-center instead of shuffling. */
+/* ---------- LONG TITLES ("What I Can Deliver") ---------- */
 .page-title-card .section-title.is-long{
   font-size:clamp(2.6rem, 6.5vw, 5rem);
   line-height:1.05;
   max-width:14ch;
   margin-left:auto;
   margin-right:auto;
-  /* Lock the letter-spacing so the animation can't widen the text beyond the
-     card or pull its center sideways. */
   letter-spacing:-0.01em;
 }
-
-/* The description under a long title also deserves a slightly narrower measure
-   so it lines up visually with the two-line title above it. */
 .page-title-card:has(.section-title.is-long) .page-title-desc,
 .page-title-card:has(.section-title.is-long) .section-sub{
   max-width:40ch;
 }
-
-/* For long titles specifically, skip the letter-spacing part of the opening
-   animation — keep only the rise + unblur. That removes the horizontal drift
-   entirely while preserving the entrance. */
 .page-title-card.is-entering .section-title.is-long{
   animation-name:titleCardInLong;
 }
@@ -1135,7 +1096,6 @@ body.is-preloading .bg-orb{
   55%{opacity:1;filter:blur(0);}
   100%{opacity:1;filter:blur(0);transform:translateY(0);}
 }
-
 @media (max-width:700px){
   .page-title-card .section-title.is-long{
     font-size:clamp(2rem, 9vw, 3rem);
@@ -1143,8 +1103,11 @@ body.is-preloading .bg-orb{
   }
 }
 
+/* The description's own entrance: rises a touch further than the display
+   title so the two elements feel composed in sequence, then settles with a
+   subtle letter-spacing relax to mirror the display title's behaviour. */
 @keyframes titleCardInFade{
-  0%{opacity:0;filter:blur(6px);transform:translateY(18px);letter-spacing:0;}
+  0%{opacity:0;filter:blur(8px);transform:translateY(26px);letter-spacing:0.02em;}
   55%{opacity:1;filter:blur(0);}
   100%{opacity:1;filter:blur(0);transform:translateY(0);letter-spacing:0;}
 }
@@ -1161,24 +1124,21 @@ body.is-preloading .bg-orb{
   }
 }
 
-/* Cap the height on very tall / very wide viewports. */
 @media (min-width:1500px){
   .page-title-card{height:min(80vh, 720px);}
 }
-
 @media (max-width:900px){
   .page-title-card{
     width:92vw;
   }
   .page-title-card .section-title{font-size:clamp(3rem, 12vw, 5.6rem);}
 }
-
 @media (max-width:700px){
   .page-title-card{
     width:100%;
     height:auto;
     min-height:52vh;
-    margin:2rem auto 1rem;
+    margin:0 auto 2.2rem;
     padding:2.6rem 1.4rem;
   }
   .page-title-card .section-title{font-size:clamp(2.6rem, 14vw, 4.2rem);}
@@ -1203,19 +1163,16 @@ body.is-preloading .bg-orb{
 
 /* ---------- HERO ---------- */
 .hero{
-  min-height:100vh;         /* fallback for old browsers */
-  min-height:100svh;        /* real visible height on mobile */
+  min-height:100vh;
+  min-height:100svh;
   display:flex;
   flex-direction:column;
-  /* justify-content:center;  ← REMOVE this line */
   align-items:center;
   text-align:center;
-  padding:7rem 3rem 3rem;
+  padding:7.2rem 3rem 2.6rem;
   background:transparent;
   perspective:1200px;
 }
-/* A single quiet, static wash of color behind the hero card — no spin, no rainbow
-   conic gradient, no floating blobs. Minimal means one soft light source, not three. */
 .hero-aura{
   position:absolute;
   width:820px;height:820px;
@@ -1228,18 +1185,10 @@ body.is-preloading .bg-orb{
   z-index:0;
   pointer-events:none;
 }
-/* The shimmering "DHAKAL" letters still run on an infinite CSS animation. That's fine
-   while the hero is on screen, but there's no reason to keep compositing/painting it
-   once the user has scrolled past — toggled by JS (IntersectionObserver) via .in-view. */
-.hero:not(.in-view) .hero-name .reveal-line:nth-child(2){
-  animation-play-state:paused;
-}
 .hero-glow{
   position:absolute;
   width:460px;height:460px;
   left:50%;top:30%;
-  /* Positioned with transform only (no left/top writes at runtime) so the pointer-follow
-     effect is pure GPU compositing instead of triggering layout on every mousemove. */
   transform:translate(-50%,-50%) translate3d(var(--gx, 0px), var(--gy, 0px), 0);
   background:radial-gradient(circle, rgba(139,92,246,0.08), transparent 70%);
   pointer-events:none;
@@ -1249,20 +1198,38 @@ body.is-preloading .bg-orb{
 }
 
 .hero-inner{
-  max-width:1080px;width:100%;position:relative;z-index:1;margin: auto;
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:26px;
-  padding:3.8rem 4.5rem 3.4rem;
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-  box-shadow:0 20px 50px rgba(0,0,0,0.28);
+  max-width:880px;width:100%;position:relative;z-index:1;
+  margin:auto auto 0;
+  padding:1.3rem 3.4rem 2.5rem;
+  isolation:isolate;
+  background:var(--frame-fill);
+  border:1px solid var(--frame-line);
+  border-radius:30px;
+  backdrop-filter:blur(24px) saturate(1.5);
+  -webkit-backdrop-filter:blur(24px) saturate(1.5);
+  box-shadow:0 40px 90px -40px rgba(0,0,0,0.75);
   transition:transform 0.45s ease-out, box-shadow 0.45s ease-out;
 }
-/* A gentle, one-time landing bounce on the whole hero card, timed to play right as
-   the preloader clears and the home page opens. The class is added and then removed
-   by script.js once the animation finishes, so it never lingers and never fights
-   with the pointer-tilt effect (which sets this same `transform` inline via JS). */
+.hero-blob{
+  position:absolute;z-index:-1;
+  border-radius:50%;
+  filter:blur(64px);
+  pointer-events:none;
+  opacity:calc(0.55 * var(--orb-opacity));
+  will-change:transform;
+  animation:heroBlobDrift 18s ease-in-out infinite;
+}
+.hero-blob--a{left:-9%;top:-6%;width:52%;height:48%;background:radial-gradient(closest-side, var(--accent-2), transparent);}
+.hero-blob--b{right:-9%;top:32%;width:46%;height:52%;background:radial-gradient(closest-side, var(--accent), transparent);animation-duration:21s;animation-delay:-6s;}
+.hero-blob--c{left:-5%;top:58%;width:30%;height:24%;background:radial-gradient(closest-side, var(--accent), transparent);opacity:calc(0.35 * var(--orb-opacity));animation-duration:24s;animation-delay:-10s;}
+.hero-blob--d{right:2%;bottom:-11%;width:36%;height:28%;background:radial-gradient(closest-side, var(--accent-2), transparent);opacity:calc(0.4 * var(--orb-opacity));animation-duration:20s;animation-delay:-3s;}
+@keyframes heroBlobDrift{
+  0%,100%{transform:translate3d(0,0,0) scale(1);}
+  50%{transform:translate3d(3%,-4%,0) scale(1.07);}
+}
+.hero:not(.in-view) .hero-blob{animation-play-state:paused;}
+@media (prefers-reduced-motion: reduce){.hero-blob{animation:none;}}
+
 .hero-inner.is-bouncing{
   animation:heroInnerBounce 1.65s var(--ease-out);
 }
@@ -1277,6 +1244,25 @@ body.is-preloading .bg-orb{
 @media (prefers-reduced-motion: reduce){
   .hero-inner.is-bouncing{animation:none;}
 }
+
+/* ---------- STATUS ROW ---------- */
+.status-row{
+  display:flex;align-items:center;justify-content:center;
+  margin:0;
+  opacity:0;
+  transform:translateY(10px);
+}
+.hero.is-revealed .status-row{
+  animation:heroReveal 1.15s var(--ease-out) forwards;
+  animation-delay:0.42s;
+}
+.status-row::before,
+.status-row::after{
+  content:"";
+  flex:1;height:1px;
+  background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--foam) 22%, transparent));
+}
+.status-row::after{transform:scaleX(-1);}
 
 .status-badge{
   display:flex;align-items:center;justify-content:center;gap:0.6rem;
@@ -1293,17 +1279,31 @@ body.is-preloading .bg-orb{
   opacity:0;
   transform:translateY(10px);
 }
-.hero-inner.is-revealed .status-badge{
-  animation:heroReveal 1.15s var(--ease-out) forwards;
-  animation-delay:0.42s;
+.hero .status-badge{
+  margin:0 0.5rem;
+  padding:0.55rem 1.3rem 0.55rem 1.1rem;
+  gap:0.7rem;
+  font-size:1.05rem;
+  color:color-mix(in srgb, var(--accent-2) 32%, var(--foam));
+  background-color:color-mix(in srgb, var(--accent-2) 9%, transparent);
+  background-image:linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0));
+  border:1px solid color-mix(in srgb, var(--accent-2) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 0 26px -8px color-mix(in srgb, var(--accent-2) 70%, transparent);
+  opacity:1;
+  transform:none;
+  white-space:nowrap;
 }
 .status-dot{
   position:relative;
   width:7px;height:7px;border-radius:50%;
   background:var(--accent-2);
 }
-/* A single quiet pulse instead of a growing/fading ring — reads as "alive" without
-   the extra decorative geometry. */
+.hero .status-dot{
+  width:10px;height:10px;
+  box-shadow:0 0 12px 2px color-mix(in srgb, var(--accent-2) 75%, transparent);
+}
 .status-dot::after{
   content:'';
   position:absolute;
@@ -1316,34 +1316,28 @@ body.is-preloading .bg-orb{
   0%,100%{opacity:0.9;}
   50%{opacity:0.25;}
 }
+
+/* ---------- NAME ---------- */
 .hero-name{
-  font-family:var(--font-name);
+  font-family:var(--font-script);
   font-weight:700;
-  font-size:clamp(3.1rem,9.4vw,7rem);
-  line-height:0.96;
+  font-size:var(--name-size);
+  line-height:var(--name-lh);
   letter-spacing:-0.012em;
   color:var(--foam);
-  margin-bottom:1.75rem;
+  margin:1.6rem 0 1.5rem;
   position:relative;
   opacity:0;
   filter:blur(8px);
   transform:scale(0.94);
   transform-origin:50% 50%;
+  text-shadow:0 6px 30px rgba(0,0,0,0.35);
 }
 .hero-name .reveal-line{
   display:block;
   overflow:visible;
   position:relative;
 }
-/* Comes into focus right where it already sits, in the same font and size, at the
-   exact moment the preloader name (identical font/size, same spot) blurs away —
-   see .preloader.is-hidden .preloader-name above and initPreloaderMerge() in
-   script.js. The fade/focus is what carries the "merge" feel; the small scale
-   overshoot at the end is just a quick, gentle bounce as it settles/attaches into
-   the home page — no travel, no font/size change, just a light landing wobble. */
-/* Slower and with one extra beat of settle than before: the name is the
-   thing people are meant to remember, so it gets the longest single
-   animation on the page. */
 .hero-name.is-merging{
   animation:heroNameMerge 1.35s var(--ease-out) forwards;
 }
@@ -1358,31 +1352,33 @@ body.is-preloading .bg-orb{
   color:var(--accent-2);
 }
 .hero-role{
-  font-family:var(--font-display);
-  font-weight:500;
-  font-size:clamp(1.15rem,2.6vw,1.55rem);
-  color:var(--accent-2);
-  letter-spacing:0.01em;
-  margin-bottom:1.45rem;
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:clamp(1.3rem,3.2vw,1.9rem);
+  line-height:1.25;
+  color:var(--foam);
+  letter-spacing:0.005em;
+  margin-bottom:1.5rem;
+  text-shadow:0 2px 18px rgba(0,0,0,0.35);
   opacity:0;
   transform:translateY(10px);
   filter:blur(4px);
 }
-.hero-inner.is-revealed .hero-role{
+.hero.is-revealed .hero-role{
   animation:heroReveal 1.2s var(--ease-out) forwards;
   animation-delay:0.6s;
 }
 .hero-text{
-  color:var(--muted);
-  font-size:1.18rem;
-  line-height:1.72;
-  max-width:50ch;
+  color:color-mix(in srgb, var(--foam) 62%, var(--muted));
+  font-size:clamp(1.02rem,2.2vw,1.25rem);
+  line-height:1.56;
+  max-width:35rem;
   margin:0 auto;
   opacity:0;
   transform:translateY(12px);
   filter:blur(4px);
 }
-.hero-inner.is-revealed .hero-text{
+.hero.is-revealed .hero-text{
   animation:heroReveal 1.2s var(--ease-out) forwards;
   animation-delay:0.78s;
 }
@@ -1390,8 +1386,6 @@ body.is-preloading .bg-orb{
   color:var(--foam);
   font-weight:600;
 }
-/* Accent-colored inline link for use inside regular paragraph copy (distinct from
-   nav/button links, which have their own styling). */
 .text-link{
   color:var(--accent-2);
   text-decoration:underline;
@@ -1407,30 +1401,17 @@ body.is-preloading .bg-orb{
 @keyframes heroReveal{
   to{opacity:1;transform:translateY(0);filter:blur(0);}
 }
-/* ---------- HERO ACTIONS ----------
-   The two hero buttons now sit in their own band at the foot of the hero card,
-   separated from the paragraph above by a short centred hairline. Giving them
-   their own register (rather than letting them float directly under the text)
-   is what makes them read as the card's conclusion instead of an afterthought. */
+
+/* ---------- HERO ACTIONS ---------- */
 .hero-actions{
   position:relative;
   display:flex;gap:0.9rem;flex-wrap:wrap;
   justify-content:center;
-  margin-top:2.9rem;
-  padding-top:2.5rem;
+  margin:2.4rem auto auto;
   opacity:0;
   transform:translateY(14px);
 }
-.hero-actions::before{
-  content:"";
-  position:absolute;
-  top:0;left:50%;
-  transform:translateX(-50%);
-  width:min(340px, 62%);
-  height:1px;
-  background:linear-gradient(90deg, transparent, var(--line) 22%, var(--line) 78%, transparent);
-}
-.hero-inner.is-revealed .hero-actions{
+.hero.is-revealed .hero-actions{
   animation:heroReveal 1.2s var(--ease-out) forwards;
   animation-delay:1.02s;
 }
@@ -1442,19 +1423,18 @@ body.is-preloading .bg-orb{
   position:relative;
   isolation:isolate;
   overflow:hidden;
-  min-width:186px;
-  padding:1.02rem 1.9rem;
-  border-radius:14px;
-  font-size:1rem;
-  font-weight:600;
+  min-width:190px;
+  padding:1.1rem 2rem;
+  border-radius:16px;
+  font-size:1.12rem;
+  line-height:1.3;
+  font-weight:500;
   letter-spacing:0.004em;
   backdrop-filter:blur(14px) saturate(1.3);
   -webkit-backdrop-filter:blur(14px) saturate(1.3);
   transition:transform 0.4s var(--ease-out), box-shadow 0.45s var(--ease-out),
              border-color 0.4s ease, color 0.35s ease, background-color 0.4s ease;
 }
-/* Shared specular sweep — the same light-catching streak as the glass icons,
-   so buttons and icons clearly belong to one material. */
 .hero-cta::before{
   content:"";
   position:absolute;
@@ -1469,9 +1449,6 @@ body.is-preloading .bg-orb{
 .hero-cta:hover::before{left:150%;opacity:1;}
 .hero-cta:active{transform:translateY(0) scale(0.985);}
 
-/* Primary — accent-lit glass. Deliberately not a flat filled block: the solid
-   accent fill is reserved for the Projects button in the navbar, which is the
-   single loudest control on the site. */
 .hero-cta--primary{
   color:#fff;
   background-color:rgba(139,92,246,0.22);
@@ -1490,8 +1467,6 @@ body.is-preloading .bg-orb{
     inset 0 1px 0 rgba(255,255,255,0.38),
     0 20px 40px -16px rgba(139,92,246,0.95);
 }
-
-/* Secondary — the same pane of glass with no accent light behind it. */
 .hero-cta--ghost{
   color:var(--foam);
   background-color:var(--surface);
@@ -1508,15 +1483,14 @@ body.is-preloading .bg-orb{
     inset 0 1px 0 var(--gi-edge),
     0 18px 36px -18px rgba(34,211,238,0.55);
 }
-
 .cta-icon{
-  width:17px;height:17px;
+  width:20px;height:20px;
   flex-shrink:0;
   transition:transform 0.45s var(--ease-out);
 }
 .hero-cta--primary:hover .cta-icon{transform:scale(1.12) rotate(-4deg);}
 .cta-icon--doc{
-  width:17px;height:17px;
+  width:20px;height:20px;
   color:var(--accent-2);
 }
 .hero-cta--ghost:hover .cta-icon--doc{transform:translateY(-2px);}
@@ -1527,9 +1501,6 @@ body.is-preloading .bg-orb{
 }
 
 /* ---------- HERO: floating "code card" accent ---------- */
-/* Pinned to the top-right corner of the hero card itself (not the wider hero
-   section), so it stays visually attached to the same "corner" regardless of
-   viewport width, and never fights the centered hero text for space. */
 .hero-code-card-wrap{
   position:absolute;
   top:-22px;right:34px;
@@ -1585,15 +1556,12 @@ body.is-preloading .bg-orb{
   .hero-code-card{animation:none;}
 }
 
-
 /* ---------- ABOUT ---------- */
 .about{background:transparent;}
 .about-grid{
   display:grid;grid-template-columns:210px 1fr;
   gap:2.4rem;align-items:center;
 }
-
-/* -- photo: simple glass frame with a soft static glow -- */
 .about-photo{
   position:relative;
   display:flex;flex-direction:column;align-items:center;
@@ -1635,15 +1603,12 @@ body.is-preloading .bg-orb{
   -webkit-backdrop-filter:var(--glass-blur);
 }
 .photo-tag .status-dot{flex-shrink:0;}
-
-/* -- copy: kicker + lead + fact cards -- */
 .about-kicker{
   font-size:0.8rem;letter-spacing:0.14em;text-transform:uppercase;
   color:var(--accent-2);font-weight:600;margin-bottom:0.7rem;
 }
 .about-lead{font-size:1.28rem;line-height:1.68;color:var(--foam);max-width:58ch;}
 .about-lead strong{font-family:var(--font-display);font-weight:600;}
-
 .about-facts-grid{
   display:grid;grid-template-columns:1fr 1fr;
   gap:0.9rem;
@@ -1706,13 +1671,7 @@ body.is-preloading .bg-orb{
   line-height:1.6;
 }
 
-/* ---------- EDUCATION & SKILLS ---------- */
-/* ---------- EXPERIENCE (fresher / open-to-work status) ---------- */
-/* The Experience section keeps its compact content card (less padding, no
-   forced min-height, so the status card fits comfortably), but its title
-   card now uses the SAME large display size as every other page — the old
-   `.experience .section-title` override was shrinking it below the rest of
-   the site, which made the section look like an afterthought. */
+/* ---------- EXPERIENCE ---------- */
 .section.experience{padding-top:5rem;padding-bottom:5rem;}
 .experience .content-page{min-height:auto;padding:3rem 0 2.2rem;}
 .experience .page-title-desc{margin:0 auto;}
@@ -1758,7 +1717,7 @@ body.is-preloading .bg-orb{
 .highlight-item h4{color:var(--accent-2);font-size:0.95rem;margin-bottom:0.45rem;}
 .highlight-item p{color:var(--muted);font-size:0.95rem;line-height:1.62;}
 
-/* ---------- EDUCATION TIMELINE (modern card style) ---------- */
+/* ---------- EDUCATION TIMELINE ---------- */
 .edu-timeline{
   position:relative;
   margin:0 auto 1rem;
@@ -1934,7 +1893,6 @@ body.is-preloading .bg-orb{
 .project-body a{color:var(--accent);font-size:0.95rem;}
 .project-body a:hover{text-decoration:underline;}
 
-/* staggered content entrance whenever a card becomes active */
 .project-body > *{
   opacity:0;
   transform:translateY(18px);
@@ -1950,7 +1908,6 @@ body.is-preloading .bg-orb{
 .project-card.active .project-body .tag-row{transition-delay:0.36s;}
 .project-card.active .project-body .project-links{transition-delay:0.46s;}
 
-/* nav buttons: hidden by default, revealed only on hover near left/right edge */
 .project-nav{
   position:absolute;
   top:50%;
@@ -2028,7 +1985,6 @@ body.is-preloading .bg-orb{
 }
 .contact-value{color:var(--foam);font-size:1rem;font-weight:500;word-break:break-word;}
 
-/* ---------- SOCIAL ICON ROW (bottom-right of Contact) ---------- */
 .social-links-row{
   display:flex;
   justify-content:flex-end;
@@ -2085,7 +2041,6 @@ body.is-preloading .bg-orb{
 @media (max-width:1100px){
   .project-nav.prev{left:0.4rem;}
   .project-nav.next{right:0.4rem;}
-
 }
 @media (max-width:900px){
   .about-grid{grid-template-columns:1fr;justify-items:center;gap:1.8rem;}
@@ -2094,9 +2049,6 @@ body.is-preloading .bg-orb{
   .photo-frame{width:150px;height:150px;font-size:2.6rem;}
   .about-facts-grid{max-width:520px;margin-left:auto;margin-right:auto;}
   .fact-card{text-align:left;}
-  /* The Projects button is the site's primary destination, so unlike the old
-     layout it stays in the header at every width — it just tucks in beside the
-     theme control instead of disappearing. */
   .nav-actions{display:flex;}
   .hero-aura{width:600px;height:600px;filter:blur(90px);}
   .content-page{width:min(86%, 1000px);}
@@ -2104,10 +2056,6 @@ body.is-preloading .bg-orb{
 @media (max-width:700px){
   .site-header{padding:1.1rem 1.1rem;}
   .site-header.scrolled{padding:0.85rem 1.1rem;}
-  /* The section nav becomes a fixed centred panel at this width, so it leaves
-     the header flow entirely. That leaves only the Projects button, the theme
-     control and the hamburger — group them at the right rather than letting
-     space-between fling them to opposite edges. */
   .header-inner{justify-content:flex-end;gap:0.55rem;}
   .site-mark{display:none;}
   .nav-actions{flex-shrink:0;}
@@ -2119,6 +2067,12 @@ body.is-preloading .bg-orb{
   .nav-cta-icon{--gi-size:26px;--gi-glyph:13px;}
   .theme-toggle{--gi-size:38px;--gi-glyph:17px;margin-left:0.35rem;}
   .nav-overlay{display:block;}
+
+  /* The nav pill is a desktop-only flourish — the nav becomes a vertical
+     panel here, so the pill is retired and the active link carries its own
+     fill instead. */
+  .nav-pill{display:none;}
+
   .top-nav{
     position:fixed;
     top:50%;left:50%;
@@ -2149,9 +2103,20 @@ body.is-preloading .bg-orb{
     transform:translate(-50%,-50%) scale(1);
   }
   .nav-link{border-radius:10px;text-align:center;padding:0.85rem 1rem;font-size:1rem;}
+  /* Mobile active fallback — pill is hidden, so the link paints itself. */
+  .nav-link.active,
+  .top-nav:not(.is-ready) .nav-link.active{
+    background-color:var(--accent);
+    background-image:linear-gradient(135deg, var(--accent-soft), var(--accent) 55%, var(--accent-2) 145%);
+    box-shadow:0 6px 18px -8px rgba(139,92,246,0.9), inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+
   .menu-toggle{display:flex;}
   .intensity-panel{right:-1.2rem;min-width:200px;}
-  .section{padding:5.5rem 1.4rem;}
+
+  /* Section padding tightened further on mobile — the reduced page-title
+     top margin already supplies what little air is needed. */
+  .section{padding:4.5rem 1.4rem 5.5rem;}
   .content-stack{margin-top:0;padding-bottom:1rem;}
   .content-page{
     width:100%;
@@ -2163,10 +2128,15 @@ body.is-preloading .bg-orb{
     transform:none;
   }
   .hero{padding:6rem 1.2rem 2.5rem;}
-  .page-no-hero{padding-top:6rem;}
-  .hero-inner{padding:2.6rem 1.5rem 2.4rem;border-radius:22px;}
-  .hero-actions{margin-top:2.2rem;padding-top:2rem;}
-  .hero-cta{padding:0.95rem 1.5rem;font-size:0.96rem;}
+  .page-no-hero{padding-top:5rem;}
+  .hero-inner{padding:1rem 1.2rem 1.8rem;border-radius:24px;}
+  .hero-actions{margin-top:1.8rem;}
+  .hero-cta{padding:1rem 1.5rem;font-size:1rem;}
+  .hero .status-badge{width:max-content;margin:0 0.4rem;padding:0.42rem 0.9rem 0.42rem 0.8rem;font-size:0.82rem;gap:0.5rem;}
+  .hero .status-dot{width:8px;height:8px;}
+  .hero-name{margin:1.5rem 0 0.7rem;}
+  .hero-role{margin-bottom:1rem;}
+  .hero-blob{filter:blur(44px);}
   .contact-card{padding:1.4rem;}
   .skill-card{padding:1.15rem;}
   .status-badge{
@@ -2197,8 +2167,6 @@ body.is-preloading .bg-orb{
 @media (hover:none){
   .project-nav{opacity:1;pointer-events:auto;}
 }
-/* Only on genuinely tiny screens does the label get dropped — and only the
-   label: .nav-cta-icon is a span too, so this must not target bare `span`. */
 @media (max-width:360px){
   .nav-cta-label{
     position:absolute;width:1px;height:1px;
@@ -2208,27 +2176,17 @@ body.is-preloading .bg-orb{
   .nav-home{padding:0.3rem;border-radius:50%;}
 }
 
-/* ---------- MOBILE / TOUCH PERFORMANCE ----------
-   backdrop-filter and filter:blur() are the most GPU-expensive properties on this page,
-   and mobile GPUs generally have far less headroom than desktop ones. Shrinking the blur
-   radius and turning off the purely-decorative infinite animations here cuts the ongoing
-   compositing/paint cost substantially, without changing anything structural. */
+/* ---------- MOBILE / TOUCH PERFORMANCE ---------- */
 @media (max-width:700px), (hover:none){
   :root{--glass-blur:blur(10px);}
   .bg-orb{filter:blur(60px);}
-  /* Drop the infinite shimmer/glow loop on mobile — it's purely decorative and keeps
-     compositing forever, which is the most expensive thing to leave running on phones. */
   .hero-name .reveal-line:nth-child(2){
     animation:none;
   }
 }
+
 /* ============================================================
    PROJECT SHOWCASE — reusable card components (projects.html)
-   Two component types:
-     .main-project-card    → featured / signature builds
-     .simple-project-card  → smaller side projects
-   Both open the shared #projectModal on click for full detail
-   (screenshots + how-it-works). See projects-modal.js.
    ============================================================ */
 
 .projects-showcase{max-width:960px;margin:0 auto;}
@@ -2242,7 +2200,6 @@ body.is-preloading .bg-orb{
 }
 .showcase-group-label strong{color:var(--foam);font-weight:600;}
 
-/* ---- shared badge + tag styling ---- */
 .project-badge{
   display:inline-block;
   font-size:0.72rem;color:var(--accent-2);
@@ -2252,7 +2209,6 @@ body.is-preloading .bg-orb{
   margin-bottom:0.9rem;
 }
 
-/* ---- MAIN PROJECT CARD ---- */
 .main-project-card{
   display:flex;
   align-items:stretch;
@@ -2310,7 +2266,6 @@ body.is-preloading .bg-orb{
 .main-project-card:hover .proj-link--view svg,
 .simple-project-card:hover .proj-link--view svg{transform:translateX(3px);}
 
-/* ---- SIMPLE PROJECT CARD ---- */
 .simple-projects-grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
@@ -2452,18 +2407,14 @@ body.is-preloading .bg-orb{
   .modal-body{padding:0.6rem 1.3rem 1.8rem;}
   .modal-body h2{font-size:1.4rem;}
 }
+
 /* ============================================================
    MOTION LAYER — springs, presses and the page-entrance sequence
-   The glass material itself is defined once, up in the "GLASS ICON
-   CHIP" section. This block only handles how things MOVE: the
-   spring curve used for hovers and presses, and the orchestrated
-   sequence that plays as the site opens.
    ============================================================ */
 :root{
   --spring:cubic-bezier(0.34,1.55,0.64,1);
 }
 
-/* -- press feedback: everything clickable dips slightly when held -- */
 .hero-cta:active,
 .nav-cta:active,
 .nav-home:active,
@@ -2473,8 +2424,6 @@ body.is-preloading .bg-orb{
 .project-modal-close:active{transform:scale(0.955);}
 .to-top.visible:active{transform:translateY(0) scale(0.94);}
 
-/* -- icons rotate a touch as their card lifts, so the card and the icon
-      inside it read as one object moving rather than two -- */
 .fact-card:hover .fact-icon{transform:translateY(-2px) scale(1.08) rotate(-4deg);}
 .skill-card:hover .skill-icon{transform:translateY(-2px) scale(1.08) rotate(4deg);}
 .contact-card:hover .contact-icon{transform:translateY(-3px) scale(1.09) rotate(-4deg);}
@@ -2503,7 +2452,6 @@ body.is-preloading .bg-orb{
 .project-modal-close{transition:border-color .3s ease, background .3s ease, transform 0.5s var(--spring);}
 .project-modal-close:hover{transform:rotate(90deg) scale(1.08);}
 
-/* -- cards: a consistent lift, springy but small -- */
 .fact-card{transition:border-color 0.35s var(--ease-out), transform 0.55s var(--spring), background 0.35s var(--ease-out);}
 .fact-card:hover{transform:translateY(-4px);}
 .skill-card,
@@ -2514,13 +2462,7 @@ body.is-preloading .bg-orb{
 .contact-card:hover{transform:translateY(-5px);}
 .project-card{transition:transform 0.55s var(--spring), box-shadow 0.4s ease;}
 
-/* ---------- PAGE ENTRANCE SEQUENCE ----------
-   One orchestrated opening, not a pile of separate effects. Order:
-     1. the preloader name arrives and settles (handled in the preloader rules)
-     2. the hero card lands and its contents cascade
-     3. the header slides down and the nav pill unfolds last
-   The header is deliberately last: the content the visitor came for
-   arrives before the furniture around it. */
+/* ---------- PAGE ENTRANCE SEQUENCE ---------- */
 .site-header{
   transition:background 0.45s ease, border-color 0.45s ease, padding 0.45s ease,
              opacity 1.1s var(--ease-out) 0.55s, transform 1.1s var(--ease-out) 0.55s;
@@ -2537,14 +2479,10 @@ body.is-preloading .site-header{transform:translateY(-22px);}
 body.site-open .top-nav{opacity:1;transform:translateY(0);transition-delay:0.72s;}
 body.site-open .nav-actions{opacity:1;transform:translateY(0);transition-delay:0.86s;}
 body.site-open .header-right{opacity:1;transform:translateY(0);transition-delay:0.96s;}
-/* Pages without a preloader (the Projects page) shouldn't hold their header
-   hostage waiting for a class that never arrives. */
 body.no-preloader .top-nav,
 body.no-preloader .nav-actions,
 body.no-preloader .header-right{opacity:1;transform:none;transition-delay:0.15s;}
 
-/* Ambient orbs drift very slowly, which keeps the background from ever looking
-   like a static image without drawing attention to itself. */
 @keyframes orbDrift{
   0%,100%{transform:translate3d(0,0,0) scale(1);}
   33%{transform:translate3d(3vw,-2vh,0) scale(1.06);}
@@ -2570,8 +2508,8 @@ body.no-preloader .header-right{opacity:1;transform:none;transition-delay:0.15s;
 }
 
 @media (max-height:720px){
+  :root{--name-size:clamp(2.4rem, 8vw, 4.6rem);}
   .hero{padding-top:6rem;padding-bottom:2rem;}
-  .hero-inner{padding:2.6rem 2rem 2.4rem;}
-  .hero-name{font-size:clamp(2.4rem, 8vw, 4.4rem);}
-  .hero-actions{margin-top:1.8rem;padding-top:1.6rem;}
+  .hero-name{margin-top:1.2rem;}
+  .hero-actions{margin-top:1.8rem;}
 }
