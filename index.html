@@ -44,7 +44,8 @@
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Major+Mono+Display&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 
 <script type="application/ld+json">
@@ -98,10 +99,13 @@
     </div>
   </div>
 
-  <!-- AMBIENT BACKGROUND GLOW -->
-  <div class="bg-orb bg-orb-1"></div>
-  <div class="bg-orb bg-orb-2"></div>
-  <div class="bg-orb bg-orb-3"></div>
+  <!-- AMBIENT BACKGROUND SCENE -->
+  <div class="bg-scene" aria-hidden="true">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="bg-noise"></div>
+  </div>
 
   <!-- SCROLL PROGRESS -->
   <div class="progress-bar" id="progressBar"></div>
@@ -111,9 +115,6 @@
     <div class="header-inner">
       <div class="logo-spacer" aria-hidden="true"></div>
       <nav class="top-nav" id="topNav" aria-label="Primary">
-        <!-- The liquid flowing indicator. Its position/size are set by JS from
-             whichever .nav-link is active; the CSS gives it the poured-between
-             feel via mismatched transition durations on left/width. -->
         <span class="nav-pill" aria-hidden="true"></span>
         <a href="#home" class="nav-link active">Home</a>
         <a href="#about" class="nav-link">About</a>
@@ -162,22 +163,28 @@
     <div class="hero-glow" id="heroGlow"></div>
 
     <div class="hero-inner" id="heroInner">
+      <!-- pinned notice, inside the card -->
+      <aside class="hero-notice" id="heroNotice" aria-label="Availability status">
+        <span class="hero-notice-pin" aria-hidden="true"></span>
+        <div class="hero-notice-inner">
+          <span class="status-dot"></span>
+          <span>Open to Opportunities</span>
+        </div>
+      </aside>
+
       <span class="hero-blob hero-blob--a" aria-hidden="true"></span>
       <span class="hero-blob hero-blob--b" aria-hidden="true"></span>
       <span class="hero-blob hero-blob--c" aria-hidden="true"></span>
       <span class="hero-blob hero-blob--d" aria-hidden="true"></span>
 
-      <div class="status-row">
-        <div class="status-badge">
-          <span class="status-dot"></span>
-          <span>Open to Opportunities</span>
-        </div>
-      </div>
+      <span class="hero-glare" aria-hidden="true"></span>
 
-      <h1 class="hero-name" id="heroName">
-        <span class="reveal-line">Bikash</span>
-        <span class="reveal-line">DHAKAL</span>
-      </h1>
+      <div class="hero-name-wrap" id="heroNameWrap">
+        <h1 class="hero-name" id="heroName">
+          <span class="reveal-line">Bikash</span>
+          <span class="reveal-line">DHAKAL</span>
+        </h1>
+      </div>
 
       <p class="hero-role">Full-Stack Web Developer</p>
 
@@ -547,9 +554,16 @@
     </svg>
   </button>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
-  <script src="script.js"></script>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.14/lenis.min.js"></script>
+  <script defer src="script.js"></script>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+  <script defer src="script.js"></script>
 </body>
 </html>

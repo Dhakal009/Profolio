@@ -1,6 +1,7 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
 /* ---------- THEME TOGGLE (light / dark) ---------- */
 (function initThemeToggle(){
@@ -139,10 +140,71 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
-/* ---------- SCROLL PROGRESS BAR ----------
-   Written as a transform scaleX instead of animating `width`, so the browser
-   never has to recompute layout on each scroll frame. This was one of the
-   biggest sources of janky scrolling on mobile. */
+/* Refresh ScrollTrigger after fonts load so trigger positions use final metrics. */
+if (hasGSAP && typeof ScrollTrigger !== 'undefined' && document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => ScrollTrigger.refresh());
+}
+
+/* ============================================================
+   LENIS SMOOTH SCROLL
+   ============================================================
+   Lenis drives the native scroll position, so every existing
+   consumer of window.scrollY (progress bar, header state, back-to-
+   top, edge bounce, ScrollTrigger) continues to work unchanged.
+   We:
+     • wire lenis.raf into GSAP's ticker so there's a single rAF loop,
+     • route ScrollTrigger.update through Lenis's scroll event,
+     • pause Lenis while the preloader is on-screen so the initial
+       overflow:hidden lock actually holds,
+     • leave touch alone (syncTouch: false) so mobile scrolling stays
+       native — better for the edge-bounce and for battery. */
+let lenis = null;
+
+function initLenis(){
+  if (lenis) return;
+  if (typeof Lenis === 'undefined') return;
+  if (prefersReducedMotion) return;
+
+  lenis = new Lenis({
+    duration: 1.15,
+    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expo-out
+    smoothWheel: true,
+    syncTouch: false,          // touch stays native on mobile
+    wheelMultiplier: 1,
+    touchMultiplier: 1.5,
+    infinite: false
+  });
+
+  // Sync Lenis → ScrollTrigger (one shared timeline, no drift)
+  if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+    // Trigger positions may change once Lenis takes over — recompute.
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  } else {
+    // Fallback (GSAP missing) — drive Lenis from its own rAF loop.
+    function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+  }
+
+  // If the preloader is still on-screen, pause Lenis until it lifts.
+  if (document.body.classList.contains('is-preloading')) {
+    lenis.stop();
+    const obs = new MutationObserver(() => {
+      if (!document.body.classList.contains('is-preloading')) {
+        obs.disconnect();
+        lenis.start();
+        if (hasGSAP && typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+      }
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+}
+
+initLenis();
+
+/* ---------- SCROLL PROGRESS BAR ---------- */
 const progressBar = document.getElementById('progressBar');
 function updateProgress(){
   const scrollTop = window.scrollY;
@@ -151,7 +213,7 @@ function updateProgress(){
   progressBar.style.transform = 'scaleX(' + pct + ')';
 }
 
-/* ---------- EDGE BOUNCE (top / bottom of page) ---------- */
+/* ---------- EDGE BOUNCE ---------- */
 const pageMain = document.getElementById('pageMain');
 let bounceCooldown = false;
 
@@ -184,16 +246,19 @@ if (pageMain) {
     }
   }, { passive: true });
 
-  let edgeTouchStartY = 0;
+    let edgeTouchStartY = 0;
   window.addEventListener('touchstart', (e) => {
     edgeTouchStartY = e.touches[0].clientY;
   }, { passive: true });
   window.addEventListener('touchmove', (e) => {
     const currentY = e.touches[0].clientY;
     const delta = edgeTouchStartY - currentY;
-    if (isAtTop() && delta < -6) {
+    // Raise the threshold when Lenis is active — its inertia gives the
+    // touch a longer tail, so the old 6px trigger fired mid-fling.
+    const threshold = lenis ? 18 : 6;
+    if (isAtTop() && delta < -threshold) {
       triggerBounce('top');
-    } else if (isAtBottom() && delta > 6) {
+    } else if (isAtBottom() && delta > threshold) {
       triggerBounce('bottom');
     }
   }, { passive: true });
@@ -207,25 +272,44 @@ function smoothScrollTo(targetY, durationSeconds = 0.85){
     window.scrollTo(0, targetY);
     return;
   }
+
+  // Preferred path: hand the whole motion to Lenis. `lock: true` temporarily
+  // disables user input so an anchor jump isn't intercepted mid-flight, and
+  // `force: true` lets the call succeed even if Lenis is currently stopped
+  // (e.g. during the preloader). Because Lenis drives the native scroll
+  // position, ScrollTrigger picks up the new offset on its next tick.
+  if (lenis) {
+    lenis.scrollTo(targetY, {
+      duration: durationSeconds,
+      easing: t => 1 - Math.pow(1 - t, 3),   // ease-out cubic
+      lock: true,
+      force: true
+    });
+    return;
+  }
+
+  // Fallback 1: GSAP ScrollToPlugin
   if (hasGSAP && typeof ScrollToPlugin !== 'undefined') {
     gsap.to(window, {
       duration: durationSeconds,
       scrollTo: { y: targetY, autoKill: true },
       ease: 'power2.out'
     });
-  } else {
-    const startY = window.scrollY;
-    const distance = targetY - startY;
-    const startTime = performance.now();
-    const dur = durationSeconds * 1000;
-    function step(now){
-      const progress = Math.min((now - startTime) / dur, 1);
-      const eased = progress < 0.5 ? 4 * progress ** 3 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      window.scrollTo(0, startY + distance * eased);
-      if (progress < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+    return;
   }
+
+  // Fallback 2: hand-rolled rAF scroll
+  const startY = window.scrollY;
+  const distance = targetY - startY;
+  const startTime = performance.now();
+  const dur = durationSeconds * 1000;
+  function step(now){
+    const progress = Math.min((now - startTime) / dur, 1);
+    const eased = progress < 0.5 ? 4 * progress ** 3 : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    window.scrollTo(0, startY + distance * eased);
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
 }
 
 document.querySelectorAll('a[href^="#"]').forEach(link => {
@@ -242,9 +326,6 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
     smoothScrollTo(Math.max(targetY, 0), duration);
     history.pushState(null, '', targetId);
 
-    // Update the active link + liquid pill the moment it's clicked, so the
-    // indicator starts flowing immediately rather than waiting for the
-    // IntersectionObserver to catch up mid-scroll.
     if (link.classList.contains('nav-link')) {
       document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l === link));
       updateNavPill();
@@ -252,7 +333,7 @@ document.querySelectorAll('a[href^="#"]').forEach(link => {
   });
 });
 
-/* ---------- HEADER: solid background once page is scrolled ---------- */
+/* ---------- HEADER STATE + SCROLL TICKS ---------- */
 const siteHeader = document.getElementById('siteHeader');
 let ticking = false;
 
@@ -284,12 +365,7 @@ updateProgress();
   cta.classList.toggle('is-active', isProjectsPage);
 })();
 
-/* ---------- NAV PILL (liquid flowing indicator) ----------
-   Positions a shared element behind whichever nav link is currently active.
-   The liquid feel comes from the CSS transition's intentionally mismatched
-   durations: `left` is slower than `width`, so mid-travel the pill briefly
-   elongates in the direction of motion before contracting into the target
-   link's shape. The heavy overshoot curve gives it the pourable weight. */
+/* ---------- NAV PILL ---------- */
 const navPillEl = document.querySelector('.nav-pill');
 
 function updateNavPill(){
@@ -316,8 +392,6 @@ function updateNavPill(){
   const isFirstPlace = !nav.classList.contains('is-ready');
 
   if (isFirstPlace){
-    // First placement: snap into place without animating, then mark ready
-    // so the pill fades in (via CSS opacity) at the right spot.
     navPillEl.style.transition = 'none';
     navPillEl.style.left   = targetLeft   + 'px';
     navPillEl.style.top    = targetTop    + 'px';
@@ -329,20 +403,13 @@ function updateNavPill(){
     return;
   }
 
-  // Subsequent moves: the CSS transition carries it — mismatched durations
-  // and all — which is what produces the liquid stretch.
   navPillEl.style.left   = targetLeft   + 'px';
   navPillEl.style.top    = targetTop    + 'px';
   navPillEl.style.width  = targetWidth  + 'px';
   navPillEl.style.height = targetHeight + 'px';
 }
 
-/* ---------- ACTIVE SECTION TRACKING (top navbar) ----------
-   The old implementation used threshold: 0.5, which only fires for sections
-   that are at least half-visible in the viewport. Long sections never reach
-   that, so their nav link never highlighted. The fix is to observe a thin
-   horizontal band near the middle of the viewport (via rootMargin) rather
-   than a percentage of the section. */
+/* ---------- ACTIVE SECTION TRACKING ---------- */
 const sections = document.querySelectorAll('.section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
 const contentPages = document.querySelectorAll('.content-page');
@@ -352,7 +419,7 @@ const sectionObserver = new IntersectionObserver((entries) => {
     if (!entry.isIntersecting) return;
     const id = entry.target.getAttribute('id');
     const match = Array.from(navLinks).find(l => l.getAttribute('href') === `#${id}`);
-    if (!match) return;                 // sections without a nav counterpart (e.g. #deliver)
+    if (!match) return;
     navLinks.forEach(l => l.classList.toggle('active', l === match));
     updateNavPill();
   });
@@ -382,9 +449,248 @@ if (contentPages.length) {
   contentPages.forEach(page => pageObserver.observe(page));
 }
 
-/* ---------- PARALLAX EFFECT ----------
-   On mobile a tight numeric scrub is cheaper than an interpolated one: the
-   tween still tracks the scroll but does less catch-up work per frame. */
+/* ============================================================
+   AMBIENT BACKGROUND — GSAP-scrubbed parallax + section colours
+   ============================================================
+   The orbs sit inside .bg-scene (fixed wrapper). We:
+     • scrub a slow scroll timeline so each orb drifts at its own
+       speed/direction (layered parallax),
+     • breathe opacity + scale subtly,
+     • shift the orb colours as different sections cross the
+       viewport centre,
+     • add a tiny lerped mouse-parallax on fine-pointer devices.
+   All movement is transform / opacity only (compositor-friendly). */
+(function initBackgroundScene(){
+  const scene = document.querySelector('.bg-scene');
+  if (!scene) return;
+  if (!hasGSAP || typeof ScrollTrigger === 'undefined') return;
+  if (prefersReducedMotion) return;
+
+  const orb1 = scene.querySelector('.bg-orb-1');
+  const orb2 = scene.querySelector('.bg-orb-2');
+  const orb3 = scene.querySelector('.bg-orb-3');
+  if (!orb1 || !orb2) return;
+
+  const isMobile = window.matchMedia('(max-width:700px)').matches;
+
+  function getOrbOpacity(){
+    const v = getComputedStyle(document.documentElement).getPropertyValue('--orb-opacity').trim();
+    return parseFloat(v) || 1;
+  }
+
+  // --- Scroll parallax ------------------------------------------------
+  const scrollTl = gsap.timeline({
+    scrollTrigger: {
+      trigger: document.documentElement,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 1.2
+    }
+  });
+
+  scrollTl
+    .to(orb1, { x:'8vw',  y:'35vh', scale:1.2,  ease:'none' }, 0)
+    .to(orb2, { x:'-10vw', y:'-30vh', scale:1.15, ease:'none' }, 0)
+    .fromTo(orb1, { opacity: 0.35 * getOrbOpacity() }, { opacity: 0.55 * getOrbOpacity(), ease:'sine.inOut' }, 0)
+    .fromTo(orb2, { opacity: 0.22 * getOrbOpacity() }, { opacity: 0.4  * getOrbOpacity(), ease:'sine.inOut' }, 0);
+
+  if (orb3 && !isMobile){
+    scrollTl.to(orb3, { x:'-6vw', y:'20vh', rotate:45, scale:1.1, ease:'none' }, 0);
+    scrollTl.fromTo(orb3, { opacity: 0.25 * getOrbOpacity() }, { opacity: 0.4 * getOrbOpacity(), ease:'sine.inOut' }, 0);
+  }
+
+  // --- Section colour shifts -----------------------------------------
+  const palette = {
+    home:       { a:'#8b5cf6', b:'#22d3ee', c:'#6d28d9' },
+    about:      { a:'#6d28d9', b:'#8b5cf6', c:'#22d3ee' },
+    experience: { a:'#8b5cf6', b:'#22d3ee', c:'#6d28d9' },
+    education:  { a:'#22d3ee', b:'#6d28d9', c:'#8b5cf6' },
+    skills:     { a:'#6d28d9', b:'#8b5cf6', c:'#22d3ee' },
+    deliver:    { a:'#8b5cf6', b:'#6d28d9', c:'#22d3ee' },
+    contact:    { a:'#22d3ee', b:'#8b5cf6', c:'#6d28d9' },
+    'main-content': { a:'#8b5cf6', b:'#22d3ee', c:'#6d28d9' }
+  };
+
+  function hexToRgb(hex){
+    if (!hex) return null;
+    hex = hex.replace('#','');
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    if (hex.length !== 6) return null;
+    return {
+      r: parseInt(hex.slice(0,2), 16),
+      g: parseInt(hex.slice(2,4), 16),
+      b: parseInt(hex.slice(4,6), 16)
+    };
+  }
+
+  function tweenOrbVar(varName, hexTo){
+    const current = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    const from = hexToRgb(current) || hexToRgb(hexTo);
+    const to   = hexToRgb(hexTo);
+    if (!from || !to) return;
+    const proxy = { r: from.r, g: from.g, b: from.b };
+    gsap.to(proxy, {
+      r: to.r, g: to.g, b: to.b,
+      duration: 1.4,
+      ease: 'power2.out',
+      onUpdate(){
+        document.documentElement.style.setProperty(
+          varName,
+          `rgb(${proxy.r|0}, ${proxy.g|0}, ${proxy.b|0})`
+        );
+      }
+    });
+  }
+
+  document.querySelectorAll('.section[id]').forEach(sec => {
+    const p = palette[sec.id];
+    if (!p) return;
+    ScrollTrigger.create({
+      trigger: sec,
+      start: 'top 60%',
+      end: 'bottom 40%',
+      onToggle: self => {
+        if (!self.isActive) return;
+        tweenOrbVar('--accent-orb',      p.a);
+        tweenOrbVar('--accent-2-orb',    p.b);
+        tweenOrbVar('--accent-soft-orb', p.c);
+      }
+    });
+  });
+
+  // --- Mouse parallax (desktop only) ---------------------------------
+  if (hasFinePointer && !isMobile){
+    let tx = 0, ty = 0, cx = 0, cy = 0;
+    let rafId = null;
+
+    window.addEventListener('mousemove', (e) => {
+      const w = window.innerWidth, h = window.innerHeight;
+      tx = ((e.clientX / w) - 0.5) * 40;
+      ty = ((e.clientY / h) - 0.5) * 40;
+      if (!rafId) rafId = requestAnimationFrame(tick);
+    }, { passive: true });
+
+    function tick(){
+      cx += (tx - cx) * 0.08;
+      cy += (ty - cy) * 0.08;
+      orb1.style.setProperty('--mx', cx + 'px');
+      orb1.style.setProperty('--my', cy + 'px');
+      orb2.style.setProperty('--mx', (-cx * 0.6) + 'px');
+      orb2.style.setProperty('--my', (-cy * 0.6) + 'px');
+      const settled = Math.abs(tx - cx) < 0.1 && Math.abs(ty - cy) < 0.1;
+      rafId = settled ? null : requestAnimationFrame(tick);
+    }
+  }
+})();
+
+/* ============================================================
+   SCROLL-TEXT — per-word reveal, scrubbed to scroll
+   ============================================================ */
+(function initScrollText(){
+  const SCROLL_TEXT_SELECTORS = [
+    '.page-title-desc',
+    '.about-lead',
+    '.deliver-text',
+    '.fact-value',
+    '.edu-body h3',
+    '.edu-body p',
+    '.skill-summary',
+    '.highlight-item p',
+    '.contact-value',
+    '.experience-status-card h3',
+    '.experience-status-card > p',
+    '.project-pitch',
+    '.project-body p'
+  ];
+
+  const els = document.querySelectorAll(SCROLL_TEXT_SELECTORS.join(','));
+  if (!els.length) return;
+
+  function splitIntoWords(el){
+    if (el.dataset.wordsplit === 'true') return [];
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+
+    const textNodes = [];
+    let n;
+    while ((n = walker.nextNode())) textNodes.push(n);
+
+    const spans = [];
+    textNodes.forEach(node => {
+      const parts = node.nodeValue.split(/(\s+)/);
+      const frag = document.createDocumentFragment();
+      parts.forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) {
+          frag.appendChild(document.createTextNode(part));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'sw';
+          span.textContent = part;
+          frag.appendChild(span);
+          spans.push(span);
+        }
+      });
+      if (node.parentNode) node.parentNode.replaceChild(frag, node);
+    });
+
+    el.dataset.wordsplit = 'true';
+    return spans;
+  }
+
+  els.forEach(el => el.classList.add('scroll-text'));
+
+  if (prefersReducedMotion) {
+    els.forEach(el => {
+      el.classList.add('is-lit');
+      const words = splitIntoWords(el);
+      words.forEach(w => { w.style.opacity = '1'; });
+    });
+    return;
+  }
+
+  if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+    els.forEach(el => {
+      const words = splitIntoWords(el);
+      if (!words.length) { el.classList.add('is-lit'); return; }
+
+      gsap.set(words, { opacity: 0.1 });
+
+      gsap.to(words, {
+        opacity: 1,
+        ease: 'power1.inOut',
+        stagger: { each: 0.045, from: 'start' },
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 92%',
+          end: 'top 32%',
+          scrub: 1.1,
+          onEnter:     () => el.classList.add('is-lit'),
+          onEnterBack: () => el.classList.add('is-lit')
+        }
+      });
+    });
+  } else {
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-lit');
+          const words = splitIntoWords(entry.target);
+          words.forEach(w => { w.style.opacity = '1'; });
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0 });
+
+    els.forEach(el => io.observe(el));
+  }
+})();
+
+/* ---------- PARALLAX ---------- */
 const scrubValue = window.innerWidth <= 700 ? true : 0.4;
 
 if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
@@ -564,10 +870,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
       y: -28,
       scale: 1.18,
       ease: 'power2.in',
-      stagger: {
-        each: 0.035,
-        from: 'start'
-      }
+      stagger: { each: 0.035, from: 'start' }
     }, 0);
 
     if (bigDesc) {
@@ -581,12 +884,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
 
     tl.fromTo(smallTitle,
       { scale: 2.4, opacity: 0, filter: 'blur(10px)', y: 0 },
-      {
-        scale: 1,
-        opacity: 1,
-        filter: 'blur(0px)',
-        ease: 'power2.out'
-      },
+      { scale: 1, opacity: 1, filter: 'blur(0px)', ease: 'power2.out' },
       0.18
     );
   });
@@ -601,7 +899,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
 /* ---------- HERO GLOW FOLLOWS POINTER ---------- */
 const heroGlow = document.getElementById('heroGlow');
 const heroSection = document.getElementById('home');
-const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
 if (heroSection) {
   const heroVisibilityObserver = new IntersectionObserver((entries) => {
@@ -640,6 +937,217 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
     }
   }, { passive: true });
 }
+
+/* ============================================================
+   HERO CARD 3D TILT + POINTER-FOLLOWING GLARE
+   ============================================================ */
+(function initHeroTilt(){
+  const card  = document.getElementById('heroInner');
+  const glare = card ? card.querySelector('.hero-glare') : null;
+  if (!card) return;
+  if (!hasFinePointer || prefersReducedMotion) return;
+
+  const MAX_TILT = 5;
+  const LERP     = 0.10;
+
+  let targetRX = 0, targetRY = 0;
+  let currentRX = 0, currentRY = 0;
+  let targetGX = 50, targetGY = 50;
+  let currentGX = 50, currentGY = 50;
+  let rafPending = false;
+
+  function tick(){
+    currentRX += (targetRX - currentRX) * LERP;
+    currentRY += (targetRY - currentRY) * LERP;
+    currentGX += (targetGX - currentGX) * LERP;
+    currentGY += (targetGY - currentGY) * LERP;
+
+    card.style.setProperty('--tilt-x', currentRX.toFixed(3) + 'deg');
+    card.style.setProperty('--tilt-y', currentRY.toFixed(3) + 'deg');
+    if (glare) {
+      glare.style.setProperty('--glare-x', currentGX.toFixed(2) + '%');
+      glare.style.setProperty('--glare-y', currentGY.toFixed(2) + '%');
+    }
+
+    const settled =
+      Math.abs(currentRX - targetRX) < 0.01 &&
+      Math.abs(currentRY - targetRY) < 0.01 &&
+      Math.abs(currentGX - targetGX) < 0.05 &&
+      Math.abs(currentGY - targetGY) < 0.05;
+
+    if (!settled) {
+      requestAnimationFrame(tick);
+    } else {
+      rafPending = false;
+      card.style.willChange = 'auto';
+    }
+  }
+
+  function kick(){
+    if (!rafPending) {
+      card.style.willChange = 'transform';
+      rafPending = true;
+      requestAnimationFrame(tick);
+    }
+  }
+
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;
+    const py = (e.clientY - rect.top)  / rect.height;
+
+    targetRY = (px - 0.5) * 2 * MAX_TILT;
+    targetRX = -(py - 0.5) * 2 * MAX_TILT;
+
+    targetGX = px * 100;
+    targetGY = py * 100;
+    kick();
+  });
+
+  card.addEventListener('mouseleave', () => {
+    targetRX = 0;
+    targetRY = 0;
+    targetGX = 50;
+    targetGY = 50;
+    kick();
+  });
+})();
+
+/* ============================================================
+   HERO NAME — balloon float + per-letter mouse repulsion
+   ============================================================
+   Two nested spans per letter:
+     • outer  → vertical float (y only, no rotation)
+     • inner  → mouse repulsion (x + y)
+   GSAP drives both, and because they animate different elements
+   the two effects never fight each other.
+
+   The repulsion is measured from the OUTER letter's rect (which
+   carries the float but not the repulsion), so the force is
+   computed against the letter's natural home position — that
+   avoids a self-reinforcing feedback loop.
+
+   A single rAF gate throttles the mousemove handling so at most
+   one repulsion pass runs per frame regardless of event rate. */
+(function initHeroNameBalloon(){
+  const heroName = document.getElementById('heroName');
+  const heroCard = document.getElementById('heroInner');
+  if (!heroName || !heroCard) return;
+
+  // --- Split each line into per-letter spans -----------------------------
+  const lines = heroName.querySelectorAll('.reveal-line');
+  const outerLetters = [];
+  const innerLetters = [];
+
+  lines.forEach(line => {
+    const text = line.textContent;
+    line.textContent = '';
+    Array.from(text).forEach(ch => {
+      const outer = document.createElement('span');
+      outer.className = 'hero-name-letter';
+      const inner = document.createElement('span');
+      inner.className = 'hero-name-letter-inner';
+      inner.textContent = ch === ' ' ? '\u00A0' : ch;
+      outer.appendChild(inner);
+      line.appendChild(outer);
+      outerLetters.push(outer);
+      innerLetters.push(inner);
+    });
+  });
+
+  if (prefersReducedMotion || !hasGSAP) return;
+
+  // --- Balloon float: y only, no rotation --------------------------------
+  outerLetters.forEach((letter, i) => {
+    const drift = gsap.utils.random(5, 9);
+    const durY  = gsap.utils.random(3.8, 5.2);
+    const phase = (i % 6) * 0.22;
+
+    gsap.fromTo(letter,
+      { y: -drift },
+      {
+        y: drift,
+        duration: durY,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+        delay: phase
+      }
+    );
+  });
+
+  // --- Repulsion ---------------------------------------------------------
+  const REPEL_RADIUS = 190;
+  const MAX_PUSH     = 48;
+  const FOLLOW_DUR   = 0.4;
+  const RETURN_DUR   = 1.0;
+
+  let mouseX = 0, mouseY = 0;
+  let repelRaf = null;
+
+  function applyRepel(){
+    repelRaf = null;
+
+    // Batch every rect read first so we only trigger one layout pass.
+    // Read the OUTER letters (float-only), not the inner ones.
+    const rects = outerLetters.map(el => el.getBoundingClientRect());
+
+    for (let i = 0; i < innerLetters.length; i++){
+      const inner = innerLetters[i];
+      const r = rects[i];
+      const cx = r.left + r.width  * 0.5;
+      const cy = r.top  + r.height * 0.5;
+      const dx = cx - mouseX;
+      const dy = cy - mouseY;
+      const dist = Math.hypot(dx, dy) || 0.0001;
+
+      let tx = 0, ty = 0;
+
+      if (dist < REPEL_RADIUS){
+        const t = 1 - dist / REPEL_RADIUS;
+        const force = t * t * MAX_PUSH;
+        const angle = Math.atan2(dy, dx);
+        tx = Math.cos(angle) * force;
+        ty = Math.sin(angle) * force;
+      }
+
+      const returning = (tx === 0 && ty === 0);
+
+      gsap.to(inner, {
+        x: tx,
+        y: ty,
+        duration: returning ? RETURN_DUR : FOLLOW_DUR,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    }
+  }
+
+  function scheduleRepel(){
+    if (!repelRaf) repelRaf = requestAnimationFrame(applyRepel);
+  }
+
+  if (hasFinePointer){
+    heroCard.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      scheduleRepel();
+    });
+
+    heroCard.addEventListener('mouseleave', () => {
+      innerLetters.forEach((inner, i) => {
+        gsap.to(inner, {
+          x: 0,
+          y: 0,
+          duration: 1.4,
+          ease: 'elastic.out(1, 0.55)',
+          overwrite: 'auto',
+          delay: i * 0.018
+        });
+      });
+    });
+  }
+})();
 
 /* ---------- MAGNETIC BUTTONS ---------- */
 if (hasFinePointer && !prefersReducedMotion) {
@@ -684,10 +1192,6 @@ if (menuToggle) {
     menuToggle.classList.add('active');
     menuToggle.setAttribute('aria-expanded', 'true');
     if (navOverlay) navOverlay.classList.add('open');
-    // Tells CSS to remove backdrop-filter from the header, so the fixed-positioned
-    // .top-nav inside it is positioned against the viewport again rather than
-    // against the header's filter containing block. Without this the menu ends
-    // up somewhere between the header and the middle of the screen after scroll.
     document.body.classList.add('menu-open');
     document.body.style.overflow = 'hidden';
   }
@@ -755,7 +1259,7 @@ document.querySelectorAll('.skill-card').forEach(card => {
   syncDetailsHeight();
 });
 
-/* ---------- PROJECT CAROUSEL ---------- */
+/* ---------- PROJECT CAROUSEL (index only) ---------- */
 const projectCarousel = document.getElementById('projectCarousel');
 const projectTrack = document.getElementById('projectTrack');
 const prevBtn = document.getElementById('prevBtn');
