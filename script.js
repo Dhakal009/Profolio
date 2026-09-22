@@ -9,21 +9,79 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
   const toggle = document.getElementById('themeToggle');
   if (!toggle) return;
 
+  /* Fallback colours (matched to each theme's --bg) used only when
+     the View Transitions API isn't available. */
+  const THEME_BG = { dark: '#050507', light: '#f7f6fb' };
+
   function updateLabel(theme){
     toggle.setAttribute('aria-label', theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
   }
 
+  function applyTheme(next){
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- Preferred path: native View Transition ----
+       The browser snapshots the current (old) theme, we swap
+       data-theme inside the callback so it also snapshots the new
+       theme, then the two are stacked and CSS reveals the new one
+       via an animated clip-path. The user sees the actual dark and
+       light palettes transitioning into each other. */
+    if (!reduce && typeof document.startViewTransition === 'function') {
+      document.startViewTransition(() => {
+        root.setAttribute('data-theme', next);
+      });
+      return;
+    }
+
+    /* ---- Fallback path: solid-colour wipe (WAAPI) ----
+       Used by Firefox and older Safari. Same direction, same timing,
+       just without the true colour morph. */
+    document.querySelectorAll('.theme-wipe').forEach(w => w.remove());
+
+    if (reduce || typeof Element.prototype.animate !== 'function') {
+      root.setAttribute('data-theme', next);
+      return;
+    }
+
+    const wipe = document.createElement('div');
+    wipe.className = 'theme-wipe';
+    wipe.style.backgroundColor = THEME_BG[next] || THEME_BG.dark;
+    wipe.style.clipPath = 'circle(0% at 100% 0%)';
+    document.body.appendChild(wipe);
+
+    const expand = wipe.animate(
+      [
+        { clipPath: 'circle(0% at 100% 0%)' },
+        { clipPath: 'circle(150% at 100% 0%)' }
+      ],
+      { duration: 650, easing: 'cubic-bezier(.7,0,.3,1)', fill: 'forwards' }
+    );
+
+    expand.onfinish = () => {
+      root.setAttribute('data-theme', next);
+      wipe.remove();
+    };
+  }
+
   updateLabel(root.getAttribute('data-theme') || 'dark');
 
-  toggle.addEventListener('click', () => {
+    toggle.addEventListener('click', (e) => {
     const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', next);
+    applyTheme(next);
     updateLabel(next);
     try { localStorage.setItem('theme', next); } catch (e) { /* private mode, etc. */ }
 
     toggle.classList.remove('theme-changed');
     void toggle.offsetWidth;
     toggle.classList.add('theme-changed');
+
+    /* The intensity panel is shown via .theme-control:focus-within.
+       A mouse click leaves the toggle focused, which pins the panel
+       open. Blur it so the panel collapses. `e.detail > 0` means the
+       event came from a real pointer — keyboard activation reports
+       detail 0 and skips the blur, keeping the button focusable for
+       tab users. */
+    if (e.detail > 0) toggle.blur();
   });
 
   toggle.addEventListener('animationend', () => {
@@ -150,14 +208,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && document.fonts && documen
    ============================================================
    Lenis drives the native scroll position, so every existing
    consumer of window.scrollY (progress bar, header state, back-to-
-   top, edge bounce, ScrollTrigger) continues to work unchanged.
-   We:
-     • wire lenis.raf into GSAP's ticker so there's a single rAF loop,
-     • route ScrollTrigger.update through Lenis's scroll event,
-     • pause Lenis while the preloader is on-screen so the initial
-       overflow:hidden lock actually holds,
-     • leave touch alone (syncTouch: false) so mobile scrolling stays
-       native — better for the edge-bounce and for battery. */
+   top, edge bounce, ScrollTrigger) continues to work unchanged. */
 let lenis = null;
 
 function initLenis(){
@@ -180,10 +231,8 @@ function initLenis(){
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => { lenis.raf(time * 1000); });
     gsap.ticker.lagSmoothing(0);
-    // Trigger positions may change once Lenis takes over — recompute.
     requestAnimationFrame(() => ScrollTrigger.refresh());
   } else {
-    // Fallback (GSAP missing) — drive Lenis from its own rAF loop.
     function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
     requestAnimationFrame(raf);
   }
@@ -246,15 +295,13 @@ if (pageMain) {
     }
   }, { passive: true });
 
-    let edgeTouchStartY = 0;
+  let edgeTouchStartY = 0;
   window.addEventListener('touchstart', (e) => {
     edgeTouchStartY = e.touches[0].clientY;
   }, { passive: true });
   window.addEventListener('touchmove', (e) => {
     const currentY = e.touches[0].clientY;
     const delta = edgeTouchStartY - currentY;
-    // Raise the threshold when Lenis is active — its inertia gives the
-    // touch a longer tail, so the old 6px trigger fired mid-fling.
     const threshold = lenis ? 18 : 6;
     if (isAtTop() && delta < -threshold) {
       triggerBounce('top');
@@ -273,22 +320,16 @@ function smoothScrollTo(targetY, durationSeconds = 0.85){
     return;
   }
 
-  // Preferred path: hand the whole motion to Lenis. `lock: true` temporarily
-  // disables user input so an anchor jump isn't intercepted mid-flight, and
-  // `force: true` lets the call succeed even if Lenis is currently stopped
-  // (e.g. during the preloader). Because Lenis drives the native scroll
-  // position, ScrollTrigger picks up the new offset on its next tick.
   if (lenis) {
     lenis.scrollTo(targetY, {
       duration: durationSeconds,
-      easing: t => 1 - Math.pow(1 - t, 3),   // ease-out cubic
+      easing: t => 1 - Math.pow(1 - t, 3),
       lock: true,
       force: true
     });
     return;
   }
 
-  // Fallback 1: GSAP ScrollToPlugin
   if (hasGSAP && typeof ScrollToPlugin !== 'undefined') {
     gsap.to(window, {
       duration: durationSeconds,
@@ -298,7 +339,6 @@ function smoothScrollTo(targetY, durationSeconds = 0.85){
     return;
   }
 
-  // Fallback 2: hand-rolled rAF scroll
   const startY = window.scrollY;
   const distance = targetY - startY;
   const startTime = performance.now();
@@ -367,6 +407,17 @@ updateProgress();
 
 /* ---------- NAV PILL ---------- */
 const navPillEl = document.querySelector('.nav-pill');
+let lastPillTarget = { left: -1, width: -1 };
+
+function wobbleNavPill(){
+  if (!navPillEl || prefersReducedMotion) return;
+  navPillEl.classList.remove('is-wobbling');
+  void navPillEl.offsetWidth;
+  navPillEl.classList.add('is-wobbling');
+}
+if (navPillEl) {
+  navPillEl.addEventListener('animationend', () => navPillEl.classList.remove('is-wobbling'));
+}
 
 function updateNavPill(){
   if (!navPillEl) return;
@@ -377,7 +428,7 @@ function updateNavPill(){
   const active = nav.querySelector('.nav-link.active');
   if (!active) return;
 
-  const navStyle = getComputedStyle(nav);
+  const navStyle   = getComputedStyle(nav);
   const borderLeft = parseFloat(navStyle.borderLeftWidth) || 0;
   const borderTop  = parseFloat(navStyle.borderTopWidth)  || 0;
 
@@ -400,14 +451,70 @@ function updateNavPill(){
     void navPillEl.getBoundingClientRect();
     nav.classList.add('is-ready');
     navPillEl.style.transition = '';
+    lastPillTarget = { left: targetLeft, width: targetWidth };
     return;
   }
+
+  const moved =
+    Math.abs(targetLeft  - lastPillTarget.left)  > 1 ||
+    Math.abs(targetWidth - lastPillTarget.width) > 1;
+  lastPillTarget = { left: targetLeft, width: targetWidth };
 
   navPillEl.style.left   = targetLeft   + 'px';
   navPillEl.style.top    = targetTop    + 'px';
   navPillEl.style.width  = targetWidth  + 'px';
   navPillEl.style.height = targetHeight + 'px';
+
+  if (moved) wobbleNavPill();
 }
+
+/* ---------- NAV DROPLET / WATER EFFECT ---------- */
+(function initNavDroplets(){
+  const nav = document.querySelector('.top-nav');
+  if (!nav || prefersReducedMotion) return;
+
+  const links = nav.querySelectorAll('.nav-link');
+  if (!links.length) return;
+
+  function spawnDroplet(host, x, y){
+    const drop = document.createElement('span');
+    drop.className = 'nav-droplet';
+    drop.style.left = x + 'px';
+    drop.style.top  = y + 'px';
+    host.appendChild(drop);
+
+    const anim = drop.animate([
+      { transform:'translate(-50%,-50%) scale(0.15,0.15)', opacity:0.95, offset:0    },
+      { transform:'translate(-50%,-50%) scale(0.72,0.56)', opacity:0.90, offset:0.28 },
+      { transform:'translate(-50%,-50%) scale(1.15,0.86)', opacity:0.78, offset:0.50 },
+      { transform:'translate(-50%,-50%) scale(0.90,1.06)', opacity:0.58, offset:0.70 },
+      { transform:'translate(-50%,-50%) scale(1.52,0.72)', opacity:0.24, offset:0.86 },
+      { transform:'translate(-50%,-50%) scale(1.90,0.40)', opacity:0,    offset:1    }
+    ], { duration: 680, easing: 'cubic-bezier(.22,1,.36,1)' });
+    anim.onfinish = () => drop.remove();
+
+    const ring = document.createElement('span');
+    ring.className = 'nav-ripple';
+    ring.style.left = x + 'px';
+    ring.style.top  = y + 'px';
+    host.appendChild(ring);
+
+    const r = ring.animate([
+      { transform:'translate(-50%,-50%) scale(0.25)', opacity:0.75 },
+      { transform:'translate(-50%,-50%) scale(1.00)', opacity:0.35, offset:0.55 },
+      { transform:'translate(-50%,-50%) scale(1.90)', opacity:0    }
+    ], { duration: 720, easing: 'cubic-bezier(.22,1,.36,1)' });
+    r.onfinish = () => ring.remove();
+  }
+
+  links.forEach(link => {
+    link.addEventListener('pointerdown', (e) => {
+      const rect = link.getBoundingClientRect();
+      spawnDroplet(link, e.clientX - rect.left, e.clientY - rect.top);
+    });
+    link.addEventListener('click', () => wobbleNavPill());
+  });
+})();
 
 /* ---------- ACTIVE SECTION TRACKING ---------- */
 const sections = document.querySelectorAll('.section[id]');
@@ -451,15 +558,7 @@ if (contentPages.length) {
 
 /* ============================================================
    AMBIENT BACKGROUND — GSAP-scrubbed parallax + section colours
-   ============================================================
-   The orbs sit inside .bg-scene (fixed wrapper). We:
-     • scrub a slow scroll timeline so each orb drifts at its own
-       speed/direction (layered parallax),
-     • breathe opacity + scale subtly,
-     • shift the orb colours as different sections cross the
-       viewport centre,
-     • add a tiny lerped mouse-parallax on fine-pointer devices.
-   All movement is transform / opacity only (compositor-friendly). */
+   ============================================================ */
 (function initBackgroundScene(){
   const scene = document.querySelector('.bg-scene');
   if (!scene) return;
@@ -728,6 +827,193 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   window.addEventListener('scroll', () => requestAnimationFrame(updateParallax), { passive: true });
   updateParallax();
 }
+
+/* ============================================================
+   BUILD-ON-SCROLL — cards + section containers assemble as they
+   enter the viewport. Everything is scoped inside one IIFE so the
+   shared `isMobile` / `ROTATE` values are reachable from both the
+   grid pass and the container pass.
+   ============================================================ */
+(function initBuildCards(){
+  const GRID_SELECTOR = [
+    '.about-facts-grid',
+    '.deliver-grid',
+    '.skills-grid',
+    '.contact-grid',
+    '.edu-timeline',
+    '.experience-highlights',
+    '.simple-projects-grid',
+    '.showcase-group'
+  ].join(',');
+
+  const CARD_SELECTOR = [
+    '.fact-card',
+    '.deliver-card',
+    '.skill-card',
+    '.contact-card',
+    '.edu-item',
+    '.highlight-item',
+    '.simple-project-card',
+    '.main-project-card'
+  ].join(',');
+
+  const isMobile = window.matchMedia('(max-width: 700px)').matches;
+  const ROTATE   = isMobile ? 0 : -12;
+
+  /* ---- Pass 1: individual cards inside grids ---- */
+  const grids = document.querySelectorAll(GRID_SELECTOR);
+
+  grids.forEach(grid => {
+    const cards = Array.from(grid.children).filter(el => el.matches(CARD_SELECTOR));
+    if (!cards.length) return;
+
+    // Opt these cards out of the generic reveal batch.
+    cards.forEach(card => {
+      card.classList.remove('reveal');
+      card.classList.add('build-card');
+    });
+
+    if (prefersReducedMotion) return;
+
+    if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+      gsap.set(cards, {
+        opacity: 0,
+        y: isMobile ? 34 : 54,
+        scale: isMobile ? 0.97 : 0.93,
+        rotateX: ROTATE,
+        transformPerspective: 900,
+        transformOrigin: '50% 100%',
+        force3D: true
+      });
+
+      ScrollTrigger.batch(cards, {
+        start: 'top 90%',
+        once: true,
+        batchMax: 6,
+        onEnter: batch => {
+          gsap.to(batch, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            duration: 0.95,
+            ease: 'power3.out',
+            stagger: 0.10,
+            force3D: true,
+            onStart(){
+              batch.forEach(card => card.classList.add('is-building'));
+            },
+            onComplete(){
+              batch.forEach(card => card.classList.remove('is-building'));
+              // Hand transform back to CSS so :hover lift still works.
+              gsap.set(batch, { clearProps: 'all' });
+            }
+          });
+        }
+      });
+    } else {
+      // No GSAP — lightweight CSS fallback.
+      cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(38px)';
+        card.style.transition = 'opacity .85s cubic-bezier(.16,1,.3,1), transform .85s cubic-bezier(.16,1,.3,1)';
+      });
+
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry, i) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          obs.unobserve(el);
+          window.setTimeout(() => {
+            el.classList.add('is-building');
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+            window.setTimeout(() => {
+              el.classList.remove('is-building');
+              el.style.transition = '';
+              el.style.transform = '';
+              el.style.opacity = '';
+            }, 900);
+          }, i * 90);
+        });
+      }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+      cards.forEach(card => io.observe(card));
+    }
+  });
+
+  /* ---- Pass 2: section containers (.content-page) ----
+     These aren't grid children. The animation is deliberately flatter
+     than the card pass — a whole 66vh panel flipping on rotateX reads
+     as nauseating. Instead: rises + scales up from 0.955, with a
+     perspective origin near the top so it feels like the panel is
+     unfolding toward the viewer while the inner cards fill it in. */
+  const containerPages = document.querySelectorAll('.content-page');
+  if (!containerPages.length || prefersReducedMotion) return;
+
+  containerPages.forEach(p => p.classList.add('build-card'));
+
+  if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
+    gsap.set(containerPages, {
+      opacity: 0,
+      y: isMobile ? 30 : 52,
+      scale: isMobile ? 0.985 : 0.955,
+      transformPerspective: 1200,
+      transformOrigin: '50% 0%',
+      force3D: true
+    });
+
+    ScrollTrigger.batch(containerPages, {
+      start: 'top 92%',
+      once: true,
+      onEnter: batch => {
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.0,
+          ease: 'power3.out',
+          stagger: 0.08,
+          force3D: true,
+          onStart(){
+            batch.forEach(p => p.classList.add('is-building'));
+          },
+          onComplete(){
+            batch.forEach(p => p.classList.remove('is-building'));
+            // Release inline styles so border-color / box-shadow
+            // transitions on .content-page.is-current still work.
+            gsap.set(batch, { clearProps: 'all' });
+          }
+        });
+      }
+    });
+  } else {
+    containerPages.forEach(p => {
+      p.style.opacity = '0';
+      p.style.transform = 'translateY(36px) scale(0.96)';
+      p.style.transition = 'opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1)';
+    });
+
+    const pageIO = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        obs.unobserve(el);
+        el.classList.add('is-building');
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+        window.setTimeout(() => {
+          el.classList.remove('is-building');
+          el.style.transition = '';
+          el.style.transform = '';
+          el.style.opacity = '';
+        }, 950);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.03 });
+
+    containerPages.forEach(p => pageIO.observe(p));
+  }
+})();
 
 /* ---------- REVEAL ON SCROLL ---------- */
 if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
@@ -1020,15 +1306,7 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
      • outer  → vertical float (y only, no rotation)
      • inner  → mouse repulsion (x + y)
    GSAP drives both, and because they animate different elements
-   the two effects never fight each other.
-
-   The repulsion is measured from the OUTER letter's rect (which
-   carries the float but not the repulsion), so the force is
-   computed against the letter's natural home position — that
-   avoids a self-reinforcing feedback loop.
-
-   A single rAF gate throttles the mousemove handling so at most
-   one repulsion pass runs per frame regardless of event rate. */
+   the two effects never fight each other. */
 (function initHeroNameBalloon(){
   const heroName = document.getElementById('heroName');
   const heroCard = document.getElementById('heroInner');
@@ -1089,7 +1367,6 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
     repelRaf = null;
 
     // Batch every rect read first so we only trigger one layout pass.
-    // Read the OUTER letters (float-only), not the inner ones.
     const rects = outerLetters.map(el => el.getBoundingClientRect());
 
     for (let i = 0; i < innerLetters.length; i++){
