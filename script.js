@@ -1585,10 +1585,8 @@ if (toTopBtn) {
 }
 
 /* ============================================================
-   SWIPE NAVIGATION — home ⇄ projects
-   ============================================================
-   • On the home page, swipe right→left to open projects.html
-   • On the projects page, swipe left→right to return to index.html */
+   SWIPE NAVIGATION — home ⇄ projects with 3D PAPER FLIP
+   ============================================================ */
 (function initSwipeNavigation(){
   const isHomePage     = !!document.getElementById('heroName');
   const isProjectsPage = !!document.querySelector('.projects-showcase');
@@ -1598,18 +1596,11 @@ if (toTopBtn) {
   const ALLOW_DIR  = isHomePage ? 'left' : 'right';
   const FROM       = isHomePage ? 'right' : 'left';
 
-  const DIST_THRESHOLD  = 90;
-  const VELOCITY_MIN    = 0.45;
-  const AXIS_SLOP       = 1.4;
-  const MAX_DURATION_MS = 900;
-  const DRAG_SPAN       = 0.75;
-
   let startX = 0, startY = 0, startT = 0;
   let tracking = false;
   let axis = null;
   let veil = null;
   let navigated = false;
-  let suppressClickUntil = 0;
 
   function isBlocked(target){
     if (document.body.classList.contains('menu-open')) return true;
@@ -1621,94 +1612,102 @@ if (toTopBtn) {
     );
   }
 
-  function showVeil(){
+  function createVeil(){
     if (veil) return veil;
     veil = document.createElement('div');
     veil.className = 'swipe-veil swipe-veil--from-' + FROM;
-    document.body.style.perspective = '1200px';
     document.body.appendChild(veil);
+
+    // Ensure initial transform is set
+    if (FROM === 'right') {
+      veil.style.transform = 'translateX(100%) rotateY(0deg)';
+      veil.style.transformOrigin = 'right center';
+    } else {
+      veil.style.transform = 'translateX(-100%) rotateY(0deg)';
+      veil.style.transformOrigin = 'left center';
+    }
+    veil.style.transformStyle = 'preserve-3d';
     return veil;
   }
 
-  function hideVeil(){
+  function removeVeil(){
     if (!veil) return;
     const el = veil;
     veil = null;
-    el.style.transition = 'transform .34s cubic-bezier(.4,0,1,1)';
-    el.style.transform  = FROM === 'right' ? 'translateX(100%) rotateY(0deg)' : 'translateX(-100%) rotateY(0deg)';
-    el.addEventListener('transitionend', () => el.remove(), { once:true });
-    window.setTimeout(() => el.remove(), 600);
+    el.style.transition = 'transform 0.34s cubic-bezier(.4,0,1,1)';
+    if (FROM === 'right') {
+      el.style.transform = 'translateX(100%) rotateY(0deg)';
+    } else {
+      el.style.transform = 'translateX(-100%) rotateY(0deg)';
+    }
+    setTimeout(() => el && el.remove(), 400);
   }
 
-  function finish(){
-    if (navigated) return;
+  function navigate(){
+    if (navigated || !veil) return;
     navigated = true;
 
-    let gone = false;
-    const go = () => {
-      if (gone) return;
-      gone = true;
-      window.location.href = TARGET_URL;
-    };
-
-    if (!veil){ go(); return; }
-
-    const el = veil;
-    el.classList.add('flip-complete');
-    el.style.transition = 'transform .42s cubic-bezier(.7,0,.3,1)';
-    el.style.transform  = FROM === 'right'
-      ? 'translateX(0) rotateY(-90deg)'
-      : 'translateX(0) rotateY(90deg)';
-    el.addEventListener('transitionend', go, { once:true });
-    window.setTimeout(go, 640);
+    veil.style.transition = 'transform 0.42s cubic-bezier(.7,0,.3,1)';
+    if (FROM === 'right') {
+      veil.style.transform = 'translateX(0) rotateY(-90deg)';
+    } else {
+      veil.style.transform = 'translateX(0) rotateY(90deg)';
+    }
+    setTimeout(() => window.location.href = TARGET_URL, 450);
   }
 
   document.addEventListener('touchstart', (e) => {
-    if (navigated) return;
-    if (e.touches.length !== 1){ tracking = false; return; }
-    if (isBlocked(e.target)){ tracking = false; return; }
-
+    if (navigated || e.touches.length !== 1 || isBlocked(e.target)) return;
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     startT = performance.now();
-    axis = null;
     tracking = true;
+    axis = null;
   }, { passive: true });
 
   document.addEventListener('touchmove', (e) => {
     if (!tracking || navigated) return;
 
-    const x = e.touches[0].clientX;
-    const y = e.touches[0].clientY;
-    const dx = x - startX;
-    const dy = y - startY;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
 
-    if (!axis){
+    // Determine axis
+    if (!axis) {
       if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
-      axis = Math.abs(dx) > Math.abs(dy) * AXIS_SLOP ? 'x' : 'y';
-      if (axis === 'y'){ tracking = false; return; }
+      axis = Math.abs(dx) > Math.abs(dy) * 1.4 ? 'x' : 'y';
+      if (axis === 'y') {
+        tracking = false;
+        return;
+      }
     }
+
     if (axis !== 'x') return;
 
+    // Check direction
     const dir = dx < 0 ? 'left' : 'right';
-    if (dir !== ALLOW_DIR){ hideVeil(); return; }
+    if (dir !== ALLOW_DIR) {
+      removeVeil();
+      return;
+    }
 
-    showVeil();
-    veil.classList.add('is-flipping');
+    // Create veil if needed
+    if (!veil) {
+      createVeil();
+      veil.classList.add('is-flipping');
+    }
 
-    const span     = window.innerWidth * DRAG_SPAN;
-    const progress = Math.min(Math.abs(dx) / span, 1);
-
-    /* Paper flip rotation: 0deg (hidden) → 85deg (fully flipped) */
+    // Calculate flip animation
+    const maxDrag = window.innerWidth * 0.75;
+    const progress = Math.min(Math.abs(dx) / maxDrag, 1);
     const rotation = progress * 85;
-    const translatePercent = 100 - (progress * 100);
+    const translate = 100 - (progress * 100);
 
+    // Apply 3D transform
     veil.style.transition = 'none';
-
     if (FROM === 'right') {
-      veil.style.transform = `translateX(${translatePercent}%) rotateY(-${rotation}deg)`;
+      veil.style.transform = `translateX(${translate}%) rotateY(-${rotation}deg)`;
     } else {
-      veil.style.transform = `translateX(${-translatePercent}%) rotateY(${rotation}deg)`;
+      veil.style.transform = `translateX(${-translate}%) rotateY(${rotation}deg)`;
     }
   }, { passive: true });
 
@@ -1716,31 +1715,23 @@ if (toTopBtn) {
     if (!tracking || navigated) return;
     tracking = false;
 
-    const t  = e.changedTouches[0];
-    const dx = t.clientX - startX;
-    const dy = t.clientY - startY;
-    const dt = Math.max(performance.now() - startT, 1);
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    const dt = performance.now() - startT;
 
-    const dist        = Math.abs(dx);
-    const velocity    = dist / dt;
-    const correctDir  = ALLOW_DIR === 'left' ? dx < 0 : dx > 0;
-    const horizontal  = Math.abs(dx) > Math.abs(dy) * 1.2;
-    const notTooLong  = dt < MAX_DURATION_MS;
+    const dist = Math.abs(dx);
+    const velocity = dist / Math.max(dt, 1);
+    const correctDir = ALLOW_DIR === 'left' ? dx < 0 : dx > 0;
+    const horizontal = Math.abs(dx) > Math.abs(dy) * 1.2;
+    const notTooLong = dt < 900;
 
-    const shouldNavigate =
-      axis === 'x' &&
-      correctDir &&
-      horizontal &&
-      notTooLong &&
-      Math.abs(dy) < 90 &&
-      (dist > DIST_THRESHOLD || (velocity > VELOCITY_MIN && dist > 40));
+    const shouldNavigate = axis === 'x' && correctDir && horizontal && notTooLong && Math.abs(dy) < 90 &&
+      (dist > 90 || (velocity > 0.45 && dist > 40));
 
-    if (shouldNavigate){
-      suppressClickUntil = performance.now() + 400;
-      finish();
+    if (shouldNavigate) {
+      navigate();
     } else {
-      if (axis === 'x') suppressClickUntil = performance.now() + 350;
-      hideVeil();
+      removeVeil();
     }
     axis = null;
   }, { passive: true });
@@ -1748,13 +1739,7 @@ if (toTopBtn) {
   document.addEventListener('touchcancel', () => {
     tracking = false;
     axis = null;
-    hideVeil();
+    removeVeil();
   }, { passive: true });
 
-  document.addEventListener('click', (e) => {
-    if (performance.now() < suppressClickUntil){
-      e.stopPropagation();
-      e.preventDefault();
-    }
-  }, true);
 })();
