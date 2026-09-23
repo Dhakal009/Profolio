@@ -9,8 +9,6 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
   const toggle = document.getElementById('themeToggle');
   if (!toggle) return;
 
-  /* Fallback colours (matched to each theme's --bg) used only when
-     the View Transitions API isn't available. */
   const THEME_BG = { dark: '#050507', light: '#f7f6fb' };
 
   function updateLabel(theme){
@@ -20,12 +18,6 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
   function applyTheme(next){
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* ---- Preferred path: native View Transition ----
-       The browser snapshots the current (old) theme, we swap
-       data-theme inside the callback so it also snapshots the new
-       theme, then the two are stacked and CSS reveals the new one
-       via an animated clip-path. The user sees the actual dark and
-       light palettes transitioning into each other. */
     if (!reduce && typeof document.startViewTransition === 'function') {
       document.startViewTransition(() => {
         root.setAttribute('data-theme', next);
@@ -33,9 +25,6 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
       return;
     }
 
-    /* ---- Fallback path: solid-colour wipe (WAAPI) ----
-       Used by Firefox and older Safari. Same direction, same timing,
-       just without the true colour morph. */
     document.querySelectorAll('.theme-wipe').forEach(w => w.remove());
 
     if (reduce || typeof Element.prototype.animate !== 'function') {
@@ -65,22 +54,16 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
 
   updateLabel(root.getAttribute('data-theme') || 'dark');
 
-    toggle.addEventListener('click', (e) => {
+  toggle.addEventListener('click', (e) => {
     const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
     applyTheme(next);
     updateLabel(next);
-    try { localStorage.setItem('theme', next); } catch (e) { /* private mode, etc. */ }
+    try { localStorage.setItem('theme', next); } catch (err) { /* private mode */ }
 
     toggle.classList.remove('theme-changed');
     void toggle.offsetWidth;
     toggle.classList.add('theme-changed');
 
-    /* The intensity panel is shown via .theme-control:focus-within.
-       A mouse click leaves the toggle focused, which pins the panel
-       open. Blur it so the panel collapses. `e.detail > 0` means the
-       event came from a real pointer — keyboard activation reports
-       detail 0 and skips the blur, keeping the button focusable for
-       tab users. */
     if (e.detail > 0) toggle.blur();
   });
 
@@ -103,7 +86,7 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
     slider.setAttribute('aria-valuenow', percent);
     if (valueLabel) valueLabel.textContent = percent + '%';
     if (persist) {
-      try { localStorage.setItem('intensity', percent); } catch (e) { /* private mode, etc. */ }
+      try { localStorage.setItem('intensity', percent); } catch (err) { /* private mode */ }
     }
   }
 
@@ -111,7 +94,7 @@ const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
   try {
     const saved = localStorage.getItem('intensity');
     if (saved) savedPercent = parseInt(saved, 10);
-  } catch (e) { /* private mode, etc. */ }
+  } catch (err) { /* private mode */ }
   applyIntensity(savedPercent, false);
 
   slider.addEventListener('input', () => {
@@ -198,17 +181,13 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
   ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
-/* Refresh ScrollTrigger after fonts load so trigger positions use final metrics. */
 if (hasGSAP && typeof ScrollTrigger !== 'undefined' && document.fonts && document.fonts.ready) {
   document.fonts.ready.then(() => ScrollTrigger.refresh());
 }
 
 /* ============================================================
    LENIS SMOOTH SCROLL
-   ============================================================
-   Lenis drives the native scroll position, so every existing
-   consumer of window.scrollY (progress bar, header state, back-to-
-   top, edge bounce, ScrollTrigger) continues to work unchanged. */
+   ============================================================ */
 let lenis = null;
 
 function initLenis(){
@@ -218,15 +197,14 @@ function initLenis(){
 
   lenis = new Lenis({
     duration: 1.15,
-    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // expo-out
+    easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
-    syncTouch: false,          // touch stays native on mobile
+    syncTouch: false,
     wheelMultiplier: 1,
     touchMultiplier: 1.5,
     infinite: false
   });
 
-  // Sync Lenis → ScrollTrigger (one shared timeline, no drift)
   if (hasGSAP && typeof ScrollTrigger !== 'undefined') {
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => { lenis.raf(time * 1000); });
@@ -237,7 +215,6 @@ function initLenis(){
     requestAnimationFrame(raf);
   }
 
-  // If the preloader is still on-screen, pause Lenis until it lifts.
   if (document.body.classList.contains('is-preloading')) {
     lenis.stop();
     const obs = new MutationObserver(() => {
@@ -259,7 +236,7 @@ function updateProgress(){
   const scrollTop = window.scrollY;
   const docHeight = document.documentElement.scrollHeight - window.innerHeight;
   const pct = docHeight > 0 ? Math.min(scrollTop / docHeight, 1) : 0;
-  progressBar.style.transform = 'scaleX(' + pct + ')';
+  if (progressBar) progressBar.style.transform = 'scaleX(' + pct + ')';
 }
 
 /* ---------- EDGE BOUNCE ---------- */
@@ -378,6 +355,7 @@ const siteHeader = document.getElementById('siteHeader');
 let ticking = false;
 
 function handleHeaderState(){
+  if (!siteHeader) return;
   siteHeader.classList.toggle('scrolled', window.scrollY > 40);
 }
 
@@ -577,7 +555,6 @@ if (contentPages.length) {
     return parseFloat(v) || 1;
   }
 
-  // --- Scroll parallax ------------------------------------------------
   const scrollTl = gsap.timeline({
     scrollTrigger: {
       trigger: document.documentElement,
@@ -598,7 +575,6 @@ if (contentPages.length) {
     scrollTl.fromTo(orb3, { opacity: 0.25 * getOrbOpacity() }, { opacity: 0.4 * getOrbOpacity(), ease:'sine.inOut' }, 0);
   }
 
-  // --- Section colour shifts -----------------------------------------
   const palette = {
     home:       { a:'#8b5cf6', b:'#22d3ee', c:'#6d28d9' },
     about:      { a:'#6d28d9', b:'#8b5cf6', c:'#22d3ee' },
@@ -657,7 +633,6 @@ if (contentPages.length) {
     });
   });
 
-  // --- Mouse parallax (desktop only) ---------------------------------
   if (hasFinePointer && !isMobile){
     let tx = 0, ty = 0, cx = 0, cy = 0;
     let rafId = null;
@@ -829,10 +804,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
 }
 
 /* ============================================================
-   BUILD-ON-SCROLL — cards + section containers assemble as they
-   enter the viewport. Everything is scoped inside one IIFE so the
-   shared `isMobile` / `ROTATE` values are reachable from both the
-   grid pass and the container pass.
+   BUILD-ON-SCROLL
    ============================================================ */
 (function initBuildCards(){
   const GRID_SELECTOR = [
@@ -860,14 +832,12 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   const isMobile = window.matchMedia('(max-width: 700px)').matches;
   const ROTATE   = isMobile ? 0 : -12;
 
-  /* ---- Pass 1: individual cards inside grids ---- */
   const grids = document.querySelectorAll(GRID_SELECTOR);
 
   grids.forEach(grid => {
     const cards = Array.from(grid.children).filter(el => el.matches(CARD_SELECTOR));
     if (!cards.length) return;
 
-    // Opt these cards out of the generic reveal batch.
     cards.forEach(card => {
       card.classList.remove('reveal');
       card.classList.add('build-card');
@@ -905,14 +875,12 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
             },
             onComplete(){
               batch.forEach(card => card.classList.remove('is-building'));
-              // Hand transform back to CSS so :hover lift still works.
               gsap.set(batch, { clearProps: 'all' });
             }
           });
         }
       });
     } else {
-      // No GSAP — lightweight CSS fallback.
       cards.forEach(card => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(38px)';
@@ -942,12 +910,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
     }
   });
 
-  /* ---- Pass 2: section containers (.content-page) ----
-     These aren't grid children. The animation is deliberately flatter
-     than the card pass — a whole 66vh panel flipping on rotateX reads
-     as nauseating. Instead: rises + scales up from 0.955, with a
-     perspective origin near the top so it feels like the panel is
-     unfolding toward the viewer while the inner cards fill it in. */
   const containerPages = document.querySelectorAll('.content-page');
   if (!containerPages.length || prefersReducedMotion) return;
 
@@ -980,8 +942,6 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
           },
           onComplete(){
             batch.forEach(p => p.classList.remove('is-building'));
-            // Release inline styles so border-color / box-shadow
-            // transitions on .content-page.is-current still work.
             gsap.set(batch, { clearProps: 'all' });
           }
         });
@@ -1104,7 +1064,7 @@ if (hasGSAP && typeof ScrollTrigger !== 'undefined' && !prefersReducedMotion) {
   cards.forEach(card => observer.observe(card));
 })();
 
-/* ---------- TITLE MERGE (page title → content title) ---------- */
+/* ---------- TITLE MERGE ---------- */
 function splitTitleChars(titleEl){
   if (titleEl.dataset.split === 'true') {
     return titleEl.querySelectorAll('.tc-char');
@@ -1301,18 +1261,12 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
 
 /* ============================================================
    HERO NAME — balloon float + per-letter mouse repulsion
-   ============================================================
-   Two nested spans per letter:
-     • outer  → vertical float (y only, no rotation)
-     • inner  → mouse repulsion (x + y)
-   GSAP drives both, and because they animate different elements
-   the two effects never fight each other. */
+   ============================================================ */
 (function initHeroNameBalloon(){
   const heroName = document.getElementById('heroName');
   const heroCard = document.getElementById('heroInner');
   if (!heroName || !heroCard) return;
 
-  // --- Split each line into per-letter spans -----------------------------
   const lines = heroName.querySelectorAll('.reveal-line');
   const outerLetters = [];
   const innerLetters = [];
@@ -1335,7 +1289,6 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
 
   if (prefersReducedMotion || !hasGSAP) return;
 
-  // --- Balloon float: y only, no rotation --------------------------------
   outerLetters.forEach((letter, i) => {
     const drift = gsap.utils.random(5, 9);
     const durY  = gsap.utils.random(3.8, 5.2);
@@ -1354,7 +1307,6 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
     );
   });
 
-  // --- Repulsion ---------------------------------------------------------
   const REPEL_RADIUS = 190;
   const MAX_PUSH     = 48;
   const FOLLOW_DUR   = 0.4;
@@ -1366,7 +1318,6 @@ if (heroSection && hasFinePointer && !prefersReducedMotion) {
   function applyRepel(){
     repelRaf = null;
 
-    // Batch every rect read first so we only trigger one layout pass.
     const rects = outerLetters.map(el => el.getBoundingClientRect());
 
     for (let i = 0; i < innerLetters.length; i++){
@@ -1471,6 +1422,7 @@ if (menuToggle) {
     if (navOverlay) navOverlay.classList.add('open');
     document.body.classList.add('menu-open');
     document.body.style.overflow = 'hidden';
+    if (lenis) lenis.stop();
   }
 
   function closeMenu(){
@@ -1480,6 +1432,7 @@ if (menuToggle) {
     if (navOverlay) navOverlay.classList.remove('open');
     document.body.classList.remove('menu-open');
     document.body.style.overflow = '';
+    if (lenis) lenis.start();
   }
 
   menuToggle.addEventListener('click', () => {
@@ -1614,16 +1567,184 @@ if (projectCarousel && projectTrack) {
 /* ---------- BACK TO TOP ---------- */
 const toTopBtn = document.getElementById('toTop');
 function toggleBackToTop(){
+  if (!toTopBtn) return;
   if (window.scrollY > 600) {
     toTopBtn.classList.add('visible');
   } else {
     toTopBtn.classList.remove('visible');
   }
 }
-toTopBtn.addEventListener('click', () => {
-  if (prefersReducedMotion) {
-    window.scrollTo(0, 0);
-  } else {
-    smoothScrollTo(0, 1.25);
+if (toTopBtn) {
+  toTopBtn.addEventListener('click', () => {
+    if (prefersReducedMotion) {
+      window.scrollTo(0, 0);
+    } else {
+      smoothScrollTo(0, 1.25);
+    }
+  });
+}
+
+/* ============================================================
+   SWIPE NAVIGATION — home ⇄ projects
+   ============================================================
+   • On the home page, swipe right→left to open projects.html
+   • On the projects page, swipe left→right to return to index.html */
+(function initSwipeNavigation(){
+  const isHomePage     = !!document.getElementById('heroName');
+  const isProjectsPage = !!document.querySelector('.projects-showcase');
+  if (!isHomePage && !isProjectsPage) return;
+
+  const TARGET_URL = isHomePage ? 'projects.html' : 'index.html';
+  const ALLOW_DIR  = isHomePage ? 'left' : 'right';
+  const FROM       = isHomePage ? 'right' : 'left';
+
+  const DIST_THRESHOLD  = 90;
+  const VELOCITY_MIN    = 0.45;
+  const AXIS_SLOP       = 1.4;
+  const MAX_DURATION_MS = 900;
+  const DRAG_SPAN       = 0.75;
+
+  let startX = 0, startY = 0, startT = 0;
+  let tracking = false;
+  let axis = null;
+  let veil = null;
+  let navigated = false;
+  let suppressClickUntil = 0;
+
+  function isBlocked(target){
+    if (document.body.classList.contains('menu-open')) return true;
+    const modal = document.getElementById('projectModal');
+    if (modal && modal.classList.contains('is-open')) return true;
+    return !!target.closest(
+      '.project-modal, .project-carousel, .modal-gallery-thumbs, ' +
+      '.intensity-panel, input[type="range"], [data-lenis-prevent]'
+    );
   }
-});
+
+  function showVeil(){
+    if (veil) return veil;
+    veil = document.createElement('div');
+    veil.className = 'swipe-veil swipe-veil--from-' + FROM;
+    veil.style.transform = FROM === 'right' ? 'translateX(100%)' : 'translateX(-100%)';
+    document.body.appendChild(veil);
+    return veil;
+  }
+
+  function hideVeil(){
+    if (!veil) return;
+    const el = veil;
+    veil = null;
+    el.style.transition = 'transform .34s cubic-bezier(.4,0,1,1)';
+    el.style.transform  = FROM === 'right' ? 'translateX(100%)' : 'translateX(-100%)';
+    el.addEventListener('transitionend', () => el.remove(), { once:true });
+    window.setTimeout(() => el.remove(), 600);
+  }
+
+  function finish(){
+    if (navigated) return;
+    navigated = true;
+
+    let gone = false;
+    const go = () => {
+      if (gone) return;
+      gone = true;
+      window.location.href = TARGET_URL;
+    };
+
+    if (!veil){ go(); return; }
+
+    const el = veil;
+    el.style.transition = 'transform .42s cubic-bezier(.7,0,.3,1)';
+    el.style.transform  = 'translateX(0)';
+    el.addEventListener('transitionend', go, { once:true });
+    window.setTimeout(go, 640);
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    if (navigated) return;
+    if (e.touches.length !== 1){ tracking = false; return; }
+    if (isBlocked(e.target)){ tracking = false; return; }
+
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startT = performance.now();
+    axis = null;
+    tracking = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!tracking || navigated) return;
+
+    const x = e.touches[0].clientX;
+    const y = e.touches[0].clientY;
+    const dx = x - startX;
+    const dy = y - startY;
+
+    if (!axis){
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      axis = Math.abs(dx) > Math.abs(dy) * AXIS_SLOP ? 'x' : 'y';
+      if (axis === 'y'){ tracking = false; return; }
+    }
+    if (axis !== 'x') return;
+
+    const dir = dx < 0 ? 'left' : 'right';
+    if (dir !== ALLOW_DIR){ hideVeil(); return; }
+
+    showVeil();
+
+    const span     = window.innerWidth * DRAG_SPAN;
+    const progress = Math.min(Math.abs(dx) / span, 1);
+    const offset   = (1 - progress * 0.5) * 100;
+
+    veil.style.transition = 'none';
+    veil.style.transform  = FROM === 'right'
+      ? `translateX(${offset}%)`
+      : `translateX(${-offset}%)`;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!tracking || navigated) return;
+    tracking = false;
+
+    const t  = e.changedTouches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    const dt = Math.max(performance.now() - startT, 1);
+
+    const dist        = Math.abs(dx);
+    const velocity    = dist / dt;
+    const correctDir  = ALLOW_DIR === 'left' ? dx < 0 : dx > 0;
+    const horizontal  = Math.abs(dx) > Math.abs(dy) * 1.2;
+    const notTooLong  = dt < MAX_DURATION_MS;
+
+    const shouldNavigate =
+      axis === 'x' &&
+      correctDir &&
+      horizontal &&
+      notTooLong &&
+      Math.abs(dy) < 90 &&
+      (dist > DIST_THRESHOLD || (velocity > VELOCITY_MIN && dist > 40));
+
+    if (shouldNavigate){
+      suppressClickUntil = performance.now() + 400;
+      finish();
+    } else {
+      if (axis === 'x') suppressClickUntil = performance.now() + 350;
+      hideVeil();
+    }
+    axis = null;
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', () => {
+    tracking = false;
+    axis = null;
+    hideVeil();
+  }, { passive: true });
+
+  document.addEventListener('click', (e) => {
+    if (performance.now() < suppressClickUntil){
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }, true);
+})();
