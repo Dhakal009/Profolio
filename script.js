@@ -1625,7 +1625,7 @@ if (toTopBtn) {
     if (veil) return veil;
     veil = document.createElement('div');
     veil.className = 'swipe-veil swipe-veil--from-' + FROM;
-    veil.style.transform = FROM === 'right' ? 'translateX(100%)' : 'translateX(-100%)';
+    document.body.style.perspective = '1200px';
     document.body.appendChild(veil);
     return veil;
   }
@@ -1635,7 +1635,7 @@ if (toTopBtn) {
     const el = veil;
     veil = null;
     el.style.transition = 'transform .34s cubic-bezier(.4,0,1,1)';
-    el.style.transform  = FROM === 'right' ? 'translateX(100%)' : 'translateX(-100%)';
+    el.style.transform  = FROM === 'right' ? 'translateX(100%) rotateY(0deg)' : 'translateX(-100%) rotateY(0deg)';
     el.addEventListener('transitionend', () => el.remove(), { once:true });
     window.setTimeout(() => el.remove(), 600);
   }
@@ -1654,8 +1654,11 @@ if (toTopBtn) {
     if (!veil){ go(); return; }
 
     const el = veil;
+    el.classList.add('flip-complete');
     el.style.transition = 'transform .42s cubic-bezier(.7,0,.3,1)';
-    el.style.transform  = 'translateX(0)';
+    el.style.transform  = FROM === 'right'
+      ? 'translateX(0) rotateY(-90deg)'
+      : 'translateX(0) rotateY(90deg)';
     el.addEventListener('transitionend', go, { once:true });
     window.setTimeout(go, 640);
   }
@@ -1691,15 +1694,22 @@ if (toTopBtn) {
     if (dir !== ALLOW_DIR){ hideVeil(); return; }
 
     showVeil();
+    veil.classList.add('is-flipping');
 
     const span     = window.innerWidth * DRAG_SPAN;
     const progress = Math.min(Math.abs(dx) / span, 1);
-    const offset   = (1 - progress * 0.5) * 100;
+
+    /* Paper flip rotation: 0deg (hidden) → 85deg (fully flipped) */
+    const rotation = progress * 85;
+    const translatePercent = 100 - (progress * 100);
 
     veil.style.transition = 'none';
-    veil.style.transform  = FROM === 'right'
-      ? `translateX(${offset}%)`
-      : `translateX(${-offset}%)`;
+
+    if (FROM === 'right') {
+      veil.style.transform = `translateX(${translatePercent}%) rotateY(-${rotation}deg)`;
+    } else {
+      veil.style.transform = `translateX(${-translatePercent}%) rotateY(${rotation}deg)`;
+    }
   }, { passive: true });
 
   document.addEventListener('touchend', (e) => {
