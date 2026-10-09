@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const projects = [
   {
@@ -42,12 +42,12 @@ const ArrowUpRight = () => (
 );
 
 function Projects() {
+  const navigate = useNavigate();
   return (
     <>
-      <section className="page-hero" aria-labelledby="projects-title">
-        <div className="container">
-          <span className="section-index reveal">Selected work</span>
-          <h1 className="page-title reveal" id="projects-title">Projects</h1>
+      <section className="page-hero" aria-label="Selected work header">
+        <div className="container page-hero-content">
+          <span className="section-index reveal">Selected Work</span>
           <p className="page-desc reveal">
             A curated selection of my most impactful projects, ranging from high-performance web applications and enterprise tools to immersive creative experiences.
           </p>
@@ -97,9 +97,13 @@ function Projects() {
             <p>
               I'm actively taking on new projects and looking for exciting collaborations. Whether it's a completely new platform or optimizing an existing app, I'm here to help.
             </p>
-            <Link to="/#contact" className="btn btn--primary">
+            <button
+              type="button"
+              onClick={() => navigate('/#contact')}
+              className="btn btn--primary"
+            >
               Start a Conversation <ArrowUpRight />
-            </Link>
+            </button>
           </div>
         </div>
       </section>

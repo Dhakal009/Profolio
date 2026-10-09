@@ -1,11 +1,3 @@
-import { Link } from 'react-router-dom';
-
-const ArrowUpRight = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M7 17L17 7M17 7H9M17 7v8" />
-  </svg>
-);
-
 // Split a word into masked characters for the staggered rise-in
 function SplitWord({ text, offset = 0 }) {
   return text.split('').map((ch, i) => (
@@ -19,14 +11,6 @@ function Hero() {
   return (
     <div className="hero">
       <div className="hero-head">
-        <p className="hero-meta" data-hero style={{ '--d': '0.05s' }}>
-          <span>Full Stack Developer</span>
-          <span className="hero-chip">Kathmandu, Nepal</span>
-          <span className="hero-meta-status">
-            <span className="status-dot" aria-hidden="true" /> Available <em>for</em> Work
-          </span>
-        </p>
-        
         <div className="hero-composition">
           <h1 className="hero-name" id="hero-name" aria-label="Bikash Dhakal">
             <span className="hero-name-word">

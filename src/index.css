@@ -2,6 +2,8 @@
 
 @import './styles/design-tokens.css';
 @import './styles/components.css';
+@import './styles/terminal.css';
+@import './styles/search.css';
 
 /* Tailwind preflight is intentionally omitted — design-tokens.css ships its own reset */
 @tailwind components;

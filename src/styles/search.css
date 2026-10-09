@@ -1,0 +1,407 @@
+/* ============================================================
+   SEARCH MODAL & SEARCH BUTTON STYLES (MINIMAL & HIGH PERFORMANCE)
+   ============================================================ */
+
+/* Minimal Icon-Only Search Trigger Button */
+.search-toggle-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--foam);
+  cursor: pointer;
+  transition: transform 0.3s var(--spring), background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.search-toggle-btn::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.45), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+[data-theme='light'] .search-toggle-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.search-toggle-btn:hover {
+  transform: translateY(-2px) scale(1.06);
+  background: var(--surface);
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 8px 24px -4px rgba(56, 189, 248, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25);
+  color: #38bdf8;
+}
+
+.search-toggle-btn:hover::before {
+  opacity: 1;
+}
+
+.search-toggle-btn:active {
+  transform: scale(0.92);
+  transition-duration: 0.1s;
+}
+
+.search-toggle-icon {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2.2;
+  transition: transform 0.3s var(--spring), stroke 0.2s ease;
+}
+
+.search-toggle-btn:hover .search-toggle-icon {
+  transform: scale(1.15) rotate(-10deg);
+}
+
+/* Modal Backdrop */
+.search-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(3.5rem, 12vh, 7rem) 1rem 2rem;
+  animation: searchBackdropIn 0.2s var(--ease-out) forwards;
+}
+
+@keyframes searchBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Simplified Modal Dialog */
+.search-dialog {
+  width: 100%;
+  max-width: 580px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: 0 25px 75px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  animation: searchDialogIn 0.25s var(--ease-out) forwards;
+}
+
+[data-theme='light'] .search-dialog {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.14);
+  box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes searchDialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Search input bar inside dialog */
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+[data-theme='light'] .search-input-wrapper {
+  background: #f8fafc;
+}
+
+.search-input-icon {
+  width: 20px;
+  height: 20px;
+  color: #38bdf8;
+  flex-shrink: 0;
+}
+
+.search-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--foam);
+  caret-color: #38bdf8;
+}
+
+.search-input-field::placeholder {
+  color: var(--subtle);
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.search-input-clear {
+  background: transparent;
+  border: none;
+  color: var(--subtle);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--dur-fast) ease;
+}
+
+.search-input-clear:hover {
+  color: var(--foam);
+}
+
+.search-esc-btn {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--subtle);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 0.18rem 0.45rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-esc-btn:hover {
+  color: var(--foam);
+  border-color: var(--line-strong);
+}
+
+/* Section Header (Results / Quick Links) */
+.search-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.35rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--subtle);
+  user-select: none;
+}
+
+.search-results-count {
+  font-weight: 500;
+  text-transform: lowercase;
+  opacity: 0.85;
+}
+
+/* Results container */
+.search-results-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0.35rem 0.65rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.search-results-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.search-results-list::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 4px;
+}
+
+/* Result item */
+.search-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s var(--ease-out);
+  width: 100%;
+  text-align: left;
+}
+
+.search-result-item:hover,
+.search-result-item.is-selected {
+  background: var(--surface-2);
+  border-color: var(--line);
+  transform: translateX(2px);
+}
+
+[data-theme='light'] .search-result-item:hover,
+[data-theme='light'] .search-result-item.is-selected {
+  background: #f1f5f9;
+}
+
+.search-result-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.search-result-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.search-result-title {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--foam);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-category {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+[data-theme='light'] .search-result-category {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.search-result-desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.search-result-arrow {
+  color: var(--subtle);
+  flex-shrink: 0;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.search-result-item:hover .search-result-arrow,
+.search-result-item.is-selected .search-result-arrow {
+  color: #38bdf8;
+  transform: translateX(3px);
+}
+
+/* Match highlight */
+.search-highlight {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border-radius: 2px;
+  padding: 0 0.15rem;
+  font-weight: 700;
+}
+
+[data-theme='light'] .search-highlight {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.15);
+}
+
+/* Empty State */
+.search-empty-state {
+  padding: 2.75rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+}
+
+.search-empty-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--subtle);
+  margin-bottom: 0.25rem;
+}
+
+.search-empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--foam);
+}
+
+.search-empty-desc {
+  font-size: 0.825rem;
+  color: var(--muted);
+  max-width: 20rem;
+}
+
+/* Minimal Modal Footer */
+.search-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.65rem 1.35rem;
+  border-top: 1px solid var(--line);
+  background: var(--surface-2);
+  font-size: 0.725rem;
+  color: var(--subtle);
+}
+
+[data-theme='light'] .search-modal-footer {
+  background: #f8fafc;
+}
+
+.search-footer-shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.search-footer-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.search-footer-key kbd {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}

@@ -13,28 +13,60 @@ import Preloader from '../hero/Preloader';
 // Elements entering together are staggered for a smooth cascade.
 function useGlobalReveal(pathname) {
   useEffect(() => {
-    const elements = document.querySelectorAll('.reveal:not(.is-visible)');
-    if (!('IntersectionObserver' in window)) {
-      elements.forEach((el) => el.classList.add('is-visible'));
-      return;
-    }
+    let observer = null;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let i = 0;
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.style.setProperty('--reveal-delay', `${Math.min(i, 6) * 80}ms`);
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-          i += 1;
-        });
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
-    );
+    const observeUnrevealed = () => {
+      const elements = document.querySelectorAll('.reveal:not(.is-visible)');
+      if (!elements.length) return;
 
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+      if (!('IntersectionObserver' in window)) {
+        elements.forEach((el) => el.classList.add('is-visible'));
+        return;
+      }
+
+      if (!observer) {
+        observer = new IntersectionObserver(
+          (entries) => {
+            let i = 0;
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.style.setProperty('--reveal-delay', `${Math.min(i, 6) * 60}ms`);
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+              i += 1;
+            });
+          },
+          { threshold: 0.05, rootMargin: '0px 0px 50px 0px' }
+        );
+      }
+
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('is-visible');
+        } else {
+          observer.observe(el);
+        }
+      });
+    };
+
+    observeUnrevealed();
+    const t1 = setTimeout(observeUnrevealed, 50);
+    const t2 = setTimeout(observeUnrevealed, 250);
+    const t3 = setTimeout(observeUnrevealed, 550);
+
+    const mutationObserver = new MutationObserver(() => {
+      observeUnrevealed();
+    });
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      mutationObserver.disconnect();
+      if (observer) observer.disconnect();
+    };
   }, [pathname]);
 }
 
@@ -51,6 +83,7 @@ function useRouteScroll(pathname, hash) {
         else target.scrollIntoView({ behavior: 'smooth' });
       } else if (lenis) {
         lenis.scrollTo(0, { immediate: true });
+        lenis.resize();
       } else {
         window.scrollTo(0, 0);
       }
@@ -61,6 +94,7 @@ function useRouteScroll(pathname, hash) {
 
 function Shell() {
   const { pathname, hash } = useLocation();
+  const { lenis } = useLenis();
   useGlobalReveal(pathname);
   useRouteScroll(pathname, hash);
 
@@ -74,10 +108,13 @@ function Shell() {
         <AnimatePresence mode="wait">
           <motion.div 
             key={pathname}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            onAnimationComplete={() => {
+              if (lenis) lenis.resize();
+            }}
             className="page"
           >
             <Outlet />

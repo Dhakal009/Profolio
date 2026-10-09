@@ -1,11 +1,6 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Hero from '../components/hero/Hero';
-
-const facts = [
-  { label: 'Role', value: 'Full Stack Engineer & UI Designer' },
-  { label: 'Location', value: 'Kathmandu, Nepal (Open to Remote)' },
-  { label: 'Specialties', value: 'React, Node.js, Next.js, Framer Motion, TypeScript' },
-];
+import LinuxTerminal from '../components/terminal/LinuxTerminal';
 
 const highlights = [
   { title: 'Frontend Architecture', text: 'Building scalable React applications with TypeScript, modern state management, and optimized asset delivery.' },
@@ -40,42 +35,30 @@ const featuredProjects = [
 
 const pad = (n) => String(n).padStart(2, '0');
 
-function Section({ id, index, title, children }) {
+function Section({ id, title, children }) {
   return (
     <section id={id} className="section" aria-labelledby={`${id}-title`}>
-      <div className="container section-grid">
-        <header className="section-head reveal">
-          <span className="section-index">{pad(index)}</span>
-          <h2 className="section-title" id={`${id}-title`}>{title}</h2>
-        </header>
-        <div className="section-body">{children}</div>
+      <div className="container section-centered">
+        <h2 className="sr-only" id={`${id}-title`}>{title}</h2>
+        <div className="section-content">{children}</div>
       </div>
     </section>
   );
 }
 
 function Home() {
+  const navigate = useNavigate();
   return (
     <>
       <section id="hero" aria-labelledby="hero-name">
         <Hero />
       </section>
 
-      <Section id="about" index={1} title="About">
-        <p className="about-lead reveal">
-          I'm <strong>Bikash Dhakal</strong>, a passionate Full-Stack Developer and creative coder based in Kathmandu. I specialize in bridging the gap between elegant design and robust engineering, building digital experiences that are as powerful as they are beautiful.
-        </p>
-        <dl className="facts">
-          {facts.map((f) => (
-            <div key={f.label} className="fact reveal">
-              <dt className="fact-label">{f.label}</dt>
-              <dd className="fact-value">{f.value}</dd>
-            </div>
-          ))}
-        </dl>
+      <Section id="about" title="About">
+        <LinuxTerminal />
       </Section>
 
-      <Section id="experience" index={2} title="Experience">
+      <Section id="experience" title="Experience">
         <article className="card exp-card reveal">
           <div className="exp-head">
             <h3 className="exp-role">Independent Freelance Developer</h3>
@@ -97,9 +80,9 @@ function Home() {
         </div>
       </Section>
 
-      <Section id="projects-preview" index={3} title="Selected Work">
+      <Section id="projects-preview" title="Selected Work">
         <div className="projects-list reveal">
-          {featuredProjects.map((p, i) => (
+          {featuredProjects.map((p) => (
             <div key={p.title} className="project-row">
               <div className="project-info">
                 <h3>{p.title}</h3>
@@ -110,11 +93,17 @@ function Home() {
           ))}
         </div>
         <div className="reveal" style={{ marginTop: '2rem' }}>
-          <Link to="/projects" className="btn">View All Projects</Link>
+          <button
+            type="button"
+            onClick={() => navigate('/projects')}
+            className="btn"
+          >
+            View All Projects
+          </button>
         </div>
       </Section>
 
-      <Section id="education" index={4} title="Education">
+      <Section id="education" title="Education">
         <ol className="timeline">
           {education.map((e) => (
             <li key={e.title} className="timeline-item reveal">
@@ -128,7 +117,7 @@ function Home() {
         </ol>
       </Section>
 
-      <Section id="skills" index={5} title="Skills">
+      <Section id="skills" title="Skills">
         <div className="skills-grid">
           {skills.map((s, i) => (
             <article key={s.title} className="card skill-card reveal">
@@ -140,7 +129,7 @@ function Home() {
         </div>
       </Section>
 
-      <Section id="deliver" index={6} title="What I Deliver">
+      <Section id="deliver" title="What I Deliver">
         <ol className="deliver-list">
           {deliverables.map((d, i) => (
             <li key={d.title} className="deliver-item reveal">
@@ -154,11 +143,11 @@ function Home() {
         </ol>
       </Section>
 
-      <Section id="contact" index={7} title="Contact">
+      <Section id="contact" title="Contact">
         <p className="contact-lead reveal">
           Whether you have a project in mind, a freelance opportunity, or just want to connect — my inbox is always open. Let's build something extraordinary together.
         </p>
-        <a href="mailto:bikash@example.com" className="contact-email reveal" aria-label="Email Bikash">
+        <a href="mailto:bikashdhakal546@gmail.com" className="contact-email reveal" aria-label="Email Bikash">
           bikashdhakal546@gmail.com
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M7 17L17 7M17 7H9M17 7v8" />
