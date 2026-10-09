@@ -1,0 +1,220 @@
+/* ============================================================
+   DESIGN TOKENS — minimal, neutral, one accent
+   ============================================================ */
+:root {
+  /* Typography */
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-heading: 'Inter Tight', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --fs-display: clamp(3.25rem, 11.5vw, 11rem);
+  --fs-h2: clamp(1.75rem, 3.2vw, 2.5rem);
+  --fs-h3: clamp(1.125rem, 1.6vw, 1.3rem);
+  --fs-body: 1rem;
+  --fs-lead: clamp(1.125rem, 1.8vw, 1.375rem);
+  --fs-small: 0.875rem;
+  --fs-xs: 0.75rem;
+
+  --lh-heading: 1.1;
+  --lh-body: 1.65;
+
+  /* Layout */
+  --container: 1120px;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --section-pad-y: clamp(5rem, 11vw, 8.5rem);
+  --header-h: 68px;
+  --dock-h: 60px;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 18px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-expo: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 180ms;
+  --dur: 320ms;
+  --dur-slow: 700ms;
+}
+
+/* ---------- Dark (default) ---------- */
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0c0c0c;
+  --bg-alt: #111111;
+  --surface: #151515;
+  --surface-2: #1c1c1c;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.18);
+  --foam: #ededed;          /* primary text */
+  --muted: #8d8d8d;         /* secondary text */
+  --subtle: #5e5e5e;
+  --accent: #ededed;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-2: #ffffff;
+  --success: #4ade80;
+  --btn-bg: #ededed;
+  --btn-fg: #0c0c0c;
+  --header-bg: rgba(12, 12, 12, 0.72);
+  --chip-bg: rgba(255, 255, 255, 0.04);
+  --dock-bg: rgba(28, 28, 28, 0.86);
+  --dock-item: rgba(255, 255, 255, 0.06);
+  --dock-item-hover: rgba(255, 255, 255, 0.12);
+  --dock-border: rgba(255, 255, 255, 0.08);
+  --dock-fg: #d6d6d6;
+  --dock-logo-bg: #0c0c0c;
+  --dock-cta-bg: #f2f2f2;
+  --dock-cta-fg: #111111;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Light ---------- */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #ebebeb;
+  --bg-alt: #e4e4e4;
+  --surface: #f6f6f6;
+  --surface-2: #e0e0e0;
+  --line: rgba(0, 0, 0, 0.09);
+  --line-strong: rgba(0, 0, 0, 0.2);
+  --foam: #222222;
+  --muted: #626262;
+  --subtle: #9a9a9a;
+  --accent: #222222;
+  --accent-soft: rgba(0, 0, 0, 0.06);
+  --accent-2: #000000;
+  --success: #16a34a;
+  --btn-bg: #222222;
+  --btn-fg: #f6f6f6;
+  --header-bg: rgba(235, 235, 235, 0.78);
+  --chip-bg: rgba(0, 0, 0, 0.03);
+  --dock-bg: rgba(34, 34, 34, 0.92);
+  --dock-item: rgba(255, 255, 255, 0.06);
+  --dock-item-hover: rgba(255, 255, 255, 0.14);
+  --dock-border: rgba(255, 255, 255, 0.06);
+  --dock-fg: #d9d9d9;
+  --dock-logo-bg: #161616;
+  --dock-cta-bg: #f4f4f4;
+  --dock-cta-fg: #222222;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px -12px rgba(0, 0, 0, 0.14);
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0 solid;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--foam);
+  background: var(--bg);
+  transition: background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: var(--lh-heading);
+  letter-spacing: -0.025em;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Smooth theme switching via the View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--ease-soft);
+}
+
+/* Shared surfaces transition colours together on theme change */
+.site-header,
+.card,
+.btn,
+.icon-btn,
+.tag,
+.site-footer {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

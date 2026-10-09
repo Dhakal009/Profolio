@@ -1,0 +1,177 @@
+import { Link } from 'react-router-dom';
+import Hero from '../components/hero/Hero';
+
+const facts = [
+  { label: 'Role', value: 'Full Stack Engineer & UI Designer' },
+  { label: 'Location', value: 'Kathmandu, Nepal (Open to Remote)' },
+  { label: 'Specialties', value: 'React, Node.js, Next.js, Framer Motion, TypeScript' },
+];
+
+const highlights = [
+  { title: 'Frontend Architecture', text: 'Building scalable React applications with TypeScript, modern state management, and optimized asset delivery.' },
+  { title: 'Backend & APIs', text: 'Designing robust RESTful and GraphQL APIs using Node.js, Express, and PostgreSQL/MongoDB.' },
+  { title: 'Creative Development', text: 'Crafting immersive digital experiences with WebGL, GSAP, and advanced CSS animations.' },
+];
+
+const education = [
+  { years: '2019 — 2023', title: 'B.Sc in Computer Science & Information Technology', text: 'Specialized in Software Engineering, Advanced Web Technologies, and Human-Computer Interaction.' },
+  { years: '2023 — Present', title: 'Continuous Learning & Open Source', text: 'Actively contributing to open-source UI libraries and exploring AI-driven development workflows.' },
+];
+
+const skills = [
+  { title: 'Frontend Engineering', desc: 'React, Next.js, Vue, TypeScript, Tailwind CSS, Redux, Zustand' },
+  { title: 'Backend & Database', desc: 'Node.js, Python, PostgreSQL, MongoDB, Redis, Prisma, Docker' },
+  { title: 'Animation & UI', desc: 'Framer Motion, GSAP, Three.js, Figma, Adobe Creative Suite' },
+  { title: 'DevOps & Tooling', desc: 'Git, GitHub Actions, AWS, Vercel, CI/CD pipelines, Jest' },
+];
+
+const deliverables = [
+  { title: 'Scalable Architecture', text: 'I build systems that grow with your business, ensuring maintainability and robust performance.' },
+  { title: 'Pixel-Perfect UI', text: 'Bridging the gap between design and engineering with obsessive attention to micro-interactions.' },
+  { title: 'Optimized Performance', text: 'Lighthouse-optimized applications with code splitting, SSR/SSG, and intelligent caching.' },
+  { title: 'Accessible by Default', text: 'Inclusive digital experiences adhering to WCAG guidelines, ensuring usability for everyone.' },
+];
+
+const featuredProjects = [
+  { title: 'Aether E-Commerce', category: 'Full Stack Application', year: '2025' },
+  { title: 'Lumina Dashboard', category: 'SaaS Analytics Platform', year: '2024' },
+  { title: 'Vortex Portfolio', category: 'Creative WebGL Experience', year: '2024' }
+];
+
+const pad = (n) => String(n).padStart(2, '0');
+
+function Section({ id, index, title, children }) {
+  return (
+    <section id={id} className="section" aria-labelledby={`${id}-title`}>
+      <div className="container section-grid">
+        <header className="section-head reveal">
+          <span className="section-index">{pad(index)}</span>
+          <h2 className="section-title" id={`${id}-title`}>{title}</h2>
+        </header>
+        <div className="section-body">{children}</div>
+      </div>
+    </section>
+  );
+}
+
+function Home() {
+  return (
+    <>
+      <section id="hero" aria-labelledby="hero-name">
+        <Hero />
+      </section>
+
+      <Section id="about" index={1} title="About">
+        <p className="about-lead reveal">
+          I'm <strong>Bikash Dhakal</strong>, a passionate Full-Stack Developer and creative coder based in Kathmandu. I specialize in bridging the gap between elegant design and robust engineering, building digital experiences that are as powerful as they are beautiful.
+        </p>
+        <dl className="facts">
+          {facts.map((f) => (
+            <div key={f.label} className="fact reveal">
+              <dt className="fact-label">{f.label}</dt>
+              <dd className="fact-value">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </Section>
+
+      <Section id="experience" index={2} title="Experience">
+        <article className="card exp-card reveal">
+          <div className="exp-head">
+            <h3 className="exp-role">Independent Freelance Developer</h3>
+            <span className="exp-meta">
+              <span className="status-dot" aria-hidden="true" /> Open to opportunities
+            </span>
+          </div>
+          <p className="exp-desc">
+            Collaborating with global clients and agencies to deliver high-performance web applications, from interactive marketing sites to complex SaaS dashboards.
+          </p>
+        </article>
+        <div className="highlights reveal">
+          {highlights.map((h) => (
+            <article key={h.title} className="highlight">
+              <h3>{h.title}</h3>
+              <p>{h.text}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section id="projects-preview" index={3} title="Selected Work">
+        <div className="projects-list reveal">
+          {featuredProjects.map((p, i) => (
+            <div key={p.title} className="project-row">
+              <div className="project-info">
+                <h3>{p.title}</h3>
+                <span>{p.category}</span>
+              </div>
+              <span className="project-year">{p.year}</span>
+            </div>
+          ))}
+        </div>
+        <div className="reveal" style={{ marginTop: '2rem' }}>
+          <Link to="/projects" className="btn">View All Projects</Link>
+        </div>
+      </Section>
+
+      <Section id="education" index={4} title="Education">
+        <ol className="timeline">
+          {education.map((e) => (
+            <li key={e.title} className="timeline-item reveal">
+              <span className="timeline-year">{e.years}</span>
+              <div className="timeline-body">
+                <h3>{e.title}</h3>
+                <p>{e.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section id="skills" index={5} title="Skills">
+        <div className="skills-grid">
+          {skills.map((s, i) => (
+            <article key={s.title} className="card skill-card reveal">
+              <span className="skill-num">{pad(i + 1)}</span>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section id="deliver" index={6} title="What I Deliver">
+        <ol className="deliver-list">
+          {deliverables.map((d, i) => (
+            <li key={d.title} className="deliver-item reveal">
+              <span className="deliver-num">{pad(i + 1)}</span>
+              <div>
+                <h3>{d.title}</h3>
+                <p>{d.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </Section>
+
+      <Section id="contact" index={7} title="Contact">
+        <p className="contact-lead reveal">
+          Whether you have a project in mind, a freelance opportunity, or just want to connect — my inbox is always open. Let's build something extraordinary together.
+        </p>
+        <a href="mailto:bikash@example.com" className="contact-email reveal" aria-label="Email Bikash">
+          bikashdhakal546@gmail.com
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7M17 7H9M17 7v8" />
+          </svg>
+        </a>
+        <div className="contact-links reveal">
+          <a href="#" className="btn btn--ghost" aria-label="GitHub profile">GitHub</a>
+          <a href="#" className="btn btn--ghost" aria-label="LinkedIn profile">LinkedIn</a>
+          <a href="#" className="btn btn--ghost" aria-label="Twitter profile">Twitter</a>
+        </div>
+      </Section>
+    </>
+  );
+}
+
+export default Home;
