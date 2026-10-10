@@ -466,7 +466,7 @@ function Header() {
   const closeMenu = useCallback(() => {
     setMenu((prev) => (prev ? { ...prev, closing: true } : null));
   }, []);
-
+// 
   const finishMenu = useCallback(() => {
     setMenu(null);
   }, []);
