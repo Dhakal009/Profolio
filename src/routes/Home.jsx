@@ -1,6 +1,9 @@
-import { useNavigate } from 'react-router-dom';
 import Hero from '../components/hero/Hero';
 import LinuxTerminal from '../components/terminal/LinuxTerminal';
+import LogoLoop from '../components/ui/LogoLoop';
+import { techLogos } from '../components/ui/TechLogos';
+import SelectedWorkScroll from '../components/home/SelectedWorkScroll';
+import DeliverablesSection from '../components/home/DeliverablesSection';
 
 const highlights = [
   { title: 'Frontend Architecture', text: 'Building scalable React applications with TypeScript, modern state management, and optimized asset delivery.' },
@@ -20,18 +23,6 @@ const skills = [
   { title: 'DevOps & Tooling', desc: 'Git, GitHub Actions, AWS, Vercel, CI/CD pipelines, Jest' },
 ];
 
-const deliverables = [
-  { title: 'Scalable Architecture', text: 'I build systems that grow with your business, ensuring maintainability and robust performance.' },
-  { title: 'Pixel-Perfect UI', text: 'Bridging the gap between design and engineering with obsessive attention to micro-interactions.' },
-  { title: 'Optimized Performance', text: 'Lighthouse-optimized applications with code splitting, SSR/SSG, and intelligent caching.' },
-  { title: 'Accessible by Default', text: 'Inclusive digital experiences adhering to WCAG guidelines, ensuring usability for everyone.' },
-];
-
-const featuredProjects = [
-  { title: 'Aether E-Commerce', category: 'Full Stack Application', year: '2025' },
-  { title: 'Lumina Dashboard', category: 'SaaS Analytics Platform', year: '2024' },
-  { title: 'Vortex Portfolio', category: 'Creative WebGL Experience', year: '2024' }
-];
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -47,7 +38,6 @@ function Section({ id, title, children }) {
 }
 
 function Home() {
-  const navigate = useNavigate();
   return (
     <>
       <section id="hero" aria-labelledby="hero-name">
@@ -80,28 +70,7 @@ function Home() {
         </div>
       </Section>
 
-      <Section id="projects-preview" title="Selected Work">
-        <div className="projects-list reveal">
-          {featuredProjects.map((p) => (
-            <div key={p.title} className="project-row">
-              <div className="project-info">
-                <h3>{p.title}</h3>
-                <span>{p.category}</span>
-              </div>
-              <span className="project-year">{p.year}</span>
-            </div>
-          ))}
-        </div>
-        <div className="reveal" style={{ marginTop: '2rem' }}>
-          <button
-            type="button"
-            onClick={() => navigate('/projects')}
-            className="btn"
-          >
-            View All Projects
-          </button>
-        </div>
-      </Section>
+      <SelectedWorkScroll />
 
       <Section id="education" title="Education">
         <ol className="timeline">
@@ -127,21 +96,30 @@ function Home() {
             </article>
           ))}
         </div>
+        <div className="reveal" style={{ marginTop: '2.5rem' }}>
+          <LogoLoop
+            logos={techLogos}
+            speed={60}
+            direction="left"
+            logoHeight={40}
+            gap={20}
+            hoverSpeed={0}
+            scaleOnHover
+            fadeOut
+            fadeOutColor="var(--bg)"
+            ariaLabel="Technology stack and developer tools"
+          />
+        </div>
       </Section>
 
-      <Section id="deliver" title="What I Deliver">
-        <ol className="deliver-list">
-          {deliverables.map((d, i) => (
-            <li key={d.title} className="deliver-item reveal">
-              <span className="deliver-num">{pad(i + 1)}</span>
-              <div>
-                <h3>{d.title}</h3>
-                <p>{d.text}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </Section>
+      <section
+        id="deliver"
+        className="relative w-full h-screen min-h-[100dvh] overflow-hidden"
+        aria-label="What I Deliver"
+      >
+        <h2 className="sr-only">What I Deliver</h2>
+        <DeliverablesSection />
+      </section>
 
       <Section id="contact" title="Contact">
         <p className="contact-lead reveal">

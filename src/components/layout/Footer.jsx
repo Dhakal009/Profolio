@@ -36,7 +36,11 @@ function Footer() {
         return;
       }
     }
-    navigate(item.to);
+    if (item.targetId) {
+      navigate('/', { state: { scrollTo: item.targetId } });
+    } else {
+      navigate(item.to);
+    }
   };
 
   return (

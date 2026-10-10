@@ -71,32 +71,52 @@ function useGlobalReveal(pathname) {
 }
 
 // Scroll to top (or to the #hash target) whenever the route changes
-function useRouteScroll(pathname, hash) {
+function useRouteScroll(pathname, hash, state) {
   const { lenis } = useLenis();
 
   useEffect(() => {
-    const id = hash ? hash.slice(1) : null;
-    const frame = requestAnimationFrame(() => {
-      const target = id ? document.getElementById(id) : null;
+    const targetId = state?.scrollTo || (hash ? hash.slice(1) : null);
+
+    const tryScroll = () => {
+      if (!targetId) return false;
+      const target = document.getElementById(targetId);
       if (target) {
         if (lenis) lenis.scrollTo(target, { offset: -40, duration: 1.2 });
         else target.scrollIntoView({ behavior: 'smooth' });
-      } else if (lenis) {
-        lenis.scrollTo(0, { immediate: true });
-        lenis.resize();
-      } else {
-        window.scrollTo(0, 0);
+        return true;
       }
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [pathname, hash, lenis]);
+      return false;
+    };
+
+    if (targetId) {
+      if (!tryScroll()) {
+        const t1 = setTimeout(() => {
+          if (!tryScroll()) {
+            const t2 = setTimeout(tryScroll, 200);
+            return () => clearTimeout(t2);
+          }
+        }, 80);
+        return () => clearTimeout(t1);
+      }
+    } else {
+      const frame = requestAnimationFrame(() => {
+        if (lenis) {
+          lenis.scrollTo(0, { immediate: true });
+          lenis.resize();
+        } else {
+          window.scrollTo(0, 0);
+        }
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [pathname, hash, state, lenis]);
 }
 
 function Shell() {
-  const { pathname, hash } = useLocation();
+  const { pathname, hash, state } = useLocation();
   const { lenis } = useLenis();
   useGlobalReveal(pathname);
-  useRouteScroll(pathname, hash);
+  useRouteScroll(pathname, hash, state);
 
   return (
     <>

@@ -72,6 +72,9 @@ export default {
         'frame-fill': 'var(--frame-fill)',
         'frame-line': 'var(--frame-line)',
       },
+      scale: {
+        '120': '1.2',
+      },
     },
   },
   plugins: [],

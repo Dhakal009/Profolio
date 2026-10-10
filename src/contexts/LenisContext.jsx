@@ -26,12 +26,12 @@ export function LenisProvider({ children }) {
     ensureResizeObserver();
 
     const instance = new Lenis({
-      duration: 1.15,
+      duration: 0.65,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      touchMultiplier: 1.5,
+      touchMultiplier: 1.0,
       infinite: false,
     });
 

@@ -99,7 +99,7 @@ function Projects() {
             </p>
             <button
               type="button"
-              onClick={() => navigate('/#contact')}
+              onClick={() => navigate('/', { state: { scrollTo: 'contact' } })}
               className="btn btn--primary"
             >
               Start a Conversation <ArrowUpRight />

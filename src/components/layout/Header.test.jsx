@@ -76,4 +76,11 @@ describe('Header Component', () => {
     });
     expect(dock).not.toHaveClass('is-hidden');
   });
+
+  it('handles home navigation click from /projects route', () => {
+    const { container } = renderHeader('/projects');
+    const homeBtn = container.querySelector('.header-home-btn');
+    expect(homeBtn).toBeInTheDocument();
+    fireEvent.click(homeBtn);
+  });
 });
