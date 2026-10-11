@@ -232,7 +232,7 @@ const CircularCarousel = ({
   momentum = 0.6,
   snap = true,
   pauseOnHover = true,
-  focusOnClick = true,
+  swipeSpeed = 1,
   parallax = 0.3,
   stretch = 0.5,
   depthFade = 0.55,
@@ -240,9 +240,7 @@ const CircularCarousel = ({
   innerShade = 0.6,
   cornerRadius = 12,
   captions = false,
-  captureWheel = true,
   onChange,
-  onItemClick,
   className = '',
   style
 }) => {
@@ -321,6 +319,7 @@ const CircularCarousel = ({
     holdUntil: 0,
     stepAt: 0,
     suppressClick: false,
+    wheelUntil: 0,
     wheelTimer: 0,
     fit: 1,
     shift: 0,
@@ -346,11 +345,11 @@ const CircularCarousel = ({
     momentum: clamp(momentum, 0, 1),
     snap,
     pauseOnHover,
+    swipeSpeed: clamp(swipeSpeed, 0.2, 4),
     parallax: reduced ? 0 : clamp(parallax, 0, 1),
     stretch: reduced ? 0 : clamp(stretch, 0, 1),
     depthFade: clamp(depthFade, 0, 1),
     captions,
-    captureWheel,
     reduced
   };
   const settingsRef = useRef(settings);
@@ -554,7 +553,7 @@ const CircularCarousel = ({
         const tau = 0.18 + s.momentum * 1.5;
         state.velocity += (cruise - state.velocity) * (1 - Math.exp(-dt / tau));
         state.angle += state.velocity * dt;
-        if (cruise === 0 && s.snap && Math.abs(state.velocity) < SETTLE_SPEED) {
+        if (cruise === 0 && s.snap && now >= state.wheelUntil && Math.abs(state.velocity) < SETTLE_SPEED) {
           state.target = nearest(state.angle);
         }
         busy = busy || cruise !== 0 || Math.abs(state.velocity) > 0.01 || state.target !== null;
@@ -682,56 +681,28 @@ const CircularCarousel = ({
     });
     io.observe(root);
 
-    let isWheeling = false;
-    let wheelThrottle = null;
-
+    // Two-finger (trackpad) horizontal swipe turns the carousel. Vertical scrolling
+    // is left alone, so the page keeps scrolling normally over the carousel.
     const onWheel = (event) => {
       const s = settingsRef.current;
-      if (!s.draggable || !s.captureWheel) return;
-
-      // Check if mouse event is over a card / name of the card
-      const targetCard = event.target.closest?.('[data-cc-index]');
-      if (!targetCard) {
-        root.removeAttribute('data-lenis-prevent');
-        return;
-      }
-
-      root.setAttribute('data-lenis-prevent', 'true');
+      if (!s.draggable || event.ctrlKey) return;
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
       event.preventDefault();
       event.stopPropagation();
-
-      let delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-      if (event.deltaMode === 1) delta *= 30;
-      else if (event.deltaMode === 2) delta *= 120;
-
-      if (!delta) return;
-
+      let dx = event.deltaX;
+      if (event.deltaMode === 1) dx *= 30;
+      else if (event.deltaMode === 2) dx *= 120;
       const perPixel = 180 / (Math.PI * s.radius * state.fit);
+      state.angle -= dx * perPixel * (s.layout.inward ? -1 : 1) * s.swipeSpeed;
       state.target = null;
-      state.angle -= delta * perPixel * (s.layout.inward ? -1 : 1) * 0.85;
-      state.velocity = -delta * perPixel * (s.layout.inward ? -1 : 1) * 22;
-      state.holdUntil = performance.now() + 1400;
-
+      state.velocity = 0;
+      const now = performance.now();
+      state.holdUntil = now + 1400;
+      state.wheelUntil = now + 170;
       clearTimeout(state.wheelTimer);
-      state.wheelTimer = setTimeout(() => {
-        if (settingsRef.current.snap) state.target = nearest(state.angle + state.velocity * 0.16);
-        wake();
-      }, 120);
-
-      // Light, easy step per distinct wheel notch or trackpad swipe
-      if (!isWheeling && Math.abs(delta) > 16) {
-        isWheeling = true;
-        const dir = delta > 0 ? 1 : -1;
-        state.target = (state.target ?? nearest(state.angle)) + s.step * dir * (s.layout.inward ? 1 : -1);
-        clearTimeout(wheelThrottle);
-        wheelThrottle = setTimeout(() => {
-          isWheeling = false;
-        }, 160);
-      }
-
+      state.wheelTimer = setTimeout(() => wake(), 190);
       wake();
     };
-
     root.addEventListener('wheel', onWheel, { passive: false });
     document.addEventListener('visibilitychange', onVisibility);
 
@@ -744,7 +715,6 @@ const CircularCarousel = ({
       resize.disconnect();
       io.disconnect();
       clearTimeout(state.wheelTimer);
-      clearTimeout(wheelThrottle);
       root.removeEventListener('wheel', onWheel);
       document.removeEventListener('visibilitychange', onVisibility);
     };
@@ -815,13 +785,6 @@ const CircularCarousel = ({
     if (event.pointerType === 'mouse') {
       state.pointer.inside = true;
       updatePointer(event);
-      // Lenis prevention when hovering card directly
-      const overCard = event.target.closest?.('[data-cc-index]');
-      if (overCard) {
-        rootRef.current?.setAttribute('data-lenis-prevent', 'true');
-      } else {
-        rootRef.current?.removeAttribute('data-lenis-prevent');
-      }
     }
     const press = state.press;
     if (!press || press.id !== event.pointerId) {
@@ -870,7 +833,8 @@ const CircularCarousel = ({
     const span = (last.time - first.time) / 1000;
     const velocity = span > 0.008 ? clamp((last.angle - first.angle) / span, -1400, 1400) : 0;
     state.velocity = velocity;
-    if (Math.abs(velocity) > 60) state.dir = Math.sign(velocity);
+    // Autoplay direction is fixed by the `direction` prop (right to left by default);
+    // a drag no longer flips it.
     const coasting = s.autoplay === 'drift' && !(s.pauseOnHover && state.hover && event.pointerType === 'mouse');
     if (s.snap && !coasting) {
       const tau = 0.18 + s.momentum * 1.5;
@@ -891,21 +855,7 @@ const CircularCarousel = ({
       state.hover = false;
       state.pointer.inside = false;
     }
-    rootRef.current?.removeAttribute('data-lenis-prevent');
     wakeRef.current();
-  };
-
-  const handleClick = (event) => {
-    const state = stateRef.current;
-    if (state.suppressClick) {
-      state.suppressClick = false;
-      return;
-    }
-    const card = event.target.closest?.('[data-cc-index]');
-    if (!card) return;
-    const index = Number(card.getAttribute('data-cc-index'));
-    if (focusOnClick) focusIndex(index);
-    onItemClick?.(list[index], index);
   };
 
   const handleKeyDown = (event) => {
@@ -915,7 +865,6 @@ const CircularCarousel = ({
     else if (event.key === backward) stepBy(-1);
     else if (event.key === 'Home') focusIndex(0);
     else if (event.key === 'End') focusIndex(count - 1);
-    else if (event.key === 'Enter' || event.key === ' ') onItemClick?.(list[activeRef.current], activeRef.current);
     else return;
     event.preventDefault();
   };
@@ -988,7 +937,7 @@ const CircularCarousel = ({
   return (
     <div
       ref={rootRef}
-      className={`group/cc relative h-full w-full touch-pan-y select-none overflow-hidden outline-none [-webkit-tap-highlight-color:transparent] focus-visible:shadow-[inset_0_0_0_2px_rgba(128,128,140,0.55)] data-[axis=x]:touch-pan-x data-[draggable]:cursor-grab data-[dragging]:cursor-grabbing ${className}`.trim()}
+      className={`group/cc relative h-full w-full touch-pan-y select-none overflow-hidden outline-none [-webkit-tap-highlight-color:transparent] focus-visible:shadow-[inset_0_0_0_2px_rgba(128,128,140,0.55)] data-[axis=x]:touch-pan-x cursor-default ${className}`.trim()}
       style={{
         ...style,
         '--cc-fade': fadeColor,
@@ -1010,7 +959,6 @@ const CircularCarousel = ({
       onPointerCancel={releasePointer}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
-      onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
       <div
@@ -1029,10 +977,9 @@ const CircularCarousel = ({
                   ref={(element) => {
                     cardRefs.current[index] = element;
                   }}
-                  className="absolute left-0 top-0 h-0 w-0 cursor-pointer [transform-style:preserve-3d]"
+                  className="absolute left-0 top-0 h-0 w-0 [transform-style:preserve-3d]"
                   data-cc-index={index}
-                  role="button"
-                  tabIndex={0}
+                  role="group"
                   aria-roledescription="slide"
                   aria-label={`${item.title || item.alt || `Image ${index + 1}`}, ${index + 1} of ${count}`}
                 >

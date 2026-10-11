@@ -1,0 +1,85 @@
+/* ==========================================================
+   Section focus + transitions
+   Everything below only applies once JS adds .has-section-focus
+   to <html>, so the page is fully readable without it.
+   ========================================================== */
+
+:root {
+  --focus-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --focus-accent: var(--accent, #4ade80);
+}
+
+/* ---------- Focus: the section at screen centre is lit, others recede ---------- */
+.has-section-focus .focus-section {
+  position: relative;
+}
+
+.has-section-focus .focus-section .section-content {
+  opacity: 0.22;
+  transition:
+    opacity 0.7s var(--focus-ease),
+    transform 0.9s var(--focus-ease);
+}
+
+/* Sections below the viewport wait slightly lower and rise into place;
+   sections already read drift up a little. */
+.has-section-focus .focus-section[data-state='upcoming'] .section-content {
+  transform: translate3d(0, 28px, 0) scale(0.985);
+}
+.has-section-focus .focus-section[data-state='past'] .section-content {
+  transform: translate3d(0, -14px, 0) scale(0.99);
+}
+
+.has-section-focus .focus-section[data-state='active'] .section-content,
+.has-section-focus .focus-section:hover .section-content,
+.has-section-focus .focus-section:focus-within .section-content {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- Seam: a thin line draws in at the top of the active section ---------- */
+.has-section-focus .focus-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(260px, 40%);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--focus-accent), transparent);
+  opacity: 0.75;
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 1s var(--focus-ease);
+  pointer-events: none;
+}
+.has-section-focus .focus-section[data-state='active']::before {
+  transform: translateX(-50%) scaleX(1);
+}
+
+/* ---------- Scroll progress ---------- */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+}
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  background: var(--focus-accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* ---------- Reduced motion: no dimming, no movement ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .has-section-focus .focus-section .section-content {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none;
+  }
+  .has-section-focus .focus-section::before {
+    transition: none;
+  }
+}

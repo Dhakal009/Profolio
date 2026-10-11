@@ -4,9 +4,26 @@ import { useLenis } from "../../contexts/LenisContext";
 
 /**
  * ProjectSection / SelectedWorkScroll
- * Premium typographic & architectural design cards that rise through
- * the headline in staggered depth-scaled columns, then clear out to reveal
- * the subtitle and CTA button.
+ *
+ * Tile-reveal choreography, fully scrubbed by scroll (plays forwards AND backwards):
+ *
+ *   1. Rise      The outer columns drift DOWN from above the viewport while the
+ *                centre column drifts UP from below. They converge on the
+ *                headline and overlap it as a staggered 3-column grid.
+ *   2. Zoom      The whole grid flies toward the camera: tiles scale up and the
+ *                columns spread apart horizontally.
+ *   3. Clear     Tiles nearest the headline dissolve first, then the outer ones,
+ *                so the middle "steps aside".
+ *   4. Reveal    Headline lifts, subtitle + CTA fade in. A short hold follows
+ *                before the section unpins.
+ *
+ * Why upward scrolling used to stall: a "played" latch froze the finished frame
+ * for the whole pinned distance when scrolling back up. That latch is gone, the
+ * animation is a pure function of scroll position, so up and down are symmetric.
+ *
+ * Smoothness: the drawn value chases the scroll position with frame-rate
+ * independent damping (not a fixed per-frame lerp), DOM geometry is measured
+ * once (not every frame), and only transform/opacity are written per frame.
  */
 
 const DEFAULT_PROJECTS = [
@@ -122,25 +139,35 @@ const DEFAULT_PROJECTS = [
   },
 ];
 
-// Mixed proportions give the columns a staggered rhythm.
+/* ---------- Choreography tuning (all values are fractions of scroll 0–1) ---------- */
+const COLS = 3; // keep odd: the middle column travels the opposite way
+const ROWS = 3; // tiles per column strip
+
+const TRAVEL_END = 0.78; // columns finish travelling here
+const CENTER_SPEED = 1.12; // centre column moves a touch faster, so rows drift past each other
+
+const ZOOM_START = 0.3; // camera starts flying in
+const ZOOM_END = 0.8;
+const ZOOM_MAX = 2.5; // final tile scale
+const X_SPREAD = 0.45; // extra horizontal spread at full zoom (columns fly apart faster than tiles grow)
+
+const FADE_START = 0.5; // tiles begin to dissolve (nearest the headline first)
+const FADE_LEN = 0.28;
+
+const REVEAL_START = 0.72; // subtitle + CTA
+const REVEAL_LEN = 0.2; // finishes at 0.92, the rest is a short hold
+
+const GAP_X = 0.14; // gaps between tiles, as a fraction of tile size
+const GAP_Y = 0.32;
+
+const DAMP = 13; // higher = snappier follow, lower = floatier
+
+// Mixed ratios are only used by the reduced-motion static grid.
 const RATIOS = ["4 / 5", "1 / 1", "3 / 4", "5 / 6", "4 / 5", "7 / 8"];
 
 const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
-
-function useColumnCount() {
-  const get = () => {
-    if (typeof window === "undefined") return 4;
-    const w = window.innerWidth;
-    return w >= 1024 ? 4 : w >= 640 ? 3 : 2;
-  };
-  const [cols, setCols] = useState(get);
-  useEffect(() => {
-    const onResize = () => setCols(get());
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-  return cols;
-}
+const smooth = (t) => t * t * (3 - 2 * t);
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -157,39 +184,57 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-/* Individual Interactive 3D Card with Tilt & Sheen */
+/* Individual interactive card with tilt & sheen.
+   Pointer effects write straight to the DOM (rAF-throttled) so hovering never
+   triggers React re-renders while the section is animating. */
 function ProjectCardTile({ project, ratio, onClick }) {
   const tileRef = useRef(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 50, sy: 50, isHovered: false });
+  const sheenRef = useRef(null);
+  const rafRef = useRef(0);
+  const ptrRef = useRef({ px: 0.5, py: 0.5 });
 
-  const handleMouseMove = useCallback((e) => {
-    if (!tileRef.current) return;
-    const rect = tileRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const px = x / rect.width;
-    const py = y / rect.height;
-
-    // Subtle 3D tilt angles (max ±7 degrees)
+  const paint = useCallback(() => {
+    rafRef.current = 0;
+    const tile = tileRef.current;
+    const sheen = sheenRef.current;
+    if (!tile || !sheen) return;
+    const { px, py } = ptrRef.current;
+    // Subtle 3D tilt (max ±7deg)
     const rx = (py - 0.5) * -14;
     const ry = (px - 0.5) * 14;
-
-    setTilt({
-      rx,
-      ry,
-      sx: px * 100,
-      sy: py * 100,
-      isHovered: true,
-    });
+    tile.style.transform = `perspective(800px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale3d(1.045, 1.045, 1.045)`;
+    sheen.style.setProperty("--sx", `${(px * 100).toFixed(1)}%`);
+    sheen.style.setProperty("--sy", `${(py * 100).toFixed(1)}%`);
+    sheen.style.opacity = "1";
   }, []);
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      const tile = tileRef.current;
+      if (!tile) return;
+      const rect = tile.getBoundingClientRect();
+      ptrRef.current = {
+        px: clamp((e.clientX - rect.left) / rect.width),
+        py: clamp((e.clientY - rect.top) / rect.height),
+      };
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(paint);
+    },
+    [paint]
+  );
 
   const handleMouseLeave = useCallback(() => {
-    setTilt((prev) => ({ ...prev, rx: 0, ry: 0, isHovered: false }));
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+    if (tileRef.current) tileRef.current.style.transform = "";
+    if (sheenRef.current) sheenRef.current.style.opacity = "0";
   }, []);
 
-  const dynamicTransform = tilt.isHovered
-    ? `perspective(800px) rotateX(${tilt.rx.toFixed(2)}deg) rotateY(${tilt.ry.toFixed(2)}deg) scale3d(1.045, 1.045, 1.045)`
-    : "perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
+  useEffect(
+    () => () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    },
+    []
+  );
 
   return (
     <a
@@ -197,10 +242,7 @@ function ProjectCardTile({ project, ratio, onClick }) {
       className="ps-tile"
       href={project.href || "/projects"}
       onClick={onClick}
-      style={{
-        aspectRatio: ratio,
-        transform: dynamicTransform,
-      }}
+      style={ratio ? { aspectRatio: ratio } : undefined}
       aria-label={`${project.title} — ${project.subtitle || project.category}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -210,23 +252,18 @@ function ProjectCardTile({ project, ratio, onClick }) {
         }
       }}
     >
-      {/* Dynamic Cursor Spotlight Sheen */}
+      {/* Cursor spotlight sheen */}
       <span
+        ref={sheenRef}
         className="ps-card-sheen"
-        style={{
-          opacity: tilt.isHovered ? 1 : 0,
-          background: `radial-gradient(circle at ${tilt.sx}% ${tilt.sy}%, ${project.accent || 'rgba(255,255,255,0.12)'} 0%, transparent 70%)`,
-        }}
+        style={{ "--accent": project.accent || "rgba(255,255,255,0.12)" }}
         aria-hidden="true"
       />
 
-      {/* Card Minimal Grid Background & Texture */}
       <span className="ps-card-bg" aria-hidden="true" />
       <span className="ps-card-microgrid" aria-hidden="true" />
 
-      {/* Card Content */}
       <div className="ps-card-inner">
-        {/* Top Header: Index & Year Pill */}
         <div className="ps-card-top">
           <span className="ps-card-idx">{project.index || "01"}</span>
           <div className="ps-card-pill">
@@ -235,14 +272,12 @@ function ProjectCardTile({ project, ratio, onClick }) {
           </div>
         </div>
 
-        {/* Center: Title & Subtitle */}
         <div className="ps-card-main">
           <span className="ps-card-category">{project.category}</span>
           <h3 className="ps-card-title">{project.title}</h3>
           <p className="ps-card-sub">{project.subtitle}</p>
         </div>
 
-        {/* Bottom Footer: Metric/Stat & Arrow Action */}
         <div className="ps-card-bottom">
           <span className="ps-card-stat">{project.stat || project.tech}</span>
           <span className="ps-card-arrow" aria-hidden="true">
@@ -262,92 +297,142 @@ export default function ProjectSection({
   subtitle = "A selection of recent work, from first sketch to shipped product.",
   ctaLabel = "View Works",
   ctaHref = "/projects",
-  scrollLength = 440,
+  // Section height in vh. The pinned scroll distance is (scrollLength - 100)vh.
+  // Lower = less scrolling, higher = slower and more cinematic.
+  scrollLength = 220,
   id = "projects-preview",
 }) {
   const navigate = useNavigate();
   const { lenis } = useLenis();
-  const cols = useColumnCount();
   const reduced = usePrefersReducedMotion();
 
   const sectionRef = useRef(null);
-  const colRefs = useRef([]);
+  const stageRef = useRef(null);
+  const cellRefs = useRef([]);
   const groupRef = useRef(null);
   const revealRef = useRef(null);
   const hintRef = useRef(null);
   const glowRef = useRef(null);
   const railRef = useRef(null);
 
-  // Deal projects into columns round-robin, repeating if there are too few.
-  const columns = useMemo(() => {
-    const need = cols * 2;
-    const list = [];
-    for (let i = 0; i < Math.max(need, projects.length); i++) {
-      list.push(projects[i % projects.length]);
+  // One tile per (column, row). Index = column * ROWS + row.
+  const cells = useMemo(() => {
+    const out = [];
+    for (let c = 0; c < COLS; c++) {
+      for (let r = 0; r < ROWS; r++) {
+        out.push({ c, r, project: projects[(r * COLS + c) % projects.length] });
+      }
     }
-    const out = Array.from({ length: cols }, () => []);
-    list.forEach((p, i) => out[i % cols].push(p));
     return out;
-  }, [projects, cols]);
+  }, [projects]);
 
   useEffect(() => {
     if (reduced) return;
     const section = sectionRef.current;
-    if (!section) return;
+    const stage = stageRef.current;
+    if (!section || !stage) return;
 
-    // Per-column parallax speed and start offset (fraction of viewport height).
-    const speeds = [1.06, 1.22, 1.0, 1.3, 1.12];
-    const starts = [0.0, 0.3, 0.12, 0.42, 0.2];
+    cellRefs.current.length = cells.length; // drop refs left over from a previous layout
+    const cellEls = cellRefs.current;
+    const mid = (COLS - 1) / 2;
 
-    let target = 0; // where the scroll position says we should be
-    let current = 0; // eased value that is actually drawn
+    // Geometry is measured once (and on resize), never inside the frame loop.
+    const g = { vw: 0, vh: 0, tw: 0, th: 0, pitchX: 0, pitchY: 0, revealH: 0 };
+    const shown = new Array(cellEls.length).fill(null);
+
+    let current = 0; // value actually drawn
+    let target = 0; // where scroll says we should be
+    let lastDrawn = -1;
     let raf = 0;
+    let last = 0;
+    let moving = false;
+    let revealInert = null;
+    let disposed = false;
 
-    const measure = () => {
-      const vh = window.innerHeight;
+    const measureGeo = () => {
+      const first = cellEls[0];
+      g.vw = stage.clientWidth;
+      g.vh = stage.clientHeight;
+      if (first) {
+        g.tw = first.offsetWidth;
+        g.th = first.offsetHeight;
+      }
+      g.pitchX = g.tw * (1 + GAP_X);
+      g.pitchY = g.th * (1 + GAP_Y);
+      g.revealH = revealRef.current ? revealRef.current.offsetHeight : 0;
+    };
+
+    // Returns true when the section is fully off-screen.
+    const read = () => {
       const rect = section.getBoundingClientRect();
-      const total = rect.height - vh;
+      const total = rect.height - g.vh;
       target = total > 0 ? clamp(-rect.top / total) : 0;
+      return rect.bottom <= 0 || rect.top >= g.vh;
     };
 
     const draw = (p) => {
-      const vh = window.innerHeight;
-      const n = colRefs.current.length;
-      const mid = (n - 1) / 2;
-      const travel = clamp((p - 0.03) / 0.7);
+      const { vw, vh, tw, th, pitchX, pitchY } = g;
+      const halfW = vw / 2;
+      const halfH = vh / 2;
 
-      colRefs.current.forEach((el, i) => {
-        if (!el) return;
-        // Outer columns sit further back: smaller and dimmer.
-        const dist = mid ? Math.abs(i - mid) / mid : 0;
-        const scale = 1 - dist * 0.14;
-        const h = el.offsetHeight;
-        const startY = vh * (1.05 + starts[i % starts.length]);
-        const endY = -h * scale - 60;
-        const t = clamp(travel * speeds[i % speeds.length]);
-        const y = startY + (endY - startY) * t;
+      const a = clamp(p / TRAVEL_END); // column travel
+      const zp = clamp((p - ZOOM_START) / (ZOOM_END - ZOOM_START));
+      const zz = zp * zp; // accelerating "flying in" feel
+      const z = 1 + (ZOOM_MAX - 1) * zz;
+      const spreadX = 1 + X_SPREAD * zz;
+      const f = clamp((p - FADE_START) / FADE_LEN);
 
-        el.style.transform = `translate3d(0, ${y}px, 0) scale(${scale})`;
-        el.style.opacity = 1 - dist * 0.32;
+      // Distance a strip travels so it starts fully above / below the viewport.
+      const E = halfH + ((ROWS - 1) / 2) * pitchY + th / 2 + 40;
 
-        // Off-screen columns should not be reachable by keyboard.
-        if ('inert' in el) {
-          el.inert = !(y < vh && y + h * scale > 0);
+      for (let i = 0; i < cellEls.length; i++) {
+        const el = cellEls[i];
+        if (!el) continue;
+        const { c, r } = cells[i];
+        const isCenter = c === mid;
+
+        // Outer columns travel down, the centre column travels up.
+        const dir = isCenter ? -1 : 1;
+        const k = isCenter ? CENTER_SPEED : 1;
+        const strip = dir * (-E + 2 * E * a * k);
+        const rowOffset = (r - (ROWS - 1) / 2) * pitchY + (isCenter ? pitchY * 0.5 : 0);
+
+        const sx = (c - mid) * pitchX * z * spreadX;
+        const sy = (strip + rowOffset) * z;
+
+        // Tiles near the headline dissolve first, outer ones fly out and follow.
+        const dn = Math.min(1, Math.hypot(sx / halfW, sy / halfH));
+        const t = clamp(f * 1.6 - dn * 0.6);
+        const op = 1 - smooth(t);
+
+        const onScreen =
+          Math.abs(sx) - (tw * z) / 2 < halfW && Math.abs(sy) - (th * z) / 2 < halfH;
+        const visible = op > 0.02 && onScreen;
+
+        if (shown[i] !== visible) {
+          shown[i] = visible;
+          el.style.visibility = visible ? "visible" : "hidden";
         }
-      });
+        if (visible) {
+          el.style.transform = `translate3d(${sx.toFixed(2)}px, ${sy.toFixed(2)}px, 0) scale(${z.toFixed(4)}) translate(-50%, -50%)`;
+          el.style.opacity = op.toFixed(3);
+        }
+      }
 
-      // Subtitle and button appear once the tiles have cleared.
-      const reveal = clamp((p - 0.76) / 0.16);
-      if (revealRef.current && groupRef.current) {
-        const h = revealRef.current.offsetHeight;
-        revealRef.current.style.opacity = reveal;
-        revealRef.current.style.transform = `translate3d(0, ${(1 - reveal) * 14}px, 0)`;
-        revealRef.current.style.pointerEvents = reveal > 0.5 ? "auto" : "none";
-        if ('inert' in revealRef.current) {
-          revealRef.current.inert = reveal < 0.5;
+      // Subtitle + CTA appear once the tiles have cleared.
+      const reveal = easeOut(clamp((p - REVEAL_START) / REVEAL_LEN));
+      const revealEl = revealRef.current;
+      if (revealEl && groupRef.current) {
+        revealEl.style.opacity = reveal;
+        revealEl.style.transform = `translate3d(0, ${((1 - reveal) * 14).toFixed(2)}px, 0)`;
+        revealEl.style.pointerEvents = reveal > 0.5 ? "auto" : "none";
+        const shouldInert = reveal < 0.5;
+        if (revealInert !== shouldInert && "inert" in revealEl) {
+          revealInert = shouldInert;
+          revealEl.inert = shouldInert;
         }
         // Headline steps up to make room for what appears below it.
-        groupRef.current.style.transform = `translate3d(0, ${-reveal * (h / 2)}px, 0)`;
+        groupRef.current.style.transform = `translate3d(0, ${(-reveal * (g.revealH / 2)).toFixed(2)}px, 0)`;
         if (glowRef.current) glowRef.current.style.opacity = reveal;
       }
 
@@ -355,44 +440,75 @@ export default function ProjectSection({
       if (railRef.current) railRef.current.style.transform = `scaleY(${p})`;
     };
 
-    // Ease toward the scroll position so motion feels weighted, not twitchy.
-    const tick = () => {
-      current += (target - current) * 0.14;
-      if (Math.abs(target - current) < 0.0004) current = target;
-      draw(current);
-      raf = current === target ? 0 : requestAnimationFrame(tick);
+    const setMoving = (m) => {
+      if (moving === m) return;
+      moving = m;
+      stage.dataset.moving = m ? "true" : "false";
     };
 
-    const onScroll = () => {
-      measure();
-      if (!raf) raf = requestAnimationFrame(tick);
+    // Frame-rate independent easing toward the scroll position.
+    const tick = (now) => {
+      const dt = Math.min(Math.max((now - last) / 1000, 0.001), 0.05);
+      last = now;
+
+      const offscreen = read();
+      if (offscreen) {
+        // Nothing to animate: be in the right state already when it scrolls in.
+        current = target;
+      } else {
+        current += (target - current) * (1 - Math.exp(-DAMP * dt));
+        if (Math.abs(target - current) < 0.0004) current = target;
+      }
+
+      if (current !== lastDrawn) {
+        draw(current);
+        lastDrawn = current;
+      }
+
+      const settled = current === target;
+      setMoving(!settled);
+      raf = settled ? 0 : requestAnimationFrame(tick);
     };
-    const onResize = () => {
-      measure();
+
+    const kick = () => {
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+
+    const redraw = () => {
+      if (disposed) return;
+      measureGeo();
+      read();
       current = target;
       draw(current);
+      lastDrawn = current;
     };
 
-    measure();
-    current = target;
-    draw(current);
+    redraw();
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", redraw);
+
+    // Webfonts can change the reveal block's height after first paint.
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(redraw).catch(() => {});
+    }
 
     let unbindLenis = null;
     if (lenis) {
-      lenis.on('scroll', onScroll);
-      unbindLenis = () => lenis.off('scroll', onScroll);
+      lenis.on("scroll", kick);
+      unbindLenis = () => lenis.off("scroll", kick);
     }
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+      disposed = true;
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", redraw);
       if (unbindLenis) unbindLenis();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [reduced, columns, lenis]);
+  }, [reduced, lenis, cells]);
 
   const handleTileClick = (e, project) => {
     e.preventDefault();
@@ -447,31 +563,23 @@ export default function ProjectSection({
       aria-label="Selected Work"
     >
       <style>{css}</style>
-      <div className="ps-stage">
+      <div ref={stageRef} className="ps-stage" data-moving="false">
         <div ref={glowRef} className="ps-glow" aria-hidden="true" />
 
-        <div className="ps-grid">
-          {columns.map((col, ci) => (
+        <div className="ps-world">
+          {cells.map(({ project: p }, i) => (
             <div
-              key={ci}
-              className="ps-col"
-              ref={(el) => (colRefs.current[ci] = el)}
+              key={i}
+              className="ps-cell"
+              ref={(el) => (cellRefs.current[i] = el)}
             >
-              {col.map((p, ti) => (
-                <ProjectCardTile
-                  key={`${ci}-${ti}`}
-                  project={p}
-                  ratio={RATIOS[(ci * 2 + ti) % RATIOS.length]}
-                  onClick={(e) => handleTileClick(e, p)}
-                />
-              ))}
+              <ProjectCardTile project={p} onClick={(e) => handleTileClick(e, p)} />
             </div>
           ))}
         </div>
 
         <div className="ps-center">
           <div ref={groupRef} className="ps-group">
-            <div className="ps-headline-blur" aria-hidden="true" />
             <h2 className="ps-headline" aria-label={headline}>
               {words.map((w, i) => (
                 <span
@@ -510,7 +618,8 @@ const css = `
   --ps-bg: #09090b;
   --ps-fg: #fafafa;
   --ps-muted: rgba(255,255,255,.62);
-  --ps-tile: clamp(140px, 18vw, 220px);
+  --ps-tile: clamp(160px, 18vw, 270px);
+  --ps-ratio: 1 / 1;
   position: relative;
   background: var(--ps-bg);
   color: var(--ps-fg);
@@ -532,7 +641,7 @@ const css = `
   overflow: hidden;
 }
 
-/* Ambient Radial Colour Pool */
+/* Ambient radial colour pool. Opacity is driven per frame, so no transition. */
 .ps-glow {
   position: absolute;
   left: 50%;
@@ -544,45 +653,40 @@ const css = `
   opacity: 0;
   pointer-events: none;
   z-index: 0;
-  transition: opacity .4s ease;
 }
 
 [data-theme='light'] .ps-glow {
   background: radial-gradient(closest-side, rgba(200, 180, 240, 0.35), rgba(255, 210, 220, 0.15) 55%, transparent 100%);
 }
 
-/* Tile columns — Confined to a central stage near the headline */
-.ps-grid {
+/* ==========================================================================
+   Tile world. Every cell is anchored at the stage centre and positioned by
+   JS with translate + scale (see draw() in the component).
+   ========================================================================== */
+.ps-world {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(90vw, 1060px);
-  max-width: 1060px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: clamp(16px, 2.8vw, 42px);
+  inset: 0;
   z-index: 1;
 }
-.ps-col {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(24px, 7vh, 64px);
-  transform-origin: 50% 0;
-  will-change: transform, opacity;
-  transform: translate3d(0, 110vh, 0);
+.ps-cell {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--ps-tile);
+  transform-origin: 0 0;
+  visibility: hidden; /* JS reveals it on first draw, avoids a flash at load */
+  backface-visibility: hidden;
 }
 
 /* ==========================================================================
-   Aesthetic & Clean Typographic Project Card
+   Card
    ========================================================================== */
 .ps-tile {
   position: relative;
   display: flex;
   flex-direction: column;
-  width: var(--ps-tile);
+  width: 100%;
+  aspect-ratio: var(--ps-ratio, 1 / 1);
   overflow: hidden;
   border-radius: 16px;
   border: none;
@@ -591,9 +695,7 @@ const css = `
   color: inherit;
   cursor: pointer;
   background: #0e0e13;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  will-change: transform;
+  transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1);
   transform-style: preserve-3d;
   transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .35s ease;
   user-select: none;
@@ -601,31 +703,30 @@ const css = `
 
 [data-theme='light'] .ps-tile {
   background: #ffffff;
-  border: none;
   box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.08);
 }
 
 .ps-tile:hover,
 .ps-tile:focus-visible {
-  border: none;
   box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 255, 255, 0.05);
 }
 
 [data-theme='light'] .ps-tile:hover,
 [data-theme='light'] .ps-tile:focus-visible {
-  border: none;
   box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.16);
 }
 
 .ps-tile:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
-/* Subtle Background Sheen that tracks cursor */
+/* Cursor-tracking sheen (position set through --sx / --sy) */
 .ps-card-sheen {
   position: absolute;
   inset: 0;
+  opacity: 0;
   pointer-events: none;
   transition: opacity .3s ease;
   z-index: 1;
+  background: radial-gradient(circle at var(--sx, 50%) var(--sy, 50%), var(--accent) 0%, transparent 70%);
 }
 
 .ps-card-bg {
@@ -636,7 +737,6 @@ const css = `
   z-index: 0;
 }
 
-/* Micro Dot Pattern */
 .ps-card-microgrid {
   position: absolute;
   inset: 0;
@@ -651,7 +751,6 @@ const css = `
   background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
 }
 
-/* Inner Layout */
 .ps-card-inner {
   position: relative;
   z-index: 2;
@@ -663,7 +762,6 @@ const css = `
   gap: 12px;
 }
 
-/* Top Row: Index + Year Pill */
 .ps-card-top {
   display: flex;
   justify-content: space-between;
@@ -679,17 +777,9 @@ const css = `
   transition: color .25s ease;
 }
 
-[data-theme='light'] .ps-card-idx {
-  color: rgba(0, 0, 0, 0.4);
-}
-
-.ps-tile:hover .ps-card-idx {
-  color: #fff;
-}
-
-[data-theme='light'] .ps-tile:hover .ps-card-idx {
-  color: #000;
-}
+[data-theme='light'] .ps-card-idx { color: rgba(0, 0, 0, 0.4); }
+.ps-tile:hover .ps-card-idx { color: #fff; }
+[data-theme='light'] .ps-tile:hover .ps-card-idx { color: #000; }
 
 .ps-card-pill {
   display: inline-flex;
@@ -698,7 +788,6 @@ const css = `
   padding: 3px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: none;
   font-family: var(--font-mono, monospace);
   font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.75);
@@ -706,7 +795,6 @@ const css = `
 
 [data-theme='light'] .ps-card-pill {
   background: rgba(0, 0, 0, 0.05);
-  border: none;
   color: rgba(0, 0, 0, 0.65);
 }
 
@@ -724,7 +812,6 @@ const css = `
   50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 8px rgba(34, 197, 94, 0.9); }
 }
 
-/* Center: Category, Title, Subtitle */
 .ps-card-main {
   display: flex;
   flex-direction: column;
@@ -740,13 +827,8 @@ const css = `
   transition: color .25s ease;
 }
 
-[data-theme='light'] .ps-card-category {
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.ps-tile:hover .ps-card-category {
-  color: #38bdf8;
-}
+[data-theme='light'] .ps-card-category { color: rgba(0, 0, 0, 0.45); }
+.ps-tile:hover .ps-card-category { color: #38bdf8; }
 
 .ps-card-title {
   margin: 0;
@@ -759,13 +841,8 @@ const css = `
   transition: transform .25s var(--spring, ease);
 }
 
-[data-theme='light'] .ps-card-title {
-  color: #09090b;
-}
-
-.ps-tile:hover .ps-card-title {
-  transform: translateY(-2px);
-}
+[data-theme='light'] .ps-card-title { color: #09090b; }
+.ps-tile:hover .ps-card-title { transform: translateY(-2px); }
 
 .ps-card-sub {
   margin: 0;
@@ -778,21 +855,13 @@ const css = `
   overflow: hidden;
 }
 
-[data-theme='light'] .ps-card-sub {
-  color: rgba(0, 0, 0, 0.6);
-}
+[data-theme='light'] .ps-card-sub { color: rgba(0, 0, 0, 0.6); }
 
-/* Bottom: Metric Stat & Arrow Glyph */
 .ps-card-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-top: 8px;
-  border-top: none;
-}
-
-[data-theme='light'] .ps-card-bottom {
-  border-top: none;
 }
 
 .ps-card-stat {
@@ -804,9 +873,7 @@ const css = `
   text-overflow: ellipsis;
 }
 
-[data-theme='light'] .ps-card-stat {
-  color: rgba(0, 0, 0, 0.5);
-}
+[data-theme='light'] .ps-card-stat { color: rgba(0, 0, 0, 0.5); }
 
 .ps-card-arrow {
   display: flex;
@@ -825,10 +892,7 @@ const css = `
   color: #09090b;
 }
 
-.ps-card-arrow svg {
-  width: 12px;
-  height: 12px;
-}
+.ps-card-arrow svg { width: 12px; height: 12px; }
 
 .ps-tile:hover .ps-card-arrow {
   transform: translate(2px, -2px) scale(1.1);
@@ -841,16 +905,19 @@ const css = `
   color: #ffffff;
 }
 
-/* Dim non-hovered cards on hover */
+/* Dim the other cards on hover, but only while the section is at rest.
+   Doing this mid-scroll would re-run :has() on every moving tile. */
 @media (hover: hover) {
-  .ps-grid:has(.ps-tile:hover) .ps-tile:not(:hover) {
-    opacity: .35 !important;
+  .ps-stage[data-moving="false"] .ps-world:has(.ps-tile:hover) .ps-tile:not(:hover) {
+    opacity: .35;
     filter: blur(0.4px);
     transition: opacity .35s ease, filter .35s ease;
   }
 }
 
-/* Headline Group */
+/* ==========================================================================
+   Headline group (sits above the tiles, like the reference)
+   ========================================================================== */
 .ps-center {
   position: absolute;
   inset: 0;
@@ -865,22 +932,6 @@ const css = `
   width: min(100%, 1000px);
   text-align: center;
   will-change: transform;
-}
-
-/* Soft feathered backdrop blur behind text without any box or border */
-.ps-headline-blur {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(92vw, 860px);
-  height: 420px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  mask-image: radial-gradient(ellipse 70% 55% at 50% 50%, #000 25%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 50%, #000 25%, transparent 100%);
-  pointer-events: none;
-  z-index: -1;
 }
 
 .ps-headline {
@@ -966,7 +1017,7 @@ const css = `
   border-color: #000;
 }
 
-/* Scroll Hint */
+/* Scroll hint (opacity driven per frame, so no transition) */
 .ps-hint {
   position: absolute;
   left: 50%;
@@ -983,7 +1034,6 @@ const css = `
   font-weight: 600;
   color: var(--ps-muted);
   pointer-events: none;
-  transition: opacity .3s ease;
 }
 .ps-hint i {
   display: block;
@@ -994,9 +1044,7 @@ const css = `
   animation: ps-line 2s cubic-bezier(.6,0,.3,1) infinite;
 }
 
-[data-theme='light'] .ps-hint i {
-  background: rgba(0, 0, 0, 0.4);
-}
+[data-theme='light'] .ps-hint i { background: rgba(0, 0, 0, 0.4); }
 
 @keyframes ps-line {
   0%   { transform: scaleY(0); transform-origin: top; }
@@ -1025,20 +1073,20 @@ const css = `
   transform: scaleY(0);
 }
 
-[data-theme='light'] .ps-rail {
-  background: rgba(0, 0, 0, 0.1);
-}
-[data-theme='light'] .ps-rail b {
-  background: #000;
+[data-theme='light'] .ps-rail { background: rgba(0, 0, 0, 0.1); }
+[data-theme='light'] .ps-rail b { background: #000; }
+
+@media (max-width: 1023px) {
+  .ps { --ps-tile: 21vw; }
 }
 
 @media (max-width: 639px) {
-  .ps { --ps-tile: 42vw; }
+  .ps { --ps-tile: 27vw; --ps-ratio: 4 / 5; }
   .ps-rail { display: none; }
   .ps-headline { font-size: 36px; }
-  .ps-card-inner { padding: 12px; gap: 8px; }
-  .ps-card-title { font-size: 1.05rem; }
-  .ps-card-sub { font-size: 0.7rem; }
+  .ps-card-inner { padding: 10px; gap: 6px; }
+  .ps-card-title { font-size: 1rem; }
+  .ps-card-sub, .ps-card-pill { display: none; }
 }
 
 /* Reduced-motion fallback */

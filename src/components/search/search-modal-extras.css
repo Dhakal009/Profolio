@@ -1,0 +1,99 @@
+/* Additions for the upgraded SearchModal.
+   Your existing .search-* styles stay as they are; import this after them. */
+
+/* ---------- Category filters ---------- */
+.search-filters {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.1));
+}
+.search-filters::-webkit-scrollbar {
+  display: none;
+}
+.search-filter {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--line, rgba(255, 255, 255, 0.12));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--subtle, rgba(237, 237, 237, 0.6));
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.search-filter:hover {
+  color: var(--fg, #ededed);
+  border-color: var(--subtle, rgba(237, 237, 237, 0.4));
+}
+.search-filter.is-active {
+  color: var(--bg, #0c0c0c);
+  background: var(--accent, #4ade80);
+  border-color: var(--accent, #4ade80);
+}
+.search-filter:focus-visible,
+.search-recent-clear:focus-visible {
+  outline: 2px solid var(--accent, #4ade80);
+  outline-offset: 2px;
+}
+
+/* ---------- Header extras ---------- */
+.search-header-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.search-recent-clear {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--subtle, rgba(237, 237, 237, 0.55));
+  font: inherit;
+  font-size: 0.72rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.search-recent-clear:hover {
+  color: var(--fg, #ededed);
+}
+
+/* ---------- Result list extras ---------- */
+.search-group-label {
+  padding: 0.6rem 1rem 0.25rem;
+  color: var(--subtle, rgba(237, 237, 237, 0.5));
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+.search-result-cmd {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--accent, #4ade80);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.74rem;
+}
+.search-result-action {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 0.75rem;
+  color: var(--subtle, rgba(237, 237, 237, 0.5));
+  font-size: 0.72rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.search-result-item.is-selected .search-result-action {
+  opacity: 1;
+}
+@media (max-width: 560px) {
+  .search-result-action {
+    display: none;
+  }
+}
