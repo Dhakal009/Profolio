@@ -5,7 +5,7 @@ import { techLogos } from '../components/ui/TechLogos';
 import SelectedWorkScroll from '../components/home/SelectedWorkScroll';
 import DeliverablesSection from '../components/home/DeliverablesSection';
 import Experience from '../components/ui/Experience.jsx';
-import Education from '../components/ui/Education.jsx';
+
 import Skills from '../components/ui/Skills.jsx';
 import {
   SECTION_NAV,
@@ -51,9 +51,7 @@ function Home() {
 
       <SelectedWorkScroll />
 
-      <Section id="education" title="Education">
-        <Education />
-      </Section>
+      
 
       <Section id="skills" title="Skills">
         <Skills />
