@@ -137,13 +137,13 @@ function generateDeliverableTexture(item) {
   if (typeof document === 'undefined') return '';
   const canvas = document.createElement('canvas');
   const w = 1400;
-  const h = 1140;
+  const h = 1180;
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
 
-  const padX = 110;
+  const padX = 100;
   const contentW = w - padX * 2;
 
   // 1. Clean Matte Obsidian Background
@@ -151,33 +151,33 @@ function generateDeliverableTexture(item) {
   ctx.fillRect(0, 0, w, h);
 
   // 2. Minimal Subtle Inset Border
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.roundRect(32, 32, w - 64, h - 64, 32);
+  ctx.roundRect(24, 24, w - 48, h - 48, 36);
   ctx.stroke();
 
-  // 3. Top Header: Clean Index & Subtitle (NO code words, NO //)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.font = '600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  // 3. Top Header: Clean Index & Subtitle
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.font = '600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textBaseline = 'top';
-  ctx.fillText(`0${item.index}`, padX, 85);
+  ctx.fillText(`${item.index}`, padX, 88);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.font = '600 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.font = '600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const tagText = item.subtitle;
   const tagW = ctx.measureText(tagText).width;
-  ctx.fillText(tagText, w - padX - tagW, 89);
+  ctx.fillText(tagText, w - padX - tagW, 92);
 
   // 4. Center: Bold Pure White Title
   ctx.fillStyle = '#ffffff';
-  ctx.font = '800 108px "Space Grotesk", -apple-system, sans-serif';
+  ctx.font = '800 122px "Inter Tight", "Space Grotesk", -apple-system, sans-serif';
   ctx.textBaseline = 'middle';
 
   const titleLines = wrapCanvasText(ctx, item.title, contentW);
-  const lineH = 126;
+  const lineH = 140;
   const totalTitleH = titleLines.length * lineH;
-  const startY = h / 2 - totalTitleH / 2;
+  const startY = h / 2 - totalTitleH / 2 + 12;
 
   titleLines.forEach((line, i) => {
     ctx.fillText(line, padX, startY + i * lineH + lineH / 2);
@@ -266,11 +266,11 @@ export default function DeliverablesSection() {
             items={carouselItems}
             preset="cylinder"
             intro="rise"
-            cardWidth={520}
-            aspectRatio={1.22}
-            gap={36}
+            cardWidth={720}
+            aspectRatio={1.18}
+            gap={42}
             tilt={-4}
-            perspective={2100}
+            perspective={2400}
             speed={10}
             autoplay="drift"
             pauseOnHover={true}
@@ -284,7 +284,7 @@ export default function DeliverablesSection() {
             depthFade={0.72}
             fadeColor="#000000"
             innerShade={0.9}
-            cornerRadius={20}
+            cornerRadius={24}
             captions={false}
             onChange={(idx) => setActiveIndex(idx)}
             onItemClick={(_item, idx) => handleCardClick(idx)}
@@ -295,10 +295,10 @@ export default function DeliverablesSection() {
           <button
             type="button"
             onClick={handlePrev}
-            className="pointer-events-auto absolute left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 hidden sm:flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/75 backdrop-blur-xl transition hover:border-white/40 hover:bg-black/90 hover:text-white hover:scale-105 active:scale-95 shadow-xl"
+            className="pointer-events-auto absolute left-3 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/75 backdrop-blur-xl transition hover:border-white/40 hover:bg-black/90 hover:text-white hover:scale-105 active:scale-95 shadow-xl"
             aria-label="Previous deliverable"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -307,16 +307,16 @@ export default function DeliverablesSection() {
           <button
             type="button"
             onClick={handleNext}
-            className="pointer-events-auto absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 hidden sm:flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/75 backdrop-blur-xl transition hover:border-white/40 hover:bg-black/90 hover:text-white hover:scale-105 active:scale-95 shadow-xl"
+            className="pointer-events-auto absolute right-3 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/75 backdrop-blur-xl transition hover:border-white/40 hover:bg-black/90 hover:text-white hover:scale-105 active:scale-95 shadow-xl"
             aria-label="Next deliverable"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
 
-          {/* Minimal Floating Bottom Bar: Pagination Dots Only (No text) */}
-          <div className="pointer-events-none absolute bottom-8 inset-x-0 z-20 flex justify-center">
+          {/* Minimal Floating Bottom Bar: Pagination Dots positioned clearly above dock */}
+          <div className="pointer-events-none absolute bottom-16 sm:bottom-20 inset-x-0 z-20 flex justify-center">
             <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/50 px-3.5 py-1.5 backdrop-blur-xl">
               {DELIVERABLES.map((item, idx) => (
                 <button
@@ -347,7 +347,7 @@ export default function DeliverablesSection() {
               >
                 <div>
                   <div className="flex items-center justify-between text-xs text-white/40">
-                    <span className="font-semibold text-white/60">0{item.index}</span>
+                    <span className="font-semibold text-white/60">{item.index}</span>
                     <span className="text-white/50">{item.subtitle}</span>
                   </div>
                   <h3 className="mt-8 text-2xl font-bold text-white group-hover:text-white">
@@ -371,7 +371,7 @@ export default function DeliverablesSection() {
           onClick={handleCloseDetail}
         >
           <div
-            className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#0c0c12] p-7 shadow-2xl transition sm:p-9"
+            className="relative max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0c0c12] p-6 shadow-2xl transition sm:p-9"
             style={{
               boxShadow: `0 30px 80px -20px ${activeDeliverable.accent}30`
             }}

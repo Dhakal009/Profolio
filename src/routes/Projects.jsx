@@ -1,39 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-
-const projects = [
-  {
-    title: 'Aether E-Commerce',
-    description: 'A headless e-commerce experience with sub-second page loads. Features custom WebGL product viewers, seamless Stripe integration, and dynamic inventory sync.',
-    tech: ['Next.js', 'TypeScript', 'Three.js', 'Stripe'],
-    link: '#',
-    github: '#',
-    status: 'Live',
-  },
-  {
-    title: 'Lumina Dashboard',
-    description: 'Enterprise-grade analytics dashboard for SaaS metrics. Includes real-time data visualization, customizable drag-and-drop widgets, and strict role-based access control.',
-    tech: ['React', 'Node.js', 'PostgreSQL', 'Framer Motion'],
-    link: '#',
-    github: '#',
-    status: 'Live',
-  },
-  {
-    title: 'Vortex Portfolio',
-    description: 'Award-winning creative portfolio showcasing advanced CSS and WebGL techniques. Features smooth scroll hijacking, custom cursors, and complex staggering animations.',
-    tech: ['HTML/CSS', 'GSAP', 'WebGL', 'Lenis'],
-    link: '#',
-    github: '#',
-    status: 'Live',
-  },
-  {
-    title: 'Syntax OS',
-    description: 'A web-based operating system simulation built entirely in the browser. Supports window management, a virtual file system, and custom themes.',
-    tech: ['React', 'Redux Toolkit', 'Styled Components'],
-    link: '#',
-    github: '#',
-    status: 'In Development',
-  },
-];
+import { useNavigate, Link } from 'react-router-dom';
+import { PROJECTS as projects } from '../data/projects';
 
 const ArrowUpRight = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -49,7 +15,7 @@ function Projects() {
         <div className="container page-hero-content">
           <span className="section-index reveal">Selected Work</span>
           <p className="page-desc reveal">
-            A curated selection of my most impactful projects, ranging from high-performance web applications and enterprise tools to immersive creative experiences.
+            A curated selection of my full-stack and frontend projects from the repository, complete with interactive live demos hosted right here and direct links to their source code.
           </p>
         </div>
       </section>
@@ -77,11 +43,21 @@ function Projects() {
                 </div>
 
                 <div className="project-links">
-                  <a href={project.link} className="project-link" aria-label={`View ${project.title} live`}>
-                    Live <ArrowUpRight />
-                  </a>
-                  <a href={project.github} className="project-link" aria-label={`View ${project.title} source on GitHub`}>
-                    Source <ArrowUpRight />
+                  <Link
+                    to={project.link}
+                    className="project-link"
+                    aria-label={`Launch ${project.title} live demo`}
+                  >
+                    Live Demo <ArrowUpRight />
+                  </Link>
+                  <a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="project-link"
+                    aria-label={`View ${project.title} source code on GitHub`}
+                  >
+                    Source Code <ArrowUpRight />
                   </a>
                 </div>
               </article>

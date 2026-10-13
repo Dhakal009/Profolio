@@ -5,7 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Projects from './Projects';
 
 describe('Projects Route Component', () => {
-  it('renders project list and cards properly without being blank', () => {
+  it('renders project list and cards from the Projects folder with Live Demo and Source Code links', () => {
     render(
       <BrowserRouter>
         <Projects />
@@ -13,11 +13,23 @@ describe('Projects Route Component', () => {
     );
 
     expect(screen.getByText('Selected Work')).toBeInTheDocument();
-    expect(screen.getByText('Aether E-Commerce')).toBeInTheDocument();
-    expect(screen.getByText('Lumina Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Vortex Portfolio')).toBeInTheDocument();
-    expect(screen.getByText('Syntax OS')).toBeInTheDocument();
+    expect(screen.getByText('Employee Management System')).toBeInTheDocument();
+    expect(screen.getByText('Live Chat Application')).toBeInTheDocument();
+    expect(screen.getByText('E-Commerce App')).toBeInTheDocument();
     expect(screen.getByText(/Let's build something together/i)).toBeInTheDocument();
+
+    const emsDemoLink = screen.getByRole('link', {
+      name: /Launch Employee Management System live demo/i,
+    });
+    expect(emsDemoLink).toHaveAttribute('href', '/demo/ems');
+
+    const emsSourceLink = screen.getByRole('link', {
+      name: /View Employee Management System source code on GitHub/i,
+    });
+    expect(emsSourceLink).toHaveAttribute(
+      'href',
+      'https://github.com/Dhakal009/Profolio/tree/master/Projects/EMS'
+    );
   });
 
   it('renders centered hero content container', () => {

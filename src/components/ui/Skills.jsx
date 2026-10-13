@@ -222,10 +222,10 @@ export default function Skills({ showHeading = true }) {
   const reduce = useReducedMotion();
 
   return (
-    <Section id="skills" aria-labelledby={showHeading ? "skills-title" : undefined}>
+    <Section aria-labelledby={showHeading ? "skills-heading" : undefined}>
       {showHeading && (
         <Head>
-          <h2 id="skills-title">Skills</h2>
+          <h2 id="skills-heading">Skills</h2>
           <p>Select a card to flip it and see how comfortable I am with each tool.</p>
         </Head>
       )}
@@ -249,16 +249,16 @@ export default function Skills({ showHeading = true }) {
 /* ------------------------------------------------------------------ */
 /*  Styles – map the CSS variables to your site's theme tokens         */
 /* ------------------------------------------------------------------ */
-const Section = styled.section`
+const Section = styled.div`
   --sk-fg: var(--fg, #fafafa);
   --sk-muted: var(--muted, #8b8b92);
   --sk-border: var(--border, rgba(255, 255, 255, 0.1));
   --sk-card: var(--card, #121212);
   --sk-mono: var(--font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
 
-  width: min(1200px, 100% - 48px);
+  width: 100%;
   margin: 0 auto;
-  padding: 96px 0;
+  padding: 0;
   color: var(--sk-fg);
 `;
 

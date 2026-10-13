@@ -26,118 +26,13 @@ import { useLenis } from "../../contexts/LenisContext";
  * once (not every frame), and only transform/opacity are written per frame.
  */
 
-const DEFAULT_PROJECTS = [
-  {
-    index: "01",
-    title: "Aether",
-    subtitle: "Kinetic E-Commerce",
-    category: "Full Stack & 3D",
-    year: "2025",
-    tech: "Next.js · Three.js · Stripe",
-    href: "/projects",
-    stat: "Sub-second 3D",
-    accent: "rgba(255, 140, 0, 0.15)",
-  },
-  {
-    index: "02",
-    title: "Lumina",
-    subtitle: "Streaming Telemetry",
-    category: "SaaS Analytics",
-    year: "2025",
-    tech: "React · Postgres · Framer",
-    href: "/projects",
-    stat: "120 FPS Live",
-    accent: "rgba(99, 102, 241, 0.15)",
-  },
-  {
-    index: "03",
-    title: "Vortex",
-    subtitle: "Immersive WebGL",
-    category: "Creative Dev",
-    year: "2024",
-    tech: "GLSL · WebGL · Three.js",
-    href: "/projects",
-    stat: "Fluid Physics",
-    accent: "rgba(168, 85, 247, 0.15)",
-  },
-  {
-    index: "04",
-    title: "Syntax",
-    subtitle: "Browser Desktop OS",
-    category: "Virtual WebOS",
-    year: "2024",
-    tech: "React · WebAssembly",
-    href: "/projects",
-    stat: "In-Memory FS",
-    accent: "rgba(56, 189, 248, 0.15)",
-  },
-  {
-    index: "05",
-    title: "Hyperion",
-    subtitle: "Autonomous Agent Canvas",
-    category: "AI Architecture",
-    year: "2025",
-    tech: "Next.js · Vector DB · LLM",
-    href: "/projects",
-    stat: "8ms Latency",
-    accent: "rgba(34, 197, 94, 0.15)",
-  },
-  {
-    index: "06",
-    title: "Nebula",
-    subtitle: "Generative Shader Lab",
-    category: "Creative Coding",
-    year: "2025",
-    tech: "Raymarching · WebGPU",
-    href: "/projects",
-    stat: "Real-time GLSL",
-    accent: "rgba(236, 72, 153, 0.15)",
-  },
-  {
-    index: "07",
-    title: "Prism",
-    subtitle: "Design Engineering System",
-    category: "Token Engine",
-    year: "2024",
-    tech: "TypeScript · Radix · CSS",
-    href: "/projects",
-    stat: "Zero-Runtime",
-    accent: "rgba(250, 204, 21, 0.15)",
-  },
-  {
-    index: "08",
-    title: "Chronos",
-    subtitle: "Visual Event Timeline",
-    category: "Event Streaming",
-    year: "2024",
-    tech: "Canvas · Web Workers",
-    href: "/projects",
-    stat: "1M Data Points",
-    accent: "rgba(14, 165, 233, 0.15)",
-  },
-  {
-    index: "09",
-    title: "Zenith",
-    subtitle: "Micro-Interaction Suite",
-    category: "Design System",
-    year: "2024",
-    tech: "Spring Physics · SVG",
-    href: "/projects",
-    stat: "60+ Components",
-    accent: "rgba(192, 132, 252, 0.15)",
-  },
-  {
-    index: "10",
-    title: "Horizon",
-    subtitle: "High-Scale Edge Gateway",
-    category: "Infrastructure",
-    year: "2023",
-    tech: "Node.js · Redis · Docker",
-    href: "/projects",
-    stat: "99.99% Uptime",
-    accent: "rgba(244, 63, 94, 0.15)",
-  },
-];
+import { PROJECTS } from "../../data/projects";
+
+const DEFAULT_PROJECTS = PROJECTS.map((p) => ({
+  ...p,
+  tech: p.techString || (Array.isArray(p.tech) ? p.tech.join(" · ") : p.tech),
+  href: p.link || p.href || "/projects",
+}));
 
 /* ---------- Choreography tuning (all values are fractions of scroll 0–1) ---------- */
 const COLS = 3; // keep odd: the middle column travels the opposite way
@@ -320,7 +215,11 @@ export default function ProjectSection({
     const out = [];
     for (let c = 0; c < COLS; c++) {
       for (let r = 0; r < ROWS; r++) {
-        out.push({ c, r, project: projects[(r * COLS + c) % projects.length] });
+        const idx =
+          projects.length <= COLS
+            ? (r + c) % projects.length
+            : (r * COLS + c) % projects.length;
+        out.push({ c, r, project: projects[idx] });
       }
     }
     return out;
@@ -1083,9 +982,10 @@ const css = `
 @media (max-width: 639px) {
   .ps { --ps-tile: 27vw; --ps-ratio: 4 / 5; }
   .ps-rail { display: none; }
-  .ps-headline { font-size: 36px; }
+  .ps-headline { font-size: clamp(28px, 8.5vw, 38px); }
   .ps-card-inner { padding: 10px; gap: 6px; }
-  .ps-card-title { font-size: 1rem; }
+  .ps-card-title { font-size: clamp(0.75rem, 3.2vw, 0.95rem); overflow-wrap: break-word; }
+  .ps-card-category { font-size: 0.56rem; }
   .ps-card-sub, .ps-card-pill { display: none; }
 }
 

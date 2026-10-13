@@ -117,32 +117,35 @@ Quick tip: Run 'open email' to compose an email, or 'open github' to view my cod
       projects: {
         type: 'dir',
         children: {
-          'aether.txt': {
+          'ems.txt': {
             type: 'file',
-            content: `Project: Aether E-Commerce (2025)
-Type:    Full Stack Application
-Stack:   React, Node.js, PostgreSQL, Stripe, Tailwind CSS
-Summary: Scalable e-commerce platform with real-time inventory management,
-         sub-second product filtering, and smooth animated checkout flow.
-Tip:     Run 'goto projects' to view project details.`,
+            content: `Project: Employee Management System (EMS)
+Type:    Enterprise Role-Based Dashboard
+Stack:   React 19, Tailwind CSS, Context API, LocalStorage
+Summary: Role-based task and workforce portal with Admin and Employee dashboards,
+         task assignment workflows, and real-time task status tracking.
+Live:    /demo/ems
+Source:  https://github.com/Dhakal009/Profolio/tree/master/Projects/EMS`,
           },
-          'lumina.txt': {
+          'live-chat.txt': {
             type: 'file',
-            content: `Project: Lumina Dashboard (2024)
-Type:    SaaS Analytics Platform
-Stack:   Next.js, TypeScript, Tailwind, Chart.js, Prisma
-Summary: Modern data visualization platform rendering live telemetry,
-         user engagement funnels, and customizable widget dashboards.
-Tip:     Run 'goto projects' to view project details.`,
+            content: `Project: Live Chat Application
+Type:    Full Stack Real-Time Messaging
+Stack:   React 19, Node.js, Express, MongoDB, Socket.io, Tailwind CSS
+Summary: Real-time bidirectional chat platform with JWT auth, online presence
+         indicators, typing notifications, and unread message counters.
+Live:    /demo/live-chat
+Source:  https://github.com/Dhakal009/Profolio/tree/master/Projects/live-chat`,
           },
-          'vortex.txt': {
+          'ecommerce-app.txt': {
             type: 'file',
-            content: `Project: Vortex Portfolio (2024)
-Type:    Creative WebGL Experience
-Stack:   Three.js, GSAP, WebGL, React
-Summary: Interactive 3D portfolio featuring procedural particle simulations,
-         dynamic shader uniforms, and smooth scroll choreography.
-Tip:     Run 'goto projects' to view project details.`,
+            content: `Project: E-Commerce App
+Type:    MERN Stack Online Storefront
+Stack:   React 19, Node.js, Express, MongoDB, Tailwind CSS
+Summary: Full-stack e-commerce storefront featuring product catalog browsing,
+         category filtering, search, shopping cart drawer, and checkout flow.
+Live:    /demo/ecommerce-app
+Source:  https://github.com/Dhakal009/Profolio/tree/master/Projects/ecommerce-app`,
           },
           'view-all.sh': {
             type: 'file',
@@ -1039,9 +1042,9 @@ Tasks:   6 total,   2 running,   4 sleeping
 ├── education.txt
 ├── contact.txt
 ├── projects/
-│   ├── aether.txt
-│   ├── lumina.txt
-│   ├── vortex.txt
+│   ├── ems.txt
+│   ├── live-chat.txt
+│   ├── ecommerce-app.txt
 │   └── view-all.sh
 └── socials/
     ├── github.url

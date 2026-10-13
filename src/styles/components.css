@@ -872,34 +872,78 @@ body.is-preloading {
 }
 
 @media (max-width: 640px) {
+  .dock {
+    bottom: max(0.65rem, env(safe-area-inset-bottom, 0.65rem));
+    max-width: calc(100vw - 12px);
+  }
   .dock-inner {
-    padding: 4px 6px;
-    gap: 4px;
+    padding: 4px 5px;
+    gap: 3px;
+    max-width: 100%;
+  }
+  .dock-list {
+    gap: 3px;
   }
   .dock-slot,
   .dock-tile {
-    height: 36px;
+    height: 34px;
   }
   .dock-logo {
-    width: 36px;
-    height: 36px;
-    font-size: 0.95rem;
+    width: 34px;
+    height: 34px;
+    font-size: 0.88rem;
   }
   .dock-link {
-    padding-inline: 0.75rem;
-    font-size: 0.78rem;
+    padding-inline: 0.62rem;
+    font-size: 0.75rem;
+  }
+  .dock-link.active {
+    font-weight: 600;
   }
   .dock-cta {
-    padding-inline: 0.85rem;
-    font-size: 0.78rem;
+    padding-inline: 0.72rem;
+    font-size: 0.75rem;
   }
   .header-page-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 520px) {
+  .dock-slot--cta {
+    display: none;
+  }
+  .dock-link {
+    padding-inline: 0.56rem;
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .dock-inner,
+  .dock-list {
+    gap: 2px;
+  }
+  .dock-logo {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+  }
+  .dock-slot,
+  .dock-tile {
+    height: 30px;
+  }
+  .dock-link {
+    padding-inline: 0.44rem;
+    font-size: 0.68rem;
   }
 }
 
 /* ============================================================
-   HERO — centred title + rounded media card
+   HERO — centred title + layered avatar composition
    ============================================================ */
 .hero {
   position: relative;
@@ -951,20 +995,6 @@ body.is-preloading {
   font-style: normal;
   font-size: 0.8em;
   color: var(--muted);
-}
-
-.hero-name {
-  position: absolute;
-  z-index: 1;
-  font-size: clamp(5rem, 20vw, 22rem);
-  font-weight: 900;
-  line-height: 0.8;
-  letter-spacing: -0.04em;
-  color: var(--foam);
-  text-align: center;
-  text-transform: uppercase;
-  margin: 0;
-  display: block;
 }
 
 .hero-name-word {
@@ -1039,7 +1069,6 @@ body.is-preloading {
   align-self: flex-start;
 }
 
-
 /* Hero Background Name & Avatar Composition */
 .hero-composition {
   position: absolute;
@@ -1057,7 +1086,7 @@ body.is-preloading {
 .hero-name {
   position: absolute;
   z-index: 1;
-  font-size: clamp(6rem, 23vw, 22rem);
+  font-size: clamp(3.4rem, 23vw, 22rem);
   font-weight: 800;
   line-height: 0.82;
   letter-spacing: 0;
@@ -1066,22 +1095,21 @@ body.is-preloading {
   text-transform: uppercase;
   margin: 0;
   pointer-events: none;
+  width: 100%;
 }
 
 .hero-avatar-front {
   position: absolute;
   bottom: -2vh;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
+  left: 50%;
   z-index: 2;
   height: 105vh;
   width: auto;
   max-width: none;
   object-fit: contain;
   opacity: 0;
-  transform: scale(0.95) translateY(50px);
-  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));
+  transform: translateX(-50%) scale(0.95) translateY(50px);
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
   pointer-events: none;
 }
 .is-loaded .hero-avatar-front {
@@ -1091,24 +1119,25 @@ body.is-preloading {
 @keyframes avatarIn {
   to {
     opacity: 1;
-    transform: none;
+    transform: translateX(-50%) scale(1) translateY(0);
   }
 }
 
-/* Tablet responsiveness */
+/* Tablet responsiveness — preserve desktop layered composition */
 @media (max-width: 1024px) {
   .hero-name {
-    font-size: clamp(4.5rem, 18vw, 11rem);
+    font-size: clamp(4.2rem, 22.5vw, 14rem);
+    top: 46%;
+    transform: translateY(-50%);
   }
   .hero-avatar-front {
-    height: 84vh;
-    max-height: 720px;
-    bottom: 0;
-    max-width: 90vw;
+    bottom: -1vh;
+    height: clamp(500px, 82dvh, 142vw);
+    max-width: none;
   }
 }
 
-/* Mobile responsiveness: avatar no longer dominates full screen */
+/* Mobile responsiveness — same layered composition as desktop, scaled to mobile viewport */
 @media (max-width: 768px) {
   .hero {
     height: 100vh;
@@ -1117,44 +1146,41 @@ body.is-preloading {
   }
   .hero-composition {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
     align-items: center;
+    justify-content: center;
   }
   .hero-name {
-    top: clamp(14%, 18vh, 22%);
+    top: 44%;
     left: 0;
     right: 0;
-    margin: 0 auto;
+    transform: translateY(-50%);
     width: 100%;
-    padding-inline: 1rem;
-    font-size: clamp(3.2rem, 15.5vw, 5.5rem);
-    line-height: 0.88;
-    letter-spacing: -0.02em;
+    font-size: clamp(3.4rem, 23vw, 8.5rem);
+    line-height: 0.84;
+    letter-spacing: -0.01em;
     text-align: center;
   }
   .hero-avatar-front {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    height: clamp(340px, 58vh, 480px);
+    bottom: -1vh;
+    left: 50%;
+    height: clamp(420px, 74dvh, 140vw);
     width: auto;
-    max-width: 86vw;
+    max-width: none;
     object-fit: contain;
   }
 }
 
-/* Extra small mobile screen polish (e.g. 360px - 430px) */
+/* Extra small mobile screens (e.g. 360px - 480px) */
 @media (max-width: 480px) {
   .hero-name {
-    top: clamp(15%, 19vh, 23%);
-    font-size: clamp(2.8rem, 15vw, 4.4rem);
-    line-height: 0.9;
+    top: 43%;
+    font-size: clamp(3.1rem, 23vw, 6.2rem);
+    line-height: 0.84;
   }
   .hero-avatar-front {
-    height: clamp(290px, 55vh, 430px);
-    max-width: 88vw;
+    bottom: -1vh;
+    height: clamp(380px, 70dvh, 138vw);
+    max-width: none;
   }
 }
 
@@ -1185,6 +1211,10 @@ body.is-preloading {
     opacity: 1;
     transform: none;
     clip-path: none;
+  }
+  .hero-avatar-front {
+    opacity: 1;
+    transform: translateX(-50%);
   }
 }
 
@@ -1422,7 +1452,7 @@ body.is-preloading {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: clamp(1.5rem, 4.5vw, 3rem);
+  font-size: clamp(1.1rem, 4.5vw, 3rem);
   font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.2;
@@ -1432,7 +1462,7 @@ body.is-preloading {
   background-position: 0 100%;
   background-repeat: no-repeat;
   transition: background-size 0.6s var(--ease-out), color var(--dur);
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 .contact-email svg {
   width: 0.7em;

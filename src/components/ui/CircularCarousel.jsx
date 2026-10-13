@@ -240,7 +240,9 @@ const CircularCarousel = ({
   innerShade = 0.6,
   cornerRadius = 12,
   captions = false,
+  focusOnClick = true,
   onChange,
+  onItemClick,
   className = '',
   style
 }) => {
@@ -485,7 +487,18 @@ const CircularCarousel = ({
       }
       const spanX = Math.max(maxX - minX, 1);
       const spanY = Math.max(maxY - minY, 1);
-      const fit = Math.min(1, width / spanX, height / spanY);
+      let fitX = width / spanX;
+      if (s.axis === 'y' && !s.layout.inward) {
+        if (rect.width < 640) {
+          fitX = (rect.width * 0.85) / s.cardW;
+        } else if (rect.width < 1024) {
+          fitX = (rect.width * 0.66) / s.cardW;
+        } else {
+          fitX = Math.max(width / spanX, (rect.width * 0.5) / s.cardW);
+        }
+      }
+      const fitY = height / spanY;
+      const fit = Math.min(1.15, fitX, fitY);
       state.fit = fit;
       state.shift = -((minY + maxY) / 2) * fit - room / 2;
       state.drop = s.axis === 'x' ? (rect.width / fit) * 0.55 + s.cardW : (rect.height / fit) * 0.55 + s.cardH;
@@ -977,11 +990,19 @@ const CircularCarousel = ({
                   ref={(element) => {
                     cardRefs.current[index] = element;
                   }}
-                  className="absolute left-0 top-0 h-0 w-0 [transform-style:preserve-3d]"
+                  className="absolute left-0 top-0 h-0 w-0 cursor-pointer [transform-style:preserve-3d]"
                   data-cc-index={index}
                   role="group"
                   aria-roledescription="slide"
                   aria-label={`${item.title || item.alt || `Image ${index + 1}`}, ${index + 1} of ${count}`}
+                  onClick={() => {
+                    if (stateRef.current.suppressClick) {
+                      stateRef.current.suppressClick = false;
+                      return;
+                    }
+                    if (focusOnClick) focusIndex(index);
+                    onItemClick?.(item, index);
+                  }}
                 >
                   <span className="sr-only">{item.title}</span>
                   {tiles.map((tile) => renderTile(item, tile, false, index))}

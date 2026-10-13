@@ -26,7 +26,12 @@ const sections = [
   { id: 'contact', title: 'Contact' },
 ];
 
-const routeTitles = { '/projects': 'Projects' };
+const routeTitles = {
+  '/projects': 'Projects',
+  '/demo/ems': 'EMS · Live Demo',
+  '/demo/live-chat': 'Live Chat · Live Demo',
+  '/demo/ecommerce-app': 'E-Commerce · Live Demo',
+};
 
 const SPRING_CONFIG = { mass: 0.1, stiffness: 160, damping: 13 };
 const HOP_TIME = 0.38;
@@ -292,6 +297,7 @@ function Header() {
   }, []);
 
   const measureWidths = useCallback(() => {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
     slotRefs.current.forEach((slot, idx) => {
       if (!slot) return;
       const tile = tileRefs.current[idx];
@@ -301,7 +307,14 @@ function Header() {
         tile.style.boxShadow = '';
       }
       slot.style.width = '';
+      if (isMobile) {
+        baseWidthsRef.current[idx] = 0;
+      }
     });
+    if (isMobile) {
+      pointerRef.current = { x: 0, inside: false };
+      return;
+    }
     slotRefs.current.forEach((slot, idx) => {
       if (!slot) return;
       const tile = tileRefs.current[idx];
@@ -421,6 +434,9 @@ function Header() {
   }, [getMotionState]);
 
   const handlePointerMove = useCallback((e) => {
+    if (e.pointerType === 'touch' || (typeof window !== 'undefined' && window.innerWidth <= 640)) {
+      return;
+    }
     pointerRef.current = { x: e.clientX, inside: true };
     startAnimation();
   }, [startAnimation]);
@@ -756,7 +772,7 @@ function Header() {
             })}
           </ul>
           <div
-            className="dock-slot"
+            className="dock-slot dock-slot--cta"
             ref={(el) => (slotRefs.current[navItems.length + 1] = el)}
           >
             <a
