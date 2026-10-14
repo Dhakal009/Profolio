@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ThemeProvider } from '../../contexts/ThemeContext';
@@ -30,7 +30,7 @@ function useGlobalReveal(pathname) {
             let i = 0;
             entries.forEach((entry) => {
               if (!entry.isIntersecting) return;
-              entry.target.style.setProperty('--reveal-delay', `${Math.min(i, 6) * 60}ms`);
+              entry.target.style.setProperty('--reveal-delay', `${Math.min(i, 6) * 35}ms`);
               entry.target.classList.add('is-visible');
               observer.unobserve(entry.target);
               i += 1;
@@ -73,8 +73,27 @@ function useGlobalReveal(pathname) {
 // Scroll to top (or to the #hash target) whenever the route changes
 function useRouteScroll(pathname, hash, state) {
   const { lenis } = useLenis();
+  const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
+    // On fresh page reload/load, disable automatic browser scroll jump and scroll to top
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      if (typeof window !== 'undefined') {
+        if ('scrollRestoration' in window.history) {
+          window.history.scrollRestoration = 'manual';
+        }
+        if (window.location.hash) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+        window.scrollTo(0, 0);
+        if (lenis) {
+          lenis.scrollTo(0, { immediate: true });
+        }
+      }
+      return;
+    }
+
     const targetId = state?.scrollTo || (hash ? hash.slice(1) : null);
 
     const tryScroll = () => {
@@ -128,10 +147,10 @@ function Shell() {
         <AnimatePresence mode="wait">
           <motion.div 
             key={pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 8, filter: 'blur(3px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             onAnimationComplete={() => {
               if (lenis) lenis.resize();
             }}

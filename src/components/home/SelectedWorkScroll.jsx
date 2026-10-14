@@ -55,7 +55,7 @@ const REVEAL_LEN = 0.2; // finishes at 0.92, the rest is a short hold
 const GAP_X = 0.14; // gaps between tiles, as a fraction of tile size
 const GAP_Y = 0.32;
 
-const DAMP = 13; // higher = snappier follow, lower = floatier
+const DAMP = 18; // higher = snappier follow, lower = floatier
 
 // Mixed ratios are only used by the reduced-motion static grid.
 const RATIOS = ["4 / 5", "1 / 1", "3 / 4", "5 / 6", "4 / 5", "7 / 8"];

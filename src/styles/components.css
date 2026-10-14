@@ -63,8 +63,8 @@
    ============================================================ */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out);
+  transform: translateY(16px);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
@@ -1018,8 +1018,8 @@ body.is-preloading {
   will-change: transform;
 }
 .is-loaded .hero-char {
-  animation: heroChar 1.2s var(--ease-out) forwards;
-  animation-delay: calc(0.15s + var(--ci) * 0.045s);
+  animation: heroChar 0.85s var(--ease-out) forwards;
+  animation-delay: calc(0.08s + var(--ci) * 0.028s);
 }
 
 @keyframes heroChar {
@@ -1086,11 +1086,12 @@ body.is-preloading {
 .hero-name {
   position: absolute;
   z-index: 1;
+  font-family: var(--font-heading);
   font-size: clamp(3.4rem, 23vw, 22rem);
   font-weight: 800;
   line-height: 0.82;
   letter-spacing: 0;
-  color: var(--foam);
+  color: #ffffff;
   text-align: center;
   text-transform: uppercase;
   margin: 0;
@@ -1113,7 +1114,7 @@ body.is-preloading {
   pointer-events: none;
 }
 .is-loaded .hero-avatar-front {
-  animation: avatarIn 1.4s var(--ease-expo) 0.5s forwards;
+  animation: avatarIn 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.18s forwards;
 }
 
 @keyframes avatarIn {

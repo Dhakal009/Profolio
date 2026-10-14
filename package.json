@@ -11,14 +11,17 @@
     "test": "vitest --run --environment jsdom"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.8.1",
     "@studio-freight/lenis": "^1.0.42",
+    "@types/three": "^0.186.0",
     "framer-motion": "^14.0.0",
     "gsap": "^3.12.5",
     "ogl": "^1.0.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^6.26.2",
-    "styled-components": "^6.5.3"
+    "styled-components": "^6.5.3",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",

@@ -1187,7 +1187,7 @@ Location: Kathmandu Valley, Nepal`}
   const runChip = (cmd) => {
     finishAuto(false);
     executeCommand(cmd);
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   };
 
   const handleFormSubmit = (e) => {

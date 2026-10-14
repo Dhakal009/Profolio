@@ -33,8 +33,8 @@ const routeTitles = {
   '/demo/ecommerce-app': 'E-Commerce · Live Demo',
 };
 
-const SPRING_CONFIG = { mass: 0.1, stiffness: 160, damping: 13 };
-const HOP_TIME = 0.38;
+const SPRING_CONFIG = { mass: 0.08, stiffness: 220, damping: 15 };
+const HOP_TIME = 0.28;
 const REACH = 140;
 const MAX_SWELL = 0.22;
 const MAX_LIFT = 16;

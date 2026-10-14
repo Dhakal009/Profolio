@@ -5,8 +5,8 @@ import { techLogos } from '../components/ui/TechLogos';
 import SelectedWorkScroll from '../components/home/SelectedWorkScroll';
 import DeliverablesSection from '../components/home/DeliverablesSection';
 import Experience from '../components/ui/Experience.jsx';
-
 import Skills from '../components/ui/Skills.jsx';
+import ThreeCanvas from '../components/canvas/ThreeCanvas';
 import {
   SECTION_NAV,
   ScrollProgress,
@@ -15,10 +15,6 @@ import {
 
 const SECTION_IDS = SECTION_NAV.map((s) => s.id);
 
-// `focus-section` opts a section into the dim / lift effect.
-// Hero, SelectedWorkScroll and Deliverables are intentionally left out: they are
-// full-height or pinned, and fading/transforming their ancestors can break pinning.
-// They still get data-state for CSS if you want it.
 function Section({ id, title, children }) {
   return (
     <section id={id} className="section focus-section" aria-labelledby={`${id}-title`}>
@@ -35,6 +31,7 @@ function Home() {
 
   return (
     <>
+      <ThreeCanvas activeSection="hero" />
       <ScrollProgress />
 
       <section id="hero" aria-labelledby="hero-name">
@@ -50,8 +47,6 @@ function Home() {
       </Section>
 
       <SelectedWorkScroll />
-
-      
 
       <Section id="skills" title="Skills">
         <Skills />
