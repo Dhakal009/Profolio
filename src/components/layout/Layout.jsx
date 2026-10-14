@@ -147,10 +147,10 @@ function Shell() {
         <AnimatePresence mode="wait">
           <motion.div 
             key={pathname}
-            initial={{ opacity: 0, y: 8, filter: 'blur(3px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: pathname.startsWith('/projects') ? 0 : 8, filter: pathname.startsWith('/projects') ? 'none' : 'blur(3px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'none' }}
+            exit={{ opacity: 0, y: pathname.startsWith('/projects') ? 0 : -6, filter: pathname.startsWith('/projects') ? 'none' : 'blur(2px)' }}
+            transition={{ duration: pathname.startsWith('/projects') ? 0.15 : 0.22, ease: [0.16, 1, 0.3, 1] }}
             onAnimationComplete={() => {
               if (lenis) lenis.resize();
             }}
@@ -160,8 +160,8 @@ function Shell() {
           </motion.div>
         </AnimatePresence>
       </main>
-      <Footer />
-      <BackToTop />
+      {!pathname.startsWith('/projects') && <Footer />}
+      {!pathname.startsWith('/projects') && <BackToTop />}
     </>
   );
 }

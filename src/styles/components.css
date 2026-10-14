@@ -525,6 +525,81 @@ body.is-preloading {
   flex-shrink: 0;
 }
 
+/* Back button in navbar left side of search icon — visible ONLY when in tunnel */
+.tunnel-nav-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: 40px;
+  padding: 0 1rem 0 0.85rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--foam);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px) scale(0.92);
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+body.in-tunnel .tunnel-nav-back-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+[data-theme='light'] .tunnel-nav-back-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #18181b;
+}
+
+.tunnel-nav-back-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: var(--surface);
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 8px 24px -4px rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+.tunnel-nav-back-btn:active {
+  transform: scale(0.94);
+}
+
+.tunnel-nav-back-icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tunnel-nav-back-btn:hover .tunnel-nav-back-icon {
+  transform: translateX(-2px);
+}
+
+.tunnel-nav-back-label {
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 520px) {
+  .tunnel-nav-back-btn {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+  .tunnel-nav-back-label {
+    display: none;
+  }
+}
+
 /* Home top meta info pill (replaces section title in top bar on Home) */
 .home-meta-pill {
   display: inline-flex;
@@ -1896,12 +1971,23 @@ body.is-preloading {
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.08s ease;
   will-change: transform, opacity;
 }
-.dock.is-hidden {
+.dock.is-hidden,
+body.in-tunnel .dock,
+body.tunnel-scrolling .dock {
   animation: none !important;
-  transform: translate(-50%, calc(100% + 4rem)) !important;
+  transform: translate(-50%, calc(100% + 5rem)) !important;
   opacity: 0 !important;
   pointer-events: none !important;
-  transition: transform 0.08s ease-in, opacity 0.05s ease !important;
+  transition: transform 0.2s ease-in, opacity 0.15s ease !important;
+}
+
+body.in-tunnel .dock-show,
+body.tunnel-scrolling .dock-show,
+body.in-tunnel .to-top,
+body.tunnel-scrolling .to-top {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .dock-toggle {

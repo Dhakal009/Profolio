@@ -4,7 +4,6 @@ import LogoLoop from '../components/ui/LogoLoop';
 import { techLogos } from '../components/ui/TechLogos';
 import SelectedWorkScroll from '../components/home/SelectedWorkScroll';
 import DeliverablesSection from '../components/home/DeliverablesSection';
-import Experience from '../components/ui/Experience.jsx';
 import Skills from '../components/ui/Skills.jsx';
 import ThreeCanvas from '../components/canvas/ThreeCanvas';
 import {
@@ -42,9 +41,9 @@ function Home() {
         <LinuxTerminal />
       </Section>
 
-      <Section id="experience" title="Experience">
+      {/* <Section id="experience" title="Experience">
         <Experience />
-      </Section>
+      </Section> */}
 
       <SelectedWorkScroll />
 

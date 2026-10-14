@@ -248,6 +248,11 @@ function Header() {
     [location.pathname, navigate, scrollToId]
   );
 
+  const handleBackFromTunnel = useCallback((e) => {
+    e?.preventDefault?.();
+    window.dispatchEvent(new CustomEvent('exit-tunnel'));
+  }, []);
+
   const handleHome = useCallback(
     (e) => {
       e?.preventDefault?.();
@@ -688,6 +693,31 @@ function Header() {
           </div>
 
           <div className="nav-actions">
+            {location.pathname.startsWith('/projects') && (
+              <button
+                type="button"
+                className="tunnel-nav-back-btn"
+                onClick={handleBackFromTunnel}
+                aria-label="Back to Home"
+                title="Back to Home"
+              >
+                <svg
+                  className="tunnel-nav-back-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M19 12H5" />
+                  <polyline points="12 19 5 12 12 5" />
+                </svg>
+                <span className="tunnel-nav-back-label">Back</span>
+              </button>
+            )}
+
             <button
               type="button"
               className="search-toggle-btn"
