@@ -8,3 +8,35 @@
 /* Tailwind preflight is intentionally omitted — design-tokens.css ships its own reset */
 @tailwind components;
 @tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+/* Section focus effect - smooth dim/lift */
+.focus-section {
+  will-change: transform, opacity, filter;
+  transition: opacity 0.6s ease, transform 0.6s ease, filter 0.6s ease;
+}
+
+/* Optional: Add grain/smooth background transition */
+.section {
+  position: relative;
+}
+
+/* For browsers without JS, make sure sections are visible */
+@media (prefers-reduced-motion: reduce) {
+  .focus-section {
+    filter: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
