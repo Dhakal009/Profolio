@@ -8,9 +8,9 @@ import { DockMenu, THEMES } from '../ui/Dock';
 
 const navItems = [
   { id: 'about', label: 'About' },
-  { id: 'experience', label: 'Experience' },
+  { id: 'projects', label: 'Projects' },
   { id: 'skills', label: 'Skills' },
-  { id: 'projects', label: 'Projects', route: '/projects' },
+  { id: 'deliver', label: 'Deliverables' },
   { id: 'contact', label: 'Contact' },
 ];
 
@@ -18,16 +18,16 @@ const navItems = [
 const sections = [
   { id: 'hero', title: 'Home' },
   { id: 'about', title: 'About' },
-  { id: 'experience', title: 'Experience' },
-  { id: 'projects-preview', title: 'Selected Work' },
-  { id: 'education', title: 'Education' },
+  { id: 'projects', title: 'Projects' },
   { id: 'skills', title: 'Skills' },
+  { id: 'education', title: 'Education' },
   { id: 'deliver', title: 'What I Deliver' },
   { id: 'contact', title: 'Contact' },
 ];
 
 const routeTitles = {
   '/projects': 'Projects',
+  '/resume': 'Resume',
   '/demo/ems': 'EMS · Live Demo',
   '/demo/live-chat': 'Live Chat · Live Demo',
   '/demo/ecommerce-app': 'E-Commerce · Live Demo',
@@ -270,8 +270,7 @@ function Header() {
   const currentId = location.pathname === '/projects' ? 'projects' : isHome ? activeId : null;
   const isActive = (item) =>
     item.id === currentId ||
-    (item.id === 'experience' && currentId === 'education') ||
-    (item.id === 'skills' && currentId === 'deliver');
+    (item.id === 'skills' && currentId === 'education');
 
   const sectionIdx = sections.findIndex((s) => s.id === activeId);
   const title = isHome ? sections[Math.max(0, sectionIdx)]?.title || 'Home' : routeTitles[location.pathname] || 'Page';
@@ -550,10 +549,9 @@ function Header() {
         label: 'Jump to Section',
         items: [
           { label: 'About', onClick: () => scrollToId('about') },
-          { label: 'Experience', onClick: () => scrollToId('experience') },
-          { label: 'Selected Work', onClick: () => scrollToId('projects-preview') },
-          { label: 'Education', onClick: () => scrollToId('education') },
+          { label: 'Projects', onClick: () => scrollToId('projects') },
           { label: 'Skills', onClick: () => scrollToId('skills') },
+          { label: 'Education', onClick: () => scrollToId('education') },
           { label: 'What I Deliver', onClick: () => scrollToId('deliver') },
           { label: 'Contact', onClick: () => scrollToId('contact') },
         ],
@@ -566,32 +564,20 @@ function Header() {
       label: 'About',
       menu: [{ label: 'Interactive Terminal', onClick: () => scrollToId('about') }],
     },
-    experience: {
-      label: 'Experience',
-      menu: [
-        { label: 'Work Experience', onClick: () => scrollToId('experience') },
-        { label: 'Education & Studies', onClick: () => scrollToId('education') },
-      ],
+    projects: {
+      label: 'Projects',
+      menu: [{ label: '3D Project Gallery', onClick: () => scrollToId('projects') }],
     },
     skills: {
       label: 'Skills',
       menu: [
         { label: 'Skills & Tech Stack', onClick: () => scrollToId('skills') },
-        { label: 'What I Deliver', onClick: () => scrollToId('deliver') },
+        { label: 'Education & Studies', onClick: () => scrollToId('education') },
       ],
     },
-    projects: {
-      label: 'Projects',
-      menu: [
-        { label: 'All Projects Page', onClick: () => navigate('/projects') },
-        {
-          label: 'Selected Work (Home)',
-          onClick: () => {
-            if (location.pathname !== '/') navigate('/#projects-preview');
-            else scrollToId('projects-preview');
-          },
-        },
-      ],
+    deliver: {
+      label: 'Deliverables',
+      menu: [{ label: 'What I Deliver', onClick: () => scrollToId('deliver') }],
     },
     contact: {
       label: 'Contact',

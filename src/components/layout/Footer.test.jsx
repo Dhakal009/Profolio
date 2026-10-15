@@ -43,12 +43,11 @@ describe('Clean Editorial Brutalist Footer Component', () => {
     expect(screen.getByText(/Kathmandu, Nepal/i)).toBeInTheDocument();
   });
 
-  it('renders "LET\'S WORK TOGETHER" CTA link', () => {
+  it('does not render contact CTA link in footer (separated to contact section)', () => {
     renderFooter();
 
-    const ctaLink = screen.getByRole('link', { name: /let's work together/i });
-    expect(ctaLink).toBeInTheDocument();
-    expect(ctaLink).toHaveAttribute('href', 'mailto:bikashdhakal546@gmail.com');
+    const ctaLink = screen.queryByRole('link', { name: /let's work together/i });
+    expect(ctaLink).not.toBeInTheDocument();
   });
 
   it('renders giant uppercase name and eyebrow text', () => {

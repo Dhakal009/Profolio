@@ -918,32 +918,47 @@ body.in-tunnel .tunnel-nav-back-btn {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
+.dock-slot--cta {
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+[data-theme='light'] .dock-slot--cta {
+  border-left-color: rgba(0, 0, 0, 0.14);
+}
+
 .dock-cta {
   padding-inline: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  color: #000000;
+  background: #18181b;
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  color: #ffffff;
   font-size: 0.875rem;
   font-weight: 700;
   text-decoration: none;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  transition: background-color var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast), box-shadow var(--dur-fast);
 }
 
 [data-theme='light'] .dock-cta {
-  background: #000000;
-  border-color: #000000;
-  color: #ffffff;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  border: 1.5px solid rgba(0, 0, 0, 0.9);
+  color: #000000;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 .dock-cta:hover {
-  background: #e4e4e7;
-  border-color: #e4e4e7;
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.25);
 }
 
 [data-theme='light'] .dock-cta:hover {
-  background: #27272a;
-  border-color: #27272a;
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 640px) {
@@ -1082,8 +1097,11 @@ body.in-tunnel .tunnel-nav-back-btn {
   overflow: hidden;
   padding-bottom: 0.06em;
   margin-bottom: -0.06em;
-  margin-right: -0.055em;
+  margin-right: -0.02em;
   vertical-align: top;
+}
+.is-loaded .hero-char-mask {
+  overflow: visible;
 }
 
 .hero-char {
@@ -1517,18 +1535,56 @@ body.in-tunnel .tunnel-nav-back-btn {
 /* ============================================================
    CONTACT
    ============================================================ */
+#contact {
+  min-height: 85vh;
+  min-height: 85dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-top: 1px solid var(--line);
+  padding-block: clamp(6rem, 14vw, 12rem);
+  position: relative;
+}
+
+#contact .section-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+}
+
+#contact .section-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+.contact-eyebrow {
+  margin-bottom: 1.5rem;
+}
+
 .contact-lead {
-  font-size: var(--fs-lead);
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
   color: var(--muted);
-  max-width: 34rem;
-  margin-bottom: 2.5rem;
+  max-width: 38rem;
+  margin-inline: auto;
+  margin-bottom: 3rem;
+  line-height: 1.6;
 }
 
 .contact-email {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: clamp(1.1rem, 4.5vw, 3rem);
+  font-size: clamp(1.2rem, 4.2vw, 2.75rem);
   font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.2;
@@ -1556,8 +1612,49 @@ body.in-tunnel .tunnel-nav-back-btn {
 .contact-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 3rem;
+  justify-content: center;
+  align-items: center;
+  gap: 1.15rem;
+  margin-top: 3.5rem;
+}
+
+.contact-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--foam);
+  transition: transform 0.25s var(--ease-out),
+              border-color 0.25s var(--ease-out),
+              background-color 0.25s var(--ease-out),
+              color 0.25s var(--ease-out),
+              box-shadow 0.25s var(--ease-out);
+}
+
+.contact-icon-btn:hover {
+  border-color: var(--foam);
+  background-color: var(--surface-2);
+  color: var(--foam);
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.35);
+}
+
+.contact-icon-btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.contact-icon-btn svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.25s var(--ease-out);
+}
+
+.contact-icon-btn:hover svg {
+  transform: scale(1.1);
 }
 
 /* ============================================================
@@ -1941,7 +2038,7 @@ body.in-tunnel .tunnel-nav-back-btn {
 .to-top {
   position: fixed;
   right: clamp(1rem, 3vw, 2rem);
-  bottom: clamp(1rem, 3vw, 2rem);
+  bottom: clamp(6.5rem, 10vw, 7.5rem);
   z-index: 90;
   width: 44px;
   height: 44px;

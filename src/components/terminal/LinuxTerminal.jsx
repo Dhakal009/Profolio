@@ -188,7 +188,7 @@ const ASCII_NEOFETCH = `   ██████╗ ██████╗
    ██████╔╝██████╔╝
    ╚═════╝ ╚═════╝ `;
 
-const SECTIONS = ['hero', 'about', 'experience', 'projects-preview', 'education', 'skills', 'deliver', 'contact'];
+const SECTIONS = ['hero', 'about', 'projects', 'skills', 'education', 'deliver', 'contact'];
 
 // Mirrors the aliases declared in ~/.bashrc
 const ALIASES = {
@@ -379,7 +379,7 @@ function CopyMini({ text }) {
   );
 }
 
-function FileOutput({ name, node, dir, navigate }) {
+function FileOutput({ name, node, dir }) {
   const isJson = name.endsWith('.json');
   return (
     <div className="term-filecard">
@@ -409,8 +409,15 @@ function FileOutput({ name, node, dir, navigate }) {
         )}
         {dir === '~/projects' && (
           <div className="term-actions-row">
-            <button type="button" className="term-link-btn" onClick={() => navigate('/projects')}>
-              🚀 View All Projects Page ↗
+            <button
+              type="button"
+              className="term-link-btn"
+              onClick={() => {
+                const el = document.getElementById('projects');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              🚀 Jump to 3D Projects Gallery ↓
             </button>
           </div>
         )}
@@ -474,8 +481,7 @@ export default function LinuxTerminal() {
 
   const scrollToSection = useCallback(
     (sectionId) => {
-      const targetId = sectionId === 'projects' ? 'projects-preview' : sectionId;
-      const target = document.getElementById(targetId);
+      const target = document.getElementById(sectionId);
       if (!target) return false;
       if (lenis) lenis.scrollTo(target, { offset: -40, duration: 1.2 });
       else target.scrollIntoView({ behavior: 'smooth' });
@@ -491,13 +497,14 @@ export default function LinuxTerminal() {
       if (!dest) {
         return (
           <div className="term-line term-yellow">
-            Usage: goto &lt;projects | experience | skills | education | deliver | contact | home&gt;
+            Usage: goto &lt;projects | skills | education | deliver | contact | home&gt;
           </div>
         );
       }
       if (dest === 'projects') {
-        setTimeout(() => navigate('/projects'), 400);
-        return <div className="term-line term-green">🚀 Navigating to /projects page...</div>;
+        if (window.location.pathname !== '/') navigate('/#projects');
+        else scrollToSection('projects');
+        return <div className="term-line term-green">🚀 Scrolling to #projects 3D gallery...</div>;
       }
       if (dest === 'home' || dest === 'hero') {
         if (window.location.pathname !== '/') navigate('/');
@@ -900,7 +907,7 @@ Tasks:   6 total,   2 running,   4 sleeping
           } else if (node.type === 'dir') {
             output = <div className="term-line term-red">cat: {args[0]}: Is a directory</div>;
           } else {
-            output = <FileOutput name={name} node={node} dir={dir} navigate={navigate} />;
+            output = <FileOutput name={name} node={node} dir={dir} />;
           }
           break;
         }
@@ -965,10 +972,10 @@ Tasks:   6 total,   2 running,   4 sleeping
             setCwd('~/projects');
             output = (
               <div className="term-line term-green">
-                ✔ Navigating to <span className="term-bold">Projects</span> page (/projects)...
+                ✔ Scrolling to <span className="term-bold">Projects</span> 3D gallery (#projects)...
               </div>
             );
-            setTimeout(() => navigate('/projects'), 400);
+            setTimeout(() => scrollToSection('projects'), 300);
           } else if (dest === 'home') {
             output = runGoto('home');
           } else if (SECTIONS.includes(dest)) {
@@ -1015,8 +1022,9 @@ Tasks:   6 total,   2 running,   4 sleeping
             window.location.href = 'mailto:bikashdhakal546@gmail.com';
             output = <div className="term-line term-green">✔ Launching default email client to write Bikash...</div>;
           } else if (target === 'projects') {
-            navigate('/projects');
-            output = <div className="term-line term-green">✔ Navigating to /projects...</div>;
+            if (window.location.pathname !== '/') navigate('/#projects');
+            else scrollToSection('projects');
+            output = <div className="term-line term-green">✔ Scrolling to #projects section...</div>;
           } else if (target === 'home') {
             navigate('/');
             output = <div className="term-line term-green">✔ Navigating to home...</div>;

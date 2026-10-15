@@ -3,11 +3,11 @@
    Import AFTER your existing terminal styles so these win.
    ========================================================== */
 
-/* ---------- Fixed, taller window ---------- */
+/* ---------- Authentic terminal window aspect ratio ---------- */
 .terminal-container {
   display: flex;
   flex-direction: column;
-  height: clamp(560px, 78vh, 740px);
+  height: clamp(390px, 50vh, 470px);
   max-height: none;
   transition: height 0.35s ease;
 }
@@ -69,7 +69,7 @@
 
 @media (max-width: 640px) {
   .terminal-container {
-    height: clamp(480px, 74vh, 620px);
+    height: clamp(360px, 55vh, 430px);
   }
 }
 

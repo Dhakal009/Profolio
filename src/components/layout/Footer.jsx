@@ -3,7 +3,7 @@ import { useLenis } from '../../contexts/LenisContext';
 
 const SITEMAP = [
   { label: 'Home', to: '/', targetId: 'hero' },
-  { label: 'Works', to: '/projects' },
+  { label: 'Works', to: '/#projects', targetId: 'projects' },
   { label: 'About', to: '/#about', targetId: 'about' },
   { label: 'Terminal', to: '/#about', targetId: 'about' },
 ];
@@ -12,13 +12,11 @@ const SOCIALS = [
   { label: 'LinkedIn', href: 'https://linkedin.com/in/bikash-dhakal' },
   { label: 'GitHub', href: 'https://github.com/Dhakal009' },
   { label: 'Twitter / X', href: 'https://twitter.com' },
-  { label: 'Direct Email', href: 'mailto:bikashdhakal546@gmail.com' },
 ];
 
 const INFOS = [
   { label: 'Kathmandu, Nepal', href: null },
   { label: 'UTC+05:45 (NPT)', href: null },
-  { label: 'Available for Work', href: 'mailto:bikashdhakal546@gmail.com' },
   { label: 'Resume (PDF)', href: '/resume.pdf' },
 ];
 
@@ -114,16 +112,6 @@ function Footer() {
                 ))}
               </ul>
             </div>
-          </div>
-
-          {/* Right CTA Link */}
-          <div className="footer-work-together">
-            <a
-              href="mailto:bikashdhakal546@gmail.com"
-              className="footer-cta-link"
-            >
-              LET&apos;S WORK TOGETHER
-            </a>
           </div>
         </div>
 

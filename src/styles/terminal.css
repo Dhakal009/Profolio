@@ -195,8 +195,8 @@
 
 /* Terminal Body */
 .terminal-body {
-  padding: 1.35rem 1.35rem 1.65rem;
-  min-height: 380px;
+  padding: 1.15rem 1.25rem 1.35rem;
+  min-height: 240px;
   max-height: 560px;
   overflow-y: auto;
   overflow-x: hidden;

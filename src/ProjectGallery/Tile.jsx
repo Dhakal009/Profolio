@@ -289,17 +289,13 @@ function ProjectTileMesh({
         onPointerDown={(e) => {
           pointerDownCoord.current = { x: e.clientX, y: e.clientY }
         }}
-        onPointerUp={(e) => {
-          const dx = Math.abs(e.clientX - pointerDownCoord.current.x)
-          const dy = Math.abs(e.clientY - pointerDownCoord.current.y)
-          if (dx < 8 && dy < 8) {
-            e.stopPropagation()
-            triggerSelect()
-          }
-        }}
         onClick={(e) => {
           e.stopPropagation()
-          triggerSelect()
+          const dx = Math.abs((e.clientX ?? pointerDownCoord.current.x) - pointerDownCoord.current.x)
+          const dy = Math.abs((e.clientY ?? pointerDownCoord.current.y) - pointerDownCoord.current.y)
+          if (dx < 14 && dy < 14) {
+            triggerSelect()
+          }
         }}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
@@ -327,14 +323,47 @@ function ProjectTileMesh({
   )
 }
 
-// Subcomponent for empty default architectural bays using shared pooled objects
-function EmptyTileMesh({ position, rotation, config, isDark }) {
+// Subcomponent for architectural bays with fallback project click support
+function EmptyTileMesh({ position, rotation, config, isDark, project, onSelect }) {
   const { planeGeometry, borderGeometry, crossGeometry } = getSharedGeometries(config)
   const { meshMat, borderMat, crossMat } = getEmptyMaterials(isDark)
+  const meshRef = useRef()
+  const pointerDownCoord = useRef({ x: 0, y: 0 })
+
+  const triggerSelect = () => {
+    if (!meshRef.current || !project || !onSelect) return
+    const worldPos = new THREE.Vector3()
+    meshRef.current.getWorldPosition(worldPos)
+    onSelect(project, [worldPos.x, worldPos.y, worldPos.z], rotation)
+  }
 
   return (
     <group position={position} rotation={rotation}>
-      <mesh geometry={planeGeometry} material={meshMat} />
+      <mesh
+        ref={meshRef}
+        geometry={planeGeometry}
+        material={meshMat}
+        onPointerDown={(e) => {
+          pointerDownCoord.current = { x: e.clientX, y: e.clientY }
+        }}
+        onClick={(e) => {
+          e.stopPropagation()
+          const dx = Math.abs((e.clientX ?? pointerDownCoord.current.x) - pointerDownCoord.current.x)
+          const dy = Math.abs((e.clientY ?? pointerDownCoord.current.y) - pointerDownCoord.current.y)
+          if (dx < 14 && dy < 14) {
+            triggerSelect()
+          }
+        }}
+        onPointerOver={(e) => {
+          if (project) {
+            e.stopPropagation()
+            document.body.style.cursor = 'pointer'
+          }
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = 'auto'
+        }}
+      />
       <lineSegments geometry={borderGeometry} material={borderMat} position={[0, 0, 0.005]} />
       <lineSegments geometry={crossGeometry} material={crossMat} />
     </group>
@@ -345,6 +374,7 @@ export default function Tile({
   position,
   rotation,
   project,
+  fallbackProject,
   isDimmed,
   isSelected,
   onSelect,
@@ -376,6 +406,8 @@ export default function Tile({
       rotation={rotation}
       config={config}
       isDark={isDark}
+      project={fallbackProject}
+      onSelect={onSelect}
     />
   )
 }

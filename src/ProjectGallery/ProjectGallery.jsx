@@ -1,29 +1,28 @@
 import { useState, useEffect, useRef, Suspense, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Canvas } from '@react-three/fiber'
 import { Preload } from '@react-three/drei'
 import styled from 'styled-components'
 import gsap from 'gsap'
 import { useTheme } from '../contexts/ThemeContext'
+import { useOptionalLenis } from '../contexts/LenisContext'
 import { PROJECTS, CONFIG } from './data'
 import Tunnel from './Tunnel'
 import CameraRig from './CameraRig'
 import Overlay from './Overlay'
 
-const FullscreenContainer = styled.div`
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
+const GalleryContainer = styled.div`
+  position: ${(props) => (props.$isEmbedded ? 'relative' : 'fixed')};
+  ${(props) => (props.$isEmbedded ? 'width: 100%; height: 100%;' : 'inset: 0; width: 100vw; height: 100vh; z-index: 85;')}
   overflow: hidden;
-  z-index: 85;
   background: ${(props) => (props.$isDark ? '#08080a' : '#f4f4f6')};
   user-select: none;
 `
 
-export default function ProjectGallery() {
+export default function ProjectGallery({ isEmbedded = false, containerRef = null }) {
   const { id } = useParams()
   const { theme } = useTheme()
+  const { lenis } = useOptionalLenis() || {}
   const isDark = theme === 'dark'
 
   const [selected, setSelected] = useState(null)
@@ -48,13 +47,28 @@ export default function ProjectGallery() {
     return () => m.removeEventListener('change', update)
   }, [])
 
-  // Manage body classes for full-screen disturbance-free view and dock hiding
+  // Manage body classes for standalone view
   useEffect(() => {
+    if (isEmbedded) return
     document.body.classList.add('tunnel-active')
     return () => {
       document.body.classList.remove('tunnel-active', 'tunnel-scrolling', 'in-tunnel')
     }
-  }, [])
+  }, [isEmbedded])
+
+  // Freeze Lenis and page scroll when a project modal is open
+  useEffect(() => {
+    if (!isEmbedded) return
+    if (selected) {
+      if (lenis) lenis.stop()
+      const prevOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = prevOverflow
+        if (lenis) lenis.start()
+      }
+    }
+  }, [isEmbedded, selected, lenis])
 
   // Deep-link matching from URL parameter
   useEffect(() => {
@@ -76,21 +90,37 @@ export default function ProjectGallery() {
   useEffect(() => {
     const loop = () => {
       if (!selected) {
+        if (isEmbedded) {
+          const el = containerRef?.current || document.getElementById('projects')
+          if (el) {
+            const rect = el.getBoundingClientRect()
+            const totalDist = el.offsetHeight - window.innerHeight
+            if (totalDist > 0) {
+              const p = Math.max(0, Math.min(1, -rect.top / totalDist))
+              targetScrollRef.current = p * CONFIG.MAX_SCROLL
+            }
+          }
+        }
+
         if (!isRewindingRef.current) {
           currentScrollRef.current +=
-            (targetScrollRef.current - currentScrollRef.current) * CONFIG.LERP_FACTOR
+            (targetScrollRef.current - currentScrollRef.current) * (isEmbedded ? 0.1 : CONFIG.LERP_FACTOR)
 
-          // Clamp at entrance
+          // Clamp at entrance and end
           if (currentScrollRef.current < 0.05) currentScrollRef.current = 0
+          if (currentScrollRef.current > CONFIG.MAX_SCROLL - 0.05) {
+            currentScrollRef.current = CONFIG.MAX_SCROLL
+          }
 
           setScrollDistance(currentScrollRef.current)
         }
 
-        // Show back button and hide bottom dock ONLY when scrolling inside the tunnel or when modal is open
-        if (currentScrollRef.current > 0.4 || selected) {
-          document.body.classList.add('tunnel-scrolling', 'in-tunnel')
-        } else {
-          document.body.classList.remove('tunnel-scrolling', 'in-tunnel')
+        if (!isEmbedded) {
+          if (currentScrollRef.current > 0.4 || selected) {
+            document.body.classList.add('tunnel-scrolling', 'in-tunnel')
+          } else {
+            document.body.classList.remove('tunnel-scrolling', 'in-tunnel')
+          }
         }
       }
       animFrameRef.current = requestAnimationFrame(loop)
@@ -100,13 +130,15 @@ export default function ProjectGallery() {
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
     }
-  }, [selected])
+  }, [selected, isEmbedded, containerRef])
 
-  // Smooth exit: gradually rewinds camera and brings text back into view with zero sudden jumps
+  // Smooth exit: gradually rewinds camera
   const handleExit = useCallback(() => {
     if (selected) {
       setSelected(null)
-      window.history.replaceState(null, '', '/projects')
+      if (!isEmbedded) {
+        window.history.replaceState(null, '', '/projects')
+      }
     }
     const startScroll = currentScrollRef.current
     if (startScroll > 0.02 || targetScrollRef.current > 0.02) {
@@ -134,73 +166,78 @@ export default function ProjectGallery() {
         }
       })
     }
-  }, [selected])
+  }, [selected, isEmbedded])
 
-  // Listen to exit-tunnel custom event from navbar back button
+  // Listen to exit-tunnel custom event
   useEffect(() => {
     const onExitTunnel = () => handleExit()
     window.addEventListener('exit-tunnel', onExitTunnel)
     return () => window.removeEventListener('exit-tunnel', onExitTunnel)
   }, [handleExit])
 
-  // Wheel listener: smooth 1:1 forward and backward scroll (stops cleanly at 0 without unintended navigation)
+  // Wheel listener: smooth forward and backward scroll (used when !isEmbedded)
   const handleWheel = useCallback(
     (e) => {
-      if (selected || isRewindingRef.current) return
+      if (isEmbedded || selected || isRewindingRef.current) return
 
-      // Exact same 1:1 speed forward and backward, securely clamped at 0
-      targetScrollRef.current = Math.max(
-        0,
-        targetScrollRef.current + e.deltaY * CONFIG.SCROLL_SPEED_FORWARD
+      targetScrollRef.current = Math.min(
+        CONFIG.MAX_SCROLL,
+        Math.max(0, targetScrollRef.current + e.deltaY * CONFIG.SCROLL_SPEED_FORWARD)
       )
     },
-    [selected]
+    [selected, isEmbedded]
   )
 
-  // Touch handlers for mobile
+  // Touch handlers for mobile (used when !isEmbedded)
   const handleTouchStart = useCallback(
     (e) => {
-      if (selected || isRewindingRef.current) return
+      if (isEmbedded || selected || isRewindingRef.current) return
       touchStartY.current = e.touches[0].clientY
     },
-    [selected]
+    [selected, isEmbedded]
   )
 
   const handleTouchMove = useCallback(
     (e) => {
-      if (selected || isRewindingRef.current) return
+      if (isEmbedded || selected || isRewindingRef.current) return
       const deltaY = touchStartY.current - e.touches[0].clientY
       touchStartY.current = e.touches[0].clientY
 
-      // Exact same 1:1 speed forward and backward, securely clamped at 0
-      targetScrollRef.current = Math.max(
-        0,
-        targetScrollRef.current + deltaY * CONFIG.SCROLL_SPEED_FORWARD * 1.3
+      targetScrollRef.current = Math.min(
+        CONFIG.MAX_SCROLL,
+        Math.max(0, targetScrollRef.current + deltaY * CONFIG.SCROLL_SPEED_FORWARD * 1.3)
       )
     },
-    [selected]
+    [selected, isEmbedded]
   )
 
-  const handleSelect = useCallback((project, position, rotation) => {
-    setSelected({ project, position, rotation })
-    window.history.replaceState(null, '', `/projects/${project.id}`)
-  }, [])
+  const handleSelect = useCallback(
+    (project, position, rotation) => {
+      setSelected({ project, position, rotation })
+      if (!isEmbedded) {
+        window.history.replaceState(null, '', `/projects/${project.id}`)
+      }
+    },
+    [isEmbedded]
+  )
 
   const handleClose = useCallback(() => {
     setSelected(null)
-    window.history.replaceState(null, '', `/projects`)
-  }, [])
+    if (!isEmbedded) {
+      window.history.replaceState(null, '', `/projects`)
+    }
+  }, [isEmbedded])
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (selected) {
         if (e.key === 'Escape') handleClose()
-      } else {
+      } else if (!isEmbedded) {
         if (e.key === 'Escape') {
           handleExit()
         } else if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-          targetScrollRef.current += 3.5
+          targetScrollRef.current = Math.min(CONFIG.MAX_SCROLL, targetScrollRef.current + 3.5)
         } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
           targetScrollRef.current = Math.max(0, targetScrollRef.current - 3.5)
         }
@@ -209,14 +246,15 @@ export default function ProjectGallery() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selected, handleClose, handleExit])
+  }, [selected, isEmbedded, handleClose, handleExit])
 
   return (
-    <FullscreenContainer
+    <GalleryContainer
       $isDark={isDark}
-      onWheel={handleWheel}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
+      $isEmbedded={isEmbedded}
+      onWheel={isEmbedded ? undefined : handleWheel}
+      onTouchStart={isEmbedded ? undefined : handleTouchStart}
+      onTouchMove={isEmbedded ? undefined : handleTouchMove}
     >
       <Canvas
         dpr={[1, isMobile ? 1.5 : 1.75]}
@@ -273,7 +311,8 @@ export default function ProjectGallery() {
         onExit={handleExit}
         theme={theme}
         isExiting={isRewinding}
+        isEmbedded={isEmbedded}
       />
-    </FullscreenContainer>
+    </GalleryContainer>
   )
 }

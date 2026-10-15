@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './section-focus.css';
 
 // Order must match the order on the page. Missing ids are skipped automatically.
 export const SECTION_NAV = [
   { id: 'hero', label: 'Home' },
   { id: 'about', label: 'About' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'projects-preview', label: 'Work' },
-  { id: 'education', label: 'Education' },
+  { id: 'projects', label: 'Projects' },
   { id: 'skills', label: 'Skills' },
+  { id: 'education', label: 'Education' },
   { id: 'deliver', label: 'Deliver' },
   { id: 'contact', label: 'Contact' },
 ];
@@ -63,32 +62,5 @@ export function useSectionFocus(ids) {
 }
 
 export function ScrollProgress() {
-  const barRef = useRef(null);
-
-  useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  return (
-    <div className="scroll-progress" aria-hidden="true">
-      <span ref={barRef} />
-    </div>
-  );
+  return null;
 }

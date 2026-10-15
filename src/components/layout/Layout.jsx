@@ -8,6 +8,7 @@ import Footer from './Footer';
 import SkipLink from '../ui/SkipLink';
 import BackToTop from '../ui/BackToTop';
 import Preloader from '../hero/Preloader';
+import FloatingFolder from '../ui/FloatingFolder';
 
 // Adds `is-visible` to `.reveal` elements as they enter the viewport.
 // Elements entering together are staggered for a smooth cascade.
@@ -162,6 +163,7 @@ function Shell() {
       </main>
       {!pathname.startsWith('/projects') && <Footer />}
       {!pathname.startsWith('/projects') && <BackToTop />}
+      <FloatingFolder />
     </>
   );
 }

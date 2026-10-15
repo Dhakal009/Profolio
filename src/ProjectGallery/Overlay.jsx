@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
 const ExternalIcon = () => (
@@ -32,7 +33,7 @@ const IntroScreen = styled.div.attrs((props) => ({
     background: props.$isDark
       ? `rgba(8, 8, 10, ${0.92 * props.$bgOpacity})`
       : `rgba(244, 244, 247, ${0.92 * props.$bgOpacity})`,
-    pointerEvents: props.$progress < 0.75 ? 'auto' : 'none'
+    pointerEvents: 'none'
   }
 }))`
   position: absolute;
@@ -104,15 +105,15 @@ const IntroWrapper = styled.div`
 `
 
 const ModalBackdrop = styled.div`
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: clamp(1rem, 3vw, 2rem);
   background: ${(props) =>
-    props.$isDark ? 'rgba(4, 4, 6, 0.75)' : 'rgba(235, 235, 240, 0.75)'};
+    props.$isDark ? 'rgba(4, 4, 6, 0.78)' : 'rgba(235, 235, 240, 0.78)'};
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: opacity 0.22s ease-in;
@@ -344,13 +345,53 @@ const SecondaryButton = styled.a`
   }
 `
 
+const EndTunnelNotice = styled.div`
+  position: absolute;
+  bottom: 2.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  background: ${(props) =>
+    props.$isDark ? 'rgba(17, 17, 22, 0.9)' : 'rgba(255, 255, 255, 0.94)'};
+  border: 1px solid ${(props) =>
+    props.$isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.12)'};
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: ${(props) => (props.$isDark ? '#93c5fd' : '#2563eb')};
+  pointer-events: none;
+  z-index: 25;
+  white-space: nowrap;
+  animation: noticeFadeIn 0.35s ease-out;
+
+  @keyframes noticeFadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+`
+
 export default function Overlay({
   scrollDistance,
   selected,
   onClose,
-  onExit,
+  _onExit,
   theme,
-  isExiting = false
+  _isExiting = false,
+  _isEmbedded = false
 }) {
   const isDark = theme === 'dark'
   const [isClosing, setIsClosing] = useState(false)
@@ -426,11 +467,15 @@ export default function Overlay({
       )}
 
       {/* 2. Redesigned Project Details Modal with smooth exit animation */}
-      {selected && (
+      {selected && typeof document !== 'undefined' && createPortal(
         <ModalBackdrop
           $isDark={isDark}
           $isClosing={isClosing}
-          onClick={handleAnimatedClose}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleAnimatedClose()
+            }
+          }}
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
         >
@@ -511,7 +556,28 @@ export default function Overlay({
               </SecondaryButton>
             </ActionRow>
           </ModalCard>
-        </ModalBackdrop>
+        </ModalBackdrop>,
+        document.body
+      )}
+
+      {/* 3. Finite Tunnel End Indicator */}
+      {scrollDistance >= 58 && !selected && (
+        <EndTunnelNotice $isDark={isDark}>
+          <span>End of Projects · Scroll down for Skills</span>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </EndTunnelNotice>
       )}
     </>
   )

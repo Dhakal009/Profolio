@@ -38,49 +38,11 @@
   transform: none;
 }
 
-/* ---------- Seam: a thin line draws in at the top of the active section ---------- */
-.has-section-focus .focus-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: min(260px, 40%);
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--focus-accent), transparent);
-  opacity: 0.75;
-  transform: translateX(-50%) scaleX(0);
-  transition: transform 0.45s var(--focus-ease);
-  pointer-events: none;
-}
-.has-section-focus .focus-section[data-state='active']::before {
-  transform: translateX(-50%) scaleX(1);
-}
-
-/* ---------- Scroll progress ---------- */
-.scroll-progress {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 2px;
-  z-index: 60;
-  pointer-events: none;
-}
-.scroll-progress span {
-  display: block;
-  height: 100%;
-  background: var(--focus-accent);
-  transform: scaleX(0);
-  transform-origin: 0 50%;
-  will-change: transform;
-}
-
 /* ---------- Reduced motion: no dimming, no movement ---------- */
 @media (prefers-reduced-motion: reduce) {
   .has-section-focus .focus-section .section-content {
     opacity: 1 !important;
     transform: none !important;
-    transition: none;
-  }
-  .has-section-focus .focus-section::before {
     transition: none;
   }
 }

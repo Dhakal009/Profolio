@@ -89,6 +89,10 @@ export function LenisProvider({ children }) {
   );
 }
 
+export function useOptionalLenis() {
+  return useContext(LenisContext);
+}
+
 export function useLenis() {
   const context = useContext(LenisContext);
   if (!context) {

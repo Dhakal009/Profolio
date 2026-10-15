@@ -1,5 +1,4 @@
 import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import Tile from './Tile'
 import { CONFIG } from './data'
@@ -107,12 +106,13 @@ function TunnelRow({
       </lineSegments>
 
       {/* Row Tiles */}
-      {tiles.map((t) => (
+      {tiles.map((t, idx) => (
         <Tile
           key={t.key}
           position={t.position}
           rotation={t.rotation}
           project={t.project}
+          fallbackProject={projects[(rowIndex + idx) % projects.length]}
           config={CONFIG}
           isDark={isDark}
           isDimmed={selectedId !== null && (!t.project || selectedId !== t.project.id)}
@@ -135,37 +135,22 @@ export default function Tunnel({
   isDark
 }) {
   const rowRefs = useRef([])
-  const railsRef = useRef()
 
-  const L = CONFIG.CYCLE_LENGTH
   const halfW = CONFIG.TUNNEL_W / 2
   const halfH = CONFIG.TUNNEL_H / 2
 
-  // Generate organic, scattered pseudo-random project assignments across ALL 4 walls
+  // Distribute projects richly across all rows and walls so project cards are readily accessible
   const randomPlacements = useMemo(() => {
     const map = {}
     const walls = ['left', 'floor', 'right', 'ceiling']
-    const rand = mulberry32(777)
 
-    // Distribute projects across varied rows and all 4 walls
-    for (let r = 0; r < CONFIG.ROWS; r += 2) {
-      const wall = walls[Math.floor(rand() * walls.length)]
-      const col = Math.floor(rand() * 2)
-      const projectIdx = Math.floor(rand() * projects.length)
-      map[`${r}-${wall}-${col}`] = projectIdx
+    for (let r = 0; r < CONFIG.ROWS; r++) {
+      const pIdx = r % projects.length
+      const wall1 = walls[r % 4]
+      const wall2 = walls[(r + 2) % 4]
+      map[`${r}-${wall1}-0`] = pIdx
+      map[`${r}-${wall2}-1`] = (pIdx + 1) % projects.length
     }
-
-    // Ensure explicit showcase positions so each project is guaranteed represented
-    map['1-left-0'] = 0     // EMS on left wall
-    map['3-floor-1'] = 1    // Live Chat on floor
-    map['5-right-0'] = 2    // E-Commerce on right wall
-    map['7-ceiling-1'] = 0  // EMS on ceiling
-    map['10-right-1'] = 1   // Live Chat on right wall
-    map['13-left-1'] = 2    // E-Commerce on left wall
-    map['16-floor-0'] = 0   // EMS on floor
-    map['19-ceiling-0'] = 1 // Live Chat on ceiling
-    map['22-left-0'] = 2    // E-Commerce on left wall
-    map['25-right-1'] = 0   // EMS on right wall
 
     return map
   }, [projects.length])
@@ -185,41 +170,23 @@ export default function Tunnel({
     return new THREE.BufferGeometry().setFromPoints(points)
   }, [halfW, halfH])
 
-  // Continuous corner rails geometry
+  const totalLength = (CONFIG.ROWS - 1) * CONFIG.ROW_SPACING
+
+  // Corner rails geometry spanning the finite length of the tunnel
   const railGeometry = useMemo(() => {
-    const length = 120
+    const endZ = -totalLength - 10
     const points = [
       new THREE.Vector3(-halfW, -halfH, 15),
-      new THREE.Vector3(-halfW, -halfH, -length),
+      new THREE.Vector3(-halfW, -halfH, endZ),
       new THREE.Vector3(halfW, -halfH, 15),
-      new THREE.Vector3(halfW, -halfH, -length),
+      new THREE.Vector3(halfW, -halfH, endZ),
       new THREE.Vector3(-halfW, halfH, 15),
-      new THREE.Vector3(-halfW, halfH, -length),
+      new THREE.Vector3(-halfW, halfH, endZ),
       new THREE.Vector3(halfW, halfH, 15),
-      new THREE.Vector3(halfW, halfH, -length)
+      new THREE.Vector3(halfW, halfH, endZ)
     ]
     return new THREE.BufferGeometry().setFromPoints(points)
-  }, [halfW, halfH])
-
-  // Per-frame seamless row wrapping
-  useFrame(({ camera }) => {
-    const camZ = camera.position.z
-    const offset = 8.0 // wrap boundary behind camera
-
-    for (let r = 0; r < CONFIG.ROWS; r++) {
-      const row = rowRefs.current[r]
-      if (row) {
-        const zBase = -r * CONFIG.ROW_SPACING
-        const relZ = zBase - camZ
-        const wrappedRelZ = (((relZ + offset) % L) + L) % L - offset
-        row.position.z = camZ + wrappedRelZ
-      }
-    }
-
-    if (railsRef.current) {
-      railsRef.current.position.z = camZ
-    }
-  })
+  }, [halfW, halfH, totalLength])
 
   const rows = useMemo(() => {
     return Array.from({ length: CONFIG.ROWS }, (_, i) => ({
@@ -230,18 +197,16 @@ export default function Tunnel({
 
   return (
     <group>
-      {/* 4 continuous corner rails following camera */}
-      <group ref={railsRef}>
-        <lineSegments geometry={railGeometry}>
-          <lineBasicMaterial
-            color={isDark ? '#2e2e3a' : '#94a3b8'}
-            transparent
-            opacity={isDark ? 0.6 : 0.75}
-          />
-        </lineSegments>
-      </group>
+      {/* 4 corner rails along the finite tunnel length */}
+      <lineSegments geometry={railGeometry}>
+        <lineBasicMaterial
+          color={isDark ? '#2e2e3a' : '#94a3b8'}
+          transparent
+          opacity={isDark ? 0.6 : 0.75}
+        />
+      </lineSegments>
 
-      {/* 28 continuous seamlessly wrapped rows */}
+      {/* Finite rows arranged statically along the tunnel depth */}
       {rows.map((row) => (
         <TunnelRow
           key={row.index}
@@ -258,6 +223,17 @@ export default function Tunnel({
           rowRef={(el) => (rowRefs.current[row.index] = el)}
         />
       ))}
+
+      {/* Distinct end frame ring marking the end of the finite tunnel */}
+      <group position={[0, 0, -totalLength]}>
+        <lineSegments geometry={ringGeometry}>
+          <lineBasicMaterial
+            color={isDark ? '#38bdf8' : '#0284c7'}
+            transparent
+            opacity={0.85}
+          />
+        </lineSegments>
+      </group>
     </group>
   )
 }

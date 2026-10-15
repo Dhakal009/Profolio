@@ -58,9 +58,10 @@ export const PROJECTS = [
 // ===== TUNABLE CONFIGURATION =====
 export const CONFIG = {
   // Layout & dimensions
-  ROWS: 28,            // Total rows in one continuous cycle
+  ROWS: 28,            // Total rows in finite tunnel
   ROW_SPACING: 2.4,    // Distance along Z between consecutive rows
-  CYCLE_LENGTH: 67.2,  // Total Z length of one cycle (28 * 2.4)
+  CYCLE_LENGTH: 67.2,  // Total Z length of tunnel (28 * 2.4)
+  MAX_SCROLL: 66,      // Finite scroll boundary: camera travels smoothly from start to finish
   COLS_DESKTOP: 4,     // Wall columns on desktop
   COLS_MOBILE: 2,      // Wall columns on mobile
   TILE_W: 1.7,         // Width of each card plane
