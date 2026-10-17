@@ -117,22 +117,13 @@ const measureFolder = (book, scale, labelWidth, hasLabel, tabPosition, pageSize)
       : tabPosition === 'center'
         ? (w - tabW) / 2
         : w - corners[1] - 5 * scale - shoulder - tabW;
-  const docW = pageSize?.width ?? (book ? w * 0.8 : w * 0.54);
+  // base size = small to fit INSIDE folder
+  const docW = pageSize?.width ?? w * 0.68;
   return {
-    book,
-    scale,
-    w,
-    h,
-    tabH,
-    r,
-    shoulder,
-    corners,
-    tabW,
-    tabX,
-    frontTop,
+    book, scale, w, h, tabH, r, shoulder, corners, tabW, tabX, frontTop,
     frontH: tabH + h - frontTop,
     docW,
-    docH: pageSize?.height ?? docW * (book ? 1.28 : 1.22)
+    docH: pageSize?.height ?? docW * 1.32
   };
 };
 
@@ -797,32 +788,25 @@ const placeBook = (rank, count, phase, layout, g) => {
   const pileY = g.frontTop + g.frontH / 2;
   if (phase === 'open') {
     if (layout === 'row') {
-      const gap = 10 * g.scale;
-      const fit = Math.min(0.8, (g.w * 1.86 - gap * (count - 1)) / (count * g.docW));
+      const gap = 14 * g.scale;
+      const fit = 1.55; // BIG on open
       const step = g.docW * fit + gap;
-      return { x: g.w / 2 + (rank - (count - 1) / 2) * step, y: pileY, z: 0, r: 0, ry: 0, s: fit };
+      return { x: g.w / 2 + (rank - (count - 1) / 2) * step, y: pileY - 30 * g.scale, z: 0, r: 0, ry: 0, s: fit };
     }
     if (layout === 'stack') {
-      const fit = 0.74;
+      const fit = 1.4;
       const strip = Math.min(26 * g.scale, (g.h * 0.36) / Math.max(1, count - 1));
       const top = g.frontTop + 14 * g.scale + (count - 1) * strip;
       return { x: g.w, y: top + (g.docH * fit) / 2 - rank * strip, z: 0, r: 0, ry: 0, s: fit };
     }
-    const fit = count > 4 ? 0.58 : count > 3 ? 0.64 : 0.72;
+    const fit = count > 4 ? 1.3 : count > 3 ? 1.45 : 1.55; // BIG
     const span = count === 2 ? g.w : Math.min(g.w * 1.3, g.w * 0.6 * (count - 1));
     const x = count > 1 ? span / 2 - (rank * span) / (count - 1) : g.w * 0.5;
     return { x: g.w / 2 + x, y: pileY + SPREAD_DROP[rank] * g.h, z: 0, r: SPREAD_TURN[rank], ry: 0, s: fit };
   }
   const offsets = phase === 'rest' ? BOOK_REST : BOOK_PEEK;
   const offset = offsets[rank] ?? { x: 0.06, y: 0, r: PILE_TURN[rank] ?? 0 };
-  return {
-    x: pileX + offset.x * g.w,
-    y: pileY + offset.y * g.h + rank * 0.8 * g.scale,
-    z: 0,
-    r: offset.r,
-    ry: 0,
-    s: 1
-  };
+  return { x: pileX + offset.x * g.w, y: pileY + offset.y * g.h + rank * 0.8 * g.scale, z: 0, r: offset.r, ry: 0, s: 0.85 }; // SMALL in normal
 };
 
 const placeFlap = (rank, count, phase, layout, g, pointer) => {
@@ -833,35 +817,21 @@ const placeFlap = (rank, count, phase, layout, g, pointer) => {
     const lift = g.tabH - g.h * 0.02;
     if (layout === 'stack') {
       const strip = Math.min(30 * g.scale, (g.h * 0.62) / Math.max(1, count - 1));
-      const fit = 1.04 - rank * 0.05;
-      return {
-        x: g.w / 2,
-        y: g.tabH + g.h * 0.1 - rank * strip - (g.docH * (1.04 - fit)) / 2,
-        z: -rank * 18 * g.scale,
-        r: 0,
-        ry: 0,
-        s: fit
-      };
+      const fit = 1.45; // BIG on open
+      return { x: g.w / 2, y: g.tabH + g.h * 0.1 - rank * strip - (g.docH * (1.04 - fit)) / 2, z: -rank * 18 * g.scale, r: 0, ry: 0, s: fit };
     }
-    const gap = 12 * g.scale;
-    const fit = Math.min(0.94, (g.w * 2.3 - gap * (count - 1)) / (count * g.docW));
+    const gap = 14 * g.scale;
+    const fit = 1.55; // BIG on open
     const step = g.docW * fit + gap;
     const tidy = layout === 'row';
-    return {
-      x: g.w / 2 + (rank - mid) * step,
-      y: lift + (tidy ? 0 : SPREAD_DROP[rank] * g.h * 0.7),
-      z: 0,
-      r: tidy ? 0 : SPREAD_TURN[rank] * 0.55,
-      ry: 0,
-      s: fit
-    };
+    return { x: g.w / 2 + (rank - mid) * step, y: lift + (tidy ? -20 * g.scale : SPREAD_DROP[rank] * g.h * 0.7), z: 0, r: tidy ? 0 : SPREAD_TURN[rank] * 0.55, ry: 0, s: fit };
   }
   const part = phase === 'receive' ? 1.7 : phase === 'peek' ? 1.3 : 1;
   const x = g.w / 2 + rest.x * g.w * part;
-  if (phase === 'rest') return { x, y: floor - rest.rise * g.h, z: 0, r: rest.r, ry: 0, s: 1 };
+  if (phase === 'rest') return { x, y: floor - rest.rise * g.h, z: 0, r: rest.r, ry: 0, s: 0.85 }; // SMALL
   const near = phase === 'peek' && pointer != null ? Math.max(0, 1 - Math.abs(pointer - x) / (g.w * 0.32)) : 0;
   const rise = rest.rise + (phase === 'receive' ? 0.03 : 0.1);
-  return { x, y: floor - rise * g.h - near * near * g.h * 0.09, z: 0, r: rest.r * 1.6, ry: 0, s: 1 };
+  return { x, y: floor - rise * g.h - near * near * g.h * 0.09, z: 0, r: rest.r * 1.6, ry: 0, s: 0.85 };
 };
 
 const Folder = ({
@@ -926,8 +896,8 @@ const Folder = ({
   const g = measureFolder(book, scale, labelWidth, Boolean(label), tabPosition, pageSize);
   const total = g.tabH + g.h;
   const view = book
-    ? { x: -0.75 * g.w, y: -0.25 * total, width: 2.5 * g.w, height: 1.5 * total }
-    : { x: -0.25 * g.w, y: -0.1 * total, width: 1.5 * g.w, height: 1.3 * total };
+  ? { x: -0.95 * g.w, y: -0.45 * total, width: 2.9 * g.w, height: 1.9 * total }
+  : { x: -0.55 * g.w, y: -0.28 * total, width: 2.1 * g.w, height: 1.7 * total };
 
   useIsomorphicLayoutEffect(() => {
     const node = measureRef.current;

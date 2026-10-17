@@ -1,7 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
-import FluidGlass from '../ui/FluidGlass';
-
-const SHAPES = ['lens', 'blob', 'torus', 'prism', 'cube', 'diamond', 'pill'];
+import { useEffect, useRef } from 'react';
 
 // Split a word into masked characters for the staggered rise-in
 function SplitWord({ text, offset = 0 }) {
@@ -15,150 +12,75 @@ function SplitWord({ text, offset = 0 }) {
 }
 
 function Hero() {
-  const [currentShape, setCurrentShape] = useState('lens');
-  const [isGlassHidden, setIsGlassHidden] = useState(false);
-  const [glassSize, setGlassSize] = useState(300);
-  const [headingMetrics, setHeadingMetrics] = useState({
-    fontSize: 280,
-    lineHeight: 0.82,
-    yRatio: 0.5
-  });
-  const clickTimerRef = useRef(null);
-  const headingRef = useRef(null);
+  const heroRef = useRef(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      const w = window.innerWidth;
-      if (w < 480) setGlassSize(180);
-      else if (w < 768) setGlassSize(230);
-      else if (w < 1200) setGlassSize(280);
-      else setGlassSize(320);
+    const el = heroRef.current;
+    if (!el) return undefined;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return undefined;
 
-      if (headingRef.current) {
-        const style = window.getComputedStyle(headingRef.current);
-        const parsedSize = parseFloat(style.fontSize);
-        const parsedLineHeight = parseFloat(style.lineHeight);
-        const lhRatio = parsedLineHeight && parsedSize ? parsedLineHeight / parsedSize : 0.82;
+    let raf = 0;
+    const target = { mx: 0, my: 0 };
+    const current = { mx: 0, my: 0, sp: -1 };
 
-        const hRect = headingRef.current.getBoundingClientRect();
-        const heroEl = headingRef.current.closest('.hero');
-        const heroRect = heroEl ? heroEl.getBoundingClientRect() : { top: 0, height: window.innerHeight };
-        const centerY = (hRect.top + hRect.height / 2) - heroRect.top;
-        const yRatio = heroRect.height > 0 ? centerY / heroRect.height : 0.5;
-
-        setHeadingMetrics({
-          fontSize: parsedSize || 280,
-          lineHeight: lhRatio,
-          yRatio: Math.max(0.1, Math.min(0.9, yRatio))
-        });
-      }
+    const onPointer = (e) => {
+      target.mx = e.clientX / window.innerWidth - 0.5;
+      target.my = e.clientY / window.innerHeight - 0.5;
     };
 
-    handleResize();
-    window.addEventListener('resize', handleResize);
+    const tick = () => {
+      current.mx += (target.mx - current.mx) * 0.06;
+      current.my += (target.my - current.my) * 0.06;
+      const h = el.offsetHeight || window.innerHeight;
+      const sp = Math.min(1, Math.max(0, window.scrollY / h));
 
-    if (typeof document !== 'undefined' && document.fonts?.ready) {
-      document.fonts.ready.then(handleResize);
-    }
+      el.style.setProperty('--hx', current.mx.toFixed(4));
+      el.style.setProperty('--hy', current.my.toFixed(4));
+      if (Math.abs(sp - current.sp) > 0.0005) {
+        el.style.setProperty('--hs', sp.toFixed(4));
+        current.sp = sp;
+      }
+      raf = requestAnimationFrame(tick);
+    };
 
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('pointermove', onPointer, { passive: true });
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('pointermove', onPointer);
+    };
   }, []);
 
-  // Single click: change refraction glass engine shape
-  // Double click: hide / toggle glass engine
-  const handleHeroClick = () => {
-    if (clickTimerRef.current) {
-      // Second click within 240ms => Double Click detected!
-      clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-      setIsGlassHidden((prev) => !prev);
-    } else {
-      // First click => wait 240ms to differentiate single click vs double click
-      clickTimerRef.current = setTimeout(() => {
-        clickTimerRef.current = null;
-        if (isGlassHidden) {
-          setIsGlassHidden(false);
-        } else {
-          setCurrentShape((prevShape) => {
-            const nextIndex = (SHAPES.indexOf(prevShape) + 1) % SHAPES.length;
-            return SHAPES[nextIndex];
-          });
-        }
-      }, 200);
-    }
-  };
-
   return (
-    <div
-      className="hero relative w-full h-[100dvh] overflow-hidden select-none cursor-pointer"
-      onClick={handleHeroClick}
-      role="region"
-      aria-label="Hero Section"
-    >
+    <div ref={heroRef} className="hero relative w-full h-[100dvh] overflow-hidden select-none bg-[#070708]" role="region" aria-label="Hero Section">
       <div className="hero-head">
         <div className="hero-composition">
-          {/* Background Text: enlarged width and height with staggered rise-in */}
-          <h1
-            ref={headingRef}
-            className={`hero-name transition-opacity duration-300 ${
-              isGlassHidden ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}
-            id="hero-name"
-            aria-label="Bikash Dhakal"
-            style={{ zIndex: 1 }}
-          >
-            <span className="hero-name-word">
-              <SplitWord text="BIKASH" />
+          {/* Soft ambient glow behind the portrait */}
+          <div className="hero-glow opacity-40" aria-hidden="true" />
+
+          {/* Background name - CLEAN WHITE TEXT */}
+          <h1 className="hero-name text-white" id="hero-name" aria-label="Bikash Dhakal">
+            <span className="hero-name-word hero-name-word--top">
+              <span className="hero-name-shine" data-text="BIKASH">
+                <SplitWord text="BIKASH" />
+              </span>
             </span>
             <br />
-            <span className="hero-name-word">
-              <SplitWord text="DHAKAL" offset={6} />
+            <span className="hero-name-word hero-name-word--bottom">
+              <span className="hero-name-shine" data-text="DHAKAL">
+                <SplitWord text="DHAKAL" offset={6} />
+              </span>
             </span>
           </h1>
 
-          {/* FluidGlass Refraction Engine: sits in front of text and behind the avatar */}
-          <div
-            className={`absolute inset-0 transition-all duration-300 ease-out ${
-              isGlassHidden ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'
-            }`}
-            style={{ zIndex: 2 }}
-          >
-            <FluidGlass
-              text={'BIKASH\nDHAKAL'}
-              textColor="#ffffff"
-              fontFamily="'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif"
-              fontWeight={800}
-              lineHeight={headingMetrics.lineHeight}
-              fontSize={headingMetrics.fontSize}
-              textYRatio={headingMetrics.yRatio}
-              textOffsetY={28}
-              shape={currentShape}
-              shapes={SHAPES}
-              onShapeChange={setCurrentShape}
-              size={glassSize}
-              refraction={1.15}
-              dispersion={0.4}
-              reflection={1.25}
-              shadow={0.55}
-              elevation={0.42}
-              interaction="follow"
-              wobble={0.55}
-              smoothness={0.45}
-              spin={0.28}
-              idle={true}
-              morphOnClick={false}
-              className="w-full h-full"
-            />
-          </div>
+          {/* Portrait */}
+          <img className="hero-avatar-front" src="/avatar.png" alt="Bikash Dhakal" />
 
-          {/* Front Avatar: z-index explicitly in front of the text and glass */}
-          <img
-            className="hero-avatar-front"
-            src="/avatar.png"
-            alt="Bikash Dhakal"
-            style={{ zIndex: 10 }}
-          />
+          {/* Fade into the next section - black fade */}
+          <div className="hero-fade !from-[#070708] !to-transparent" aria-hidden="true" />
         </div>
+
       </div>
     </div>
   );

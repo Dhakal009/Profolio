@@ -139,12 +139,15 @@ export default function Tunnel({
   const halfW = CONFIG.TUNNEL_W / 2
   const halfH = CONFIG.TUNNEL_H / 2
 
+  // REDUCED LENGTH - 30% shorter (0.7 = -30%, change to 0.6 for -40%, 0.5 for half)
+  const EFFECTIVE_ROWS = Math.floor(CONFIG.ROWS * 0.7)
+
   // Distribute projects richly across all rows and walls so project cards are readily accessible
   const randomPlacements = useMemo(() => {
     const map = {}
     const walls = ['left', 'floor', 'right', 'ceiling']
 
-    for (let r = 0; r < CONFIG.ROWS; r++) {
+    for (let r = 0; r < EFFECTIVE_ROWS; r++) {
       const pIdx = r % projects.length
       const wall1 = walls[r % 4]
       const wall2 = walls[(r + 2) % 4]
@@ -153,7 +156,7 @@ export default function Tunnel({
     }
 
     return map
-  }, [projects.length])
+  }, [projects.length, EFFECTIVE_ROWS])
 
   // Shared transverse ring geometry
   const ringGeometry = useMemo(() => {
@@ -170,7 +173,7 @@ export default function Tunnel({
     return new THREE.BufferGeometry().setFromPoints(points)
   }, [halfW, halfH])
 
-  const totalLength = (CONFIG.ROWS - 1) * CONFIG.ROW_SPACING
+  const totalLength = (EFFECTIVE_ROWS - 1) * CONFIG.ROW_SPACING
 
   // Corner rails geometry spanning the finite length of the tunnel
   const railGeometry = useMemo(() => {
@@ -189,11 +192,11 @@ export default function Tunnel({
   }, [halfW, halfH, totalLength])
 
   const rows = useMemo(() => {
-    return Array.from({ length: CONFIG.ROWS }, (_, i) => ({
+    return Array.from({ length: EFFECTIVE_ROWS }, (_, i) => ({
       index: i,
       zBase: -i * CONFIG.ROW_SPACING
     }))
-  }, [])
+  }, [EFFECTIVE_ROWS])
 
   return (
     <group>

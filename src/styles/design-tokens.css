@@ -69,6 +69,12 @@
   --dock-cta-bg: #f2f2f2;
   --dock-cta-fg: #111111;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --hero-name-color: #2a2a2a;
+  --hero-name-shine: #d9d9d9;
+  --hero-glow: rgba(255, 255, 255, 0.07);
+  --card-bg: #131313;
+  --card-bg-hover: #181818;
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 50px -24px rgba(0, 0, 0, 0.8);
 }
 
 /* ---------- Light ---------- */
@@ -100,6 +106,12 @@
   --dock-cta-bg: #f4f4f4;
   --dock-cta-fg: #222222;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px -12px rgba(0, 0, 0, 0.14);
+  --hero-name-color: #d2d2d2;
+  --hero-name-shine: #8a8a8a;
+  --hero-glow: rgba(255, 255, 255, 0.85);
+  --card-bg: #f7f7f7;
+  --card-bg-hover: #ffffff;
+  --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 18px 40px -22px rgba(0, 0, 0, 0.18);
 }
 
 /* ============================================================

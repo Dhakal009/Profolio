@@ -15,7 +15,14 @@ export const PROJECTS = [
     link: '/demo/ems',
     github: 'https://github.com/Dhakal009/Profolio/tree/master/Projects/EMS',
     status: 'Live',
-    accent: '#10b981'
+    accent: '#10b981',
+    // Leave empty to show default placeholders. Later: ['/shots/ems-1.png', '/shots/ems-2.png', '/shots/ems-3.png']
+    screenshots: [],
+    // TODO: replace with the real demo logins
+    credentials: [
+      { role: 'Admin', email: 'admin@example.com', password: 'Admin@1234' },
+      { role: 'Employee', email: 'employee@example.com', password: 'Employee@1234' }
+    ]
   },
   {
     id: 'live-chat',
@@ -33,7 +40,14 @@ export const PROJECTS = [
     link: '/demo/live-chat',
     github: 'https://github.com/Dhakal009/Profolio/tree/master/Projects/live-chat',
     status: 'Live',
-    accent: '#6366f1'
+    accent: '#6366f1',
+    // Later: ['/shots/chat-1.png', '/shots/chat-2.png', '/shots/chat-3.png']
+    screenshots: [],
+    // TODO: replace with the real demo logins (two users so chat can be tested)
+    credentials: [
+      { role: 'User 1', email: 'demo@example.com', password: 'Demo@1234' },
+      { role: 'User 2', email: 'demo2@example.com', password: 'Demo@1234' }
+    ]
   },
   {
     id: 'ecommerce-app',
@@ -51,7 +65,13 @@ export const PROJECTS = [
     link: '/demo/ecommerce-app',
     github: 'https://github.com/Dhakal009/Profolio/tree/master/Projects/ecommerce-app',
     status: 'Live',
-    accent: '#f59e0b'
+    accent: '#f59e0b',
+    // Later: ['/shots/shop-1.png', '/shots/shop-2.png', '/shots/shop-3.png']
+    screenshots: [],
+    // TODO: replace with the real demo login
+    credentials: [
+      { role: 'Customer', email: 'demo@example.com', password: 'Demo@1234' }
+    ]
   }
 ];
 

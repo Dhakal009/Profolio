@@ -13,6 +13,10 @@ html {
   scroll-behavior: smooth;
 }
 
+body{
+  overflow-x: clip;
+}
+
 html.lenis, html.lenis body {
   height: auto;
 }

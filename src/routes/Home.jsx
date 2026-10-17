@@ -6,7 +6,8 @@ import { techLogos } from '../components/ui/TechLogos';
 import ProjectGallery from '../ProjectGallery/ProjectGallery';
 import DeliverablesSection from '../components/home/DeliverablesSection';
 import Skills from '../components/ui/Skills.jsx';
-import ThreeCanvas from '../components/canvas/ThreeCanvas';
+
+import { ReactLenis } from "lenis/react";
 import {
   SECTION_NAV,
   useSectionFocus,
@@ -31,15 +32,19 @@ function Home() {
 
   return (
     <>
-      <ThreeCanvas activeSection="hero" />
 
       <section id="hero" aria-labelledby="hero-name">
+        
         <Hero />
       </section>
 
-      <Section id="about" title="About">
+      <section
+        id="about"
+        className="relative w-full focus-section"
+        aria-label="About"
+      >
         <AboutSection />
-      </Section>
+      </section>
 
       <section
         id="projects"

@@ -31,6 +31,10 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
   const [scrollDistance, setScrollDistance] = useState(0)
   const [isRewinding, setIsRewinding] = useState(false)
 
+  // REDUCED TUNNEL LENGTH - 30% shorter, must match Tunnel.jsx
+  const EFFECTIVE_ROWS = Math.floor(CONFIG.ROWS * 0.7)
+  const EFFECTIVE_MAX_SCROLL = (EFFECTIVE_ROWS - 1) * CONFIG.ROW_SPACING - 2
+
   const targetScrollRef = useRef(0)
   const currentScrollRef = useRef(0)
   const touchStartY = useRef(0)
@@ -97,7 +101,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
             const totalDist = el.offsetHeight - window.innerHeight
             if (totalDist > 0) {
               const p = Math.max(0, Math.min(1, -rect.top / totalDist))
-              targetScrollRef.current = p * CONFIG.MAX_SCROLL
+              targetScrollRef.current = p * EFFECTIVE_MAX_SCROLL
             }
           }
         }
@@ -108,8 +112,8 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
 
           // Clamp at entrance and end
           if (currentScrollRef.current < 0.05) currentScrollRef.current = 0
-          if (currentScrollRef.current > CONFIG.MAX_SCROLL - 0.05) {
-            currentScrollRef.current = CONFIG.MAX_SCROLL
+          if (currentScrollRef.current > EFFECTIVE_MAX_SCROLL - 0.05) {
+            currentScrollRef.current = EFFECTIVE_MAX_SCROLL
           }
 
           setScrollDistance(currentScrollRef.current)
@@ -130,7 +134,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
     return () => {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
     }
-  }, [selected, isEmbedded, containerRef])
+  }, [selected, isEmbedded, containerRef, EFFECTIVE_MAX_SCROLL])
 
   // Smooth exit: gradually rewinds camera
   const handleExit = useCallback(() => {
@@ -181,11 +185,11 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
       if (isEmbedded || selected || isRewindingRef.current) return
 
       targetScrollRef.current = Math.min(
-        CONFIG.MAX_SCROLL,
+        EFFECTIVE_MAX_SCROLL,
         Math.max(0, targetScrollRef.current + e.deltaY * CONFIG.SCROLL_SPEED_FORWARD)
       )
     },
-    [selected, isEmbedded]
+    [selected, isEmbedded, EFFECTIVE_MAX_SCROLL]
   )
 
   // Touch handlers for mobile (used when !isEmbedded)
@@ -204,11 +208,11 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
       touchStartY.current = e.touches[0].clientY
 
       targetScrollRef.current = Math.min(
-        CONFIG.MAX_SCROLL,
+        EFFECTIVE_MAX_SCROLL,
         Math.max(0, targetScrollRef.current + deltaY * CONFIG.SCROLL_SPEED_FORWARD * 1.3)
       )
     },
-    [selected, isEmbedded]
+    [selected, isEmbedded, EFFECTIVE_MAX_SCROLL]
   )
 
   const handleSelect = useCallback(
@@ -237,7 +241,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
         if (e.key === 'Escape') {
           handleExit()
         } else if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-          targetScrollRef.current = Math.min(CONFIG.MAX_SCROLL, targetScrollRef.current + 3.5)
+          targetScrollRef.current = Math.min(EFFECTIVE_MAX_SCROLL, targetScrollRef.current + 3.5)
         } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
           targetScrollRef.current = Math.max(0, targetScrollRef.current - 3.5)
         }
@@ -246,7 +250,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selected, isEmbedded, handleClose, handleExit])
+  }, [selected, isEmbedded, handleClose, handleExit, EFFECTIVE_MAX_SCROLL])
 
   return (
     <GalleryContainer
@@ -304,7 +308,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
         </Suspense>
       </Canvas>
 
-      <Overlay
+       <Overlay
         scrollDistance={scrollDistance}
         selected={selected}
         onClose={handleClose}
@@ -312,7 +316,9 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
         theme={theme}
         isExiting={isRewinding}
         isEmbedded={isEmbedded}
+        effectiveMaxScroll={EFFECTIVE_MAX_SCROLL}
       />
+ 
     </GalleryContainer>
   )
 }

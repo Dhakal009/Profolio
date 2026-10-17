@@ -49,15 +49,17 @@ export default function ThreeCanvas() {
       m.currentY += (m.y - m.currentY) * 0.04;
 
       ctx.clearRect(0, 0, width, height);
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+      const ink = isLight ? '0, 0, 0' : '255, 255, 255';
 
-      // Subtle, high-end radial gradient aura centered around cursor
+      // Subtle, neutral radial aura centred around the cursor
       const auraX = m.currentX * width;
       const auraY = m.currentY * height;
       const radius = Math.max(width, height) * 0.45;
 
       const gradient = ctx.createRadialGradient(auraX, auraY, 0, auraX, auraY, radius);
-      gradient.addColorStop(0, 'rgba(56, 189, 248, 0.045)');
-      gradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.018)');
+      gradient.addColorStop(0, `rgba(${ink}, ${isLight ? 0.035 : 0.035})`);
+      gradient.addColorStop(0.5, `rgba(${ink}, 0.012)`);
       gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
       ctx.fillStyle = gradient;
@@ -73,7 +75,7 @@ export default function ThreeCanvas() {
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.baseAlpha})`;
+        ctx.fillStyle = `rgba(${ink}, ${p.baseAlpha * (isLight ? 0.6 : 1)})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();

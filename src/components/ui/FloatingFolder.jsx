@@ -80,7 +80,7 @@ export default function FloatingFolder() {
 
   return (
     <div
-      className="fixed bottom-3 right-3 sm:bottom-5 sm:right-5 z-[88] flex flex-col items-end pointer-events-none"
+      className="fixed bottom-3 right-6 sm:bottom-5 sm:right-5 z-[88] flex flex-col items-end pointer-events-none"
       aria-label="Floating quick navigation folder"
     >
       <div className="pointer-events-auto">

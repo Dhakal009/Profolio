@@ -1,7 +1,37 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
+/* ------------------------------------------------------------------ */
+/*  DEFAULTS – replace later per project in your projects data file:   */
+/*    screenshots: ['/shots/a.png', '/shots/b.png', ...]               */
+/*    credentials: { role, email, password }  (or an array of these)   */
+/* ------------------------------------------------------------------ */
+const DEFAULT_CREDENTIALS = [
+  { role: 'Demo user', email: 'demo@example.com', password: 'Demo@1234' }
+]
+
+const SHOT_LABELS = ['Dashboard', 'Detail view', 'Settings']
+
+const makePlaceholder = (label, accent = '#38bdf8') => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800">
+<rect width="1280" height="800" fill="#12131a"/>
+<rect width="220" height="800" fill="#181a23"/>
+<rect x="28" y="32" width="120" height="16" rx="8" fill="${accent}"/>
+${[0, 1, 2, 3, 4].map((i) => `<rect x="28" y="${110 + i * 44}" width="${150 - (i % 3) * 24}" height="12" rx="6" fill="#2a2d3a"/>`).join('')}
+<rect x="260" y="32" width="420" height="22" rx="11" fill="#2a2d3a"/>
+${[0, 1, 2].map((i) => `<rect x="${260 + i * 330}" y="100" width="300" height="130" rx="16" fill="#1d1f2b"/><rect x="${284 + i * 330}" y="126" width="90" height="12" rx="6" fill="#3a3e50"/><rect x="${284 + i * 330}" y="160" width="150" height="30" rx="8" fill="${accent}" opacity="${0.9 - i * 0.2}"/>`).join('')}
+<rect x="260" y="262" width="640" height="300" rx="16" fill="#1d1f2b"/>
+<polyline points="290,520 380,450 470,480 560,390 650,420 740,340 860,370" fill="none" stroke="${accent}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="930" y="262" width="300" height="300" rx="16" fill="#1d1f2b"/>
+${[0, 1, 2, 3].map((i) => `<rect x="956" y="${292 + i * 62}" width="248" height="42" rx="10" fill="#262938"/>`).join('')}
+<rect x="260" y="594" width="970" height="160" rx="16" fill="#1d1f2b"/>
+<text x="640" y="780" text-anchor="middle" font-family="sans-serif" font-size="22" fill="#6b7080">${label} · placeholder</text>
+</svg>`
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
+}
+
+/* ------------------------------ Icons ------------------------------ */
 const ExternalIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -23,8 +53,20 @@ const CloseIcon = () => (
   </svg>
 )
 
+const CopyIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="9" y="9" width="13" height="13" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+)
 
-// Dynamic entrance & exit overlay with cinematic 3D expansion animation
+const CheckIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
+/* --------------------------- Intro screen --------------------------- */
 const IntroScreen = styled.div.attrs((props) => ({
   style: {
     opacity: props.$bgOpacity,
@@ -84,26 +126,18 @@ const IntroWrapper = styled.div`
     opacity: 0;
     animation: wordRise 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-
   &.is-opening .opening-word:nth-child(1) { animation-delay: 0.04s; }
   &.is-opening .opening-word:nth-child(2) { animation-delay: 0.12s; }
   &.is-opening .opening-word:nth-child(3) { animation-delay: 0.20s; }
   &.is-opening .opening-word:nth-child(4) { animation-delay: 0.28s; }
 
   @keyframes wordRise {
-    0% {
-      opacity: 0;
-      transform: translateY(28px) scale(0.92);
-      filter: blur(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-      filter: blur(0px);
-    }
+    0% { opacity: 0; transform: translateY(28px) scale(0.92); filter: blur(10px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
   }
 `
 
+/* ------------------------------ Modal ------------------------------ */
 const ModalBackdrop = styled.div`
   position: fixed;
   inset: 0;
@@ -111,73 +145,92 @@ const ModalBackdrop = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1rem, 3vw, 2rem);
-  background: ${(props) =>
-    props.$isDark ? 'rgba(4, 4, 6, 0.78)' : 'rgba(235, 235, 240, 0.78)'};
+  padding: clamp(0.75rem, 3vw, 2rem);
+  background: ${(p) => (p.$isDark ? 'rgba(4, 4, 6, 0.8)' : 'rgba(235, 235, 240, 0.8)')};
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition: opacity 0.22s ease-in;
-  opacity: ${(props) => (props.$isClosing ? 0 : 1)};
+  opacity: ${(p) => (p.$isClosing ? 0 : 1)};
   animation: fadeIn 0.25s ease-out;
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+`
+
+const Scene = styled.div`
+  perspective: 1600px;
+  width: min(96vw, 1040px);
+`
+
+const Tilt = styled.div`
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.18s ease-out;
+  will-change: transform;
+
+  /* floating shadow layer sits behind the card to create depth */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 18px 14px -22px;
+    border-radius: 32px;
+    background: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
+    opacity: ${(p) => (p.$isDark ? 0.22 : 0.18)};
+    filter: blur(46px);
+    transform: translateZ(-70px);
+    pointer-events: none;
   }
 `
 
 const ModalCard = styled.div`
   position: relative;
-  width: min(92vw, 760px);
-  max-height: 88vh;
+  max-height: 90vh;
   overflow-y: auto;
   border-radius: 28px;
-  padding: clamp(1.75rem, 4vw, 2.75rem);
-  background: ${(props) =>
-    props.$isDark
-      ? 'rgba(17, 17, 22, 0.94)'
-      : 'rgba(255, 255, 255, 0.96)'};
-  border: 1px solid ${(props) => (props.$accent ? props.$accent : props.$isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.1)')};
-  box-shadow: ${(props) =>
-    props.$isDark
-      ? '0 24px 70px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 0, 0, 0.5)'
-      : '0 24px 60px rgba(0, 0, 0, 0.12)'};
-  color: ${(props) => (props.$isDark ? '#ffffff' : '#09090b')};
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  background: ${(p) =>
+    p.$isDark
+      ? 'linear-gradient(160deg, rgba(28, 29, 38, 0.97), rgba(14, 14, 19, 0.98))'
+      : 'linear-gradient(160deg, rgba(255, 255, 255, 1), rgba(246, 246, 250, 0.98))'};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)')};
+  box-shadow: ${(p) =>
+    p.$isDark
+      ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 40px 90px rgba(0,0,0,0.75), 0 10px 24px rgba(0,0,0,0.5)'
+      : 'inset 0 1px 0 #fff, 0 40px 80px rgba(20,20,40,0.18), 0 8px 20px rgba(20,20,40,0.1)'};
+  color: ${(p) => (p.$isDark ? '#f4f4f5' : '#09090b')};
   transition: transform 0.22s ease-in, opacity 0.2s ease-in;
-  transform: ${(props) => (props.$isClosing ? 'scale(0.95) translateY(20px)' : 'scale(1) translateY(0)')};
-  opacity: ${(props) => (props.$isClosing ? 0 : 1)};
-  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: ${(p) => (p.$isClosing ? 'scale(0.95) translateY(20px)' : 'none')};
+  opacity: ${(p) => (p.$isClosing ? 0 : 1)};
+  animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  scrollbar-width: thin;
 
   @keyframes popIn {
-    from { transform: scale(0.95) translateY(12px); opacity: 0; }
-    to { transform: scale(1) translateY(0); opacity: 1; }
+    from { transform: scale(0.94) translateY(16px) rotateX(6deg); opacity: 0; }
+    to { transform: none; opacity: 1; }
   }
 `
 
-const ModalTopBar = styled.div`
+const TopBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
   gap: 1rem;
+  margin-bottom: 1.25rem;
 `
 
-const BadgeGroup = styled.div`
+const Badges = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
 `
 
 const CategoryBadge = styled.span`
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.32rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
   border-radius: 999px;
-  background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)')};
-  color: ${(props) => (props.$isDark ? '#e4e4e7' : '#3f3f46')};
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')};
+  color: ${(p) => (p.$isDark ? '#e4e4e7' : '#3f3f46')};
 `
 
 const StatusDot = styled.span`
@@ -187,7 +240,7 @@ const StatusDot = styled.span`
   font-size: 0.78rem;
   font-weight: 600;
   color: #10b981;
-  padding: 0.32rem 0.75rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 999px;
   background: rgba(16, 185, 129, 0.12);
 
@@ -205,144 +258,297 @@ const CloseButton = styled.button`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)')};
-  background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)')};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)')};
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)')};
   color: currentColor;
   display: grid;
   place-items: center;
   cursor: pointer;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: background 0.2s, transform 0.2s;
 
-  &:hover {
-    background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.12)')};
-    transform: scale(1.06);
-  }
+  &:hover { background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)')}; transform: scale(1.06); }
+  &:focus-visible { outline: 2px solid ${(p) => p.$accent || '#38bdf8'}; outline-offset: 2px; }
+`
+
+const Header = styled.div`
+  margin-bottom: 1.5rem;
 `
 
 const ProjectTitle = styled.h2`
-  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-size: clamp(1.9rem, 4.6vw, 3rem);
   font-weight: 900;
   letter-spacing: -0.03em;
-  margin: 0 0 0.5rem 0;
-  line-height: 1.1;
+  line-height: 1.08;
+  margin: 0 0 0.4rem;
 `
 
 const ProjectSubtitle = styled.p`
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: ${(props) => (props.$accent ? props.$accent : props.$isDark ? '#38bdf8' : '#0284c7')};
-  margin: 0 0 1.5rem 0;
+  color: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
+  margin: 0;
 `
 
-const KeyFeaturesGrid = styled.div`
+const Layout = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  padding: 1.1rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3vw, 2rem);
+  align-items: start;
+
+  @media (max-width: 860px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`
+
+const Column = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+`
+
+/* ----- Screenshot viewer (browser frame with slight 3D lean) ----- */
+const BrowserFrame = styled.div`
   border-radius: 16px;
-  background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.03)')};
-  border: 1px solid ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.06)')};
+  overflow: hidden;
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)')};
+  background: ${(p) => (p.$isDark ? '#0d0e13' : '#fff')};
+  box-shadow: ${(p) =>
+    p.$isDark
+      ? '0 30px 50px -18px rgba(0,0,0,0.8), 0 12px 20px -10px rgba(0,0,0,0.6)'
+      : '0 30px 50px -18px rgba(20,20,40,0.3), 0 12px 20px -10px rgba(20,20,40,0.18)'};
+  transform: perspective(1200px) rotateY(-4deg) rotateX(2deg);
+  transform-origin: center;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
-  .stat-item {
-    font-size: 0.85rem;
-    color: ${(props) => (props.$isDark ? '#a1a1aa' : '#71717a')};
+  &:hover { transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(-3px); }
 
-    strong {
-      display: block;
-      font-size: 0.98rem;
-      font-weight: 700;
-      color: ${(props) => (props.$isDark ? '#ffffff' : '#09090b')};
-      margin-bottom: 3px;
-    }
+  @media (max-width: 860px) { transform: none; &:hover { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { transform: none; &:hover { transform: none; } }
+`
+
+const BrowserBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 0.8rem;
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)')};
+
+  i { width: 9px; height: 9px; border-radius: 50%; background: ${(p) => (p.$isDark ? '#3f3f46' : '#d4d4d8')}; }
+  span {
+    margin-left: 0.5rem;
+    flex: 1;
+    font-size: 0.72rem;
+    padding: 0.18rem 0.6rem;
+    border-radius: 6px;
+    color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')};
+    background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)')};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`
+
+const ShotImage = styled.img`
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: ${(p) => (p.$isDark ? '#12131a' : '#f1f1f5')};
+  animation: shotIn 0.35s ease-out;
+
+  @keyframes shotIn { from { opacity: 0; } to { opacity: 1; } }
+`
+
+const Thumbs = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+`
+
+const Thumb = styled.button`
+  flex: 0 0 auto;
+  width: 84px;
+  aspect-ratio: 16 / 10;
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+  border: 2px solid ${(p) => (p.$active ? p.$accent || '#38bdf8' : 'transparent')};
+  opacity: ${(p) => (p.$active ? 1 : 0.55)};
+  transition: opacity 0.2s, transform 0.2s, border-color 0.2s;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  &:hover { opacity: 1; transform: translateY(-2px); }
+  &:focus-visible { outline: 2px solid ${(p) => p.$accent || '#38bdf8'}; outline-offset: 2px; }
+`
+
+/* ------------------------ Info panels (right) ------------------------ */
+const Panel = styled.div`
+  padding: 1.1rem 1.2rem;
+  border-radius: 18px;
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)')};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)')};
+  box-shadow: ${(p) => (p.$isDark ? 'inset 0 1px 0 rgba(255,255,255,0.05)' : 'inset 0 1px 0 #fff')};
+`
+
+const PanelTitle = styled.h3`
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: ${(p) => (p.$isDark ? '#fafafa' : '#18181b')};
+`
+
+const Stats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+
+  div { font-size: 0.78rem; color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')}; }
+  strong {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 0.92rem;
+    color: ${(p) => (p.$isDark ? '#fff' : '#09090b')};
   }
 `
 
 const ProjectDescription = styled.p`
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.7;
-  color: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.88)' : 'rgba(0, 0, 0, 0.8)')};
-  margin: 0 0 1.75rem 0;
+  margin: 0;
+  color: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.84)' : 'rgba(0,0,0,0.78)')};
 `
 
-const TechSection = styled.div`
-  margin-bottom: 2rem;
+const CredHint = styled.p`
+  margin: -0.3rem 0 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')};
+`
 
-  .section-label {
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: ${(props) => (props.$isDark ? '#71717a' : '#a1a1aa')};
-    margin-bottom: 0.6rem;
+const CredBlock = styled.div`
+  & + & { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px dashed ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)')}; }
+`
+
+const CredRole = styled.div`
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+  color: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
+`
+
+const CredRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.8rem;
+  border-radius: 10px;
+  background: ${(p) => (p.$isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.9)')};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')};
+
+  & + & { margin-top: 0.45rem; }
+
+  .label { width: 66px; flex-shrink: 0; font-size: 0.76rem; color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')}; }
+  .value {
+    flex: 1;
+    min-width: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.86rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+`
+
+const MiniButton = styled.button`
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: ${(p) => (p.$done ? '#10b981' : 'currentColor')};
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')};
+  transition: background 0.2s;
+
+  &:hover { background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.12)')}; }
+  &:focus-visible { outline: 2px solid ${(p) => p.$accent || '#38bdf8'}; outline-offset: 1px; }
+`
+
+const TextToggle = styled(MiniButton)`
+  width: auto;
+  padding: 0 0.6rem;
+  font-size: 0.74rem;
+  font-weight: 600;
 `
 
 const TechList = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.5rem;
 `
 
 const TechPill = styled.span`
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 0.4rem 0.95rem;
+  padding: 0.35rem 0.8rem;
   border-radius: 8px;
-  background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)')};
-  border: 1px solid ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)')};
-  color: ${(props) => (props.$isDark ? '#e4e4e7' : '#3f3f46')};
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)')};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')};
+  color: ${(p) => (p.$isDark ? '#e4e4e7' : '#3f3f46')};
 `
 
 const ActionRow = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 1rem;
+  gap: 0.8rem;
   flex-wrap: wrap;
-  padding-top: 1.5rem;
-  border-top: 1px solid ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)')};
+  margin-top: 1.75rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')};
 `
 
 const PrimaryButton = styled.a`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.6rem;
+  padding: 0.8rem 1.5rem;
   border-radius: 999px;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   font-weight: 700;
   text-decoration: none;
-  background: ${(props) => (props.$accent ? props.$accent : props.$isDark ? '#ffffff' : '#09090b')};
-  color: ${(props) => (props.$accent ? '#ffffff' : props.$isDark ? '#09090b' : '#ffffff')};
-  box-shadow: 0 4px 16px ${(props) => (props.$accent ? `${props.$accent}44` : 'rgba(0,0,0,0.2)')};
-  transition: all 0.2s;
+  background: ${(p) => p.$accent || (p.$isDark ? '#ffffff' : '#09090b')};
+  color: ${(p) => (p.$accent ? '#ffffff' : p.$isDark ? '#09090b' : '#ffffff')};
+  box-shadow: 0 4px 16px ${(p) => (p.$accent ? `${p.$accent}44` : 'rgba(0,0,0,0.2)')};
+  transition: transform 0.2s, box-shadow 0.2s;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 22px ${(props) => (props.$accent ? `${props.$accent}66` : 'rgba(0,0,0,0.3)')};
-  }
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px ${(p) => (p.$accent ? `${p.$accent}66` : 'rgba(0,0,0,0.3)')}; }
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 `
 
 const SecondaryButton = styled.a`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.85rem 1.45rem;
+  padding: 0.8rem 1.4rem;
   border-radius: 999px;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   font-weight: 600;
   text-decoration: none;
-  background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)')};
-  border: 1px solid ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)')};
+  background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)')};
   color: currentColor;
-  transition: all 0.2s;
+  transition: background 0.2s, transform 0.2s;
 
-  &:hover {
-    background: ${(props) => (props.$isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.12)')};
-    transform: translateY(-2px);
-  }
+  &:hover { background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.12)')}; transform: translateY(-2px); }
+  &:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 `
 
 const EndTunnelNotice = styled.div`
@@ -355,10 +561,8 @@ const EndTunnelNotice = styled.div`
   gap: 0.5rem;
   padding: 0.55rem 1.25rem;
   border-radius: 999px;
-  background: ${(props) =>
-    props.$isDark ? 'rgba(17, 17, 22, 0.9)' : 'rgba(255, 255, 255, 0.94)'};
-  border: 1px solid ${(props) =>
-    props.$isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.12)'};
+  background: ${(p) => (p.$isDark ? 'rgba(17, 17, 22, 0.9)' : 'rgba(255, 255, 255, 0.94)')};
+  border: 1px solid ${(p) => (p.$isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.12)')};
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -366,24 +570,84 @@ const EndTunnelNotice = styled.div`
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: ${(props) => (props.$isDark ? '#93c5fd' : '#2563eb')};
+  color: ${(p) => (p.$isDark ? '#93c5fd' : '#2563eb')};
   pointer-events: none;
   z-index: 25;
   white-space: nowrap;
   animation: noticeFadeIn 0.35s ease-out;
 
   @keyframes noticeFadeIn {
-    from {
-      opacity: 0;
-      transform: translate(-50%, 8px);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
+    from { opacity: 0; transform: translate(-50%, 8px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
   }
 `
 
+/* --------------------------- Credentials --------------------------- */
+function Credentials({ list, isDark, accent }) {
+  const [copied, setCopied] = useState('')
+  const [shown, setShown] = useState({})
+
+  const copy = async (key, text) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(key)
+      setTimeout(() => setCopied(''), 1400)
+    } catch {
+      /* clipboard unavailable – ignore */
+    }
+  }
+
+  return (
+    <Panel $isDark={isDark}>
+      <PanelTitle $isDark={isDark}>Try the live demo</PanelTitle>
+      <CredHint $isDark={isDark}>Use these test accounts to log in. Data is sample only.</CredHint>
+      {list.map((c, i) => {
+        const pw = shown[i]
+        return (
+          <CredBlock key={`${c.role}-${i}`} $isDark={isDark}>
+            {c.role && <CredRole $isDark={isDark} $accent={accent}>{c.role}</CredRole>}
+            <CredRow $isDark={isDark}>
+              <span className="label">Email</span>
+              <span className="value">{c.email}</span>
+              <MiniButton
+                $isDark={isDark}
+                $accent={accent}
+                $done={copied === `e${i}`}
+                onClick={() => copy(`e${i}`, c.email)}
+                aria-label="Copy email"
+              >
+                {copied === `e${i}` ? <CheckIcon /> : <CopyIcon />}
+              </MiniButton>
+            </CredRow>
+            <CredRow $isDark={isDark}>
+              <span className="label">Password</span>
+              <span className="value">{pw ? c.password : '•'.repeat(Math.min(c.password.length, 10))}</span>
+              <TextToggle
+                $isDark={isDark}
+                $accent={accent}
+                onClick={() => setShown((s) => ({ ...s, [i]: !s[i] }))}
+                aria-label={pw ? 'Hide password' : 'Show password'}
+              >
+                {pw ? 'Hide' : 'Show'}
+              </TextToggle>
+              <MiniButton
+                $isDark={isDark}
+                $accent={accent}
+                $done={copied === `p${i}`}
+                onClick={() => copy(`p${i}`, c.password)}
+                aria-label="Copy password"
+              >
+                {copied === `p${i}` ? <CheckIcon /> : <CopyIcon />}
+              </MiniButton>
+            </CredRow>
+          </CredBlock>
+        )
+      })}
+    </Panel>
+  )
+}
+
+/* ----------------------------- Overlay ----------------------------- */
 export default function Overlay({
   scrollDistance,
   selected,
@@ -391,25 +655,38 @@ export default function Overlay({
   _onExit,
   theme,
   _isExiting = false,
-  _isEmbedded = false
+  _isEmbedded = false,
+  effectiveMaxScroll = 58
 }) {
   const isDark = theme === 'dark'
   const [isClosing, setIsClosing] = useState(false)
   const [isOpening, setIsOpening] = useState(true)
+  const [activeShot, setActiveShot] = useState(0)
+  const tiltRef = useRef(null)
 
-  // Trigger opening animation when entering project section
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsOpening(false)
-    }, 1200)
+    const timer = setTimeout(() => setIsOpening(false), 1200)
     return () => clearTimeout(timer)
   }, [])
 
-  // Dynamic scale and fly-out animation with high-end cubic easing:
-  // Using 4.8 threshold provides a deep, gradual zoom-in & zoom-out transition
-  // When scrolling forward (0 -> 4.8): scale expands smoothly from 1.0 to ~13x in 3D perspective
-  // When scrolling backward / clicking back button: text gradually reappears from outer view and scales down
-  // to rest at its crisp original size in the center of the viewport
+  const project = selected?.project
+
+  // Screenshots: use project.screenshots when provided, otherwise placeholders
+  const shots = useMemo(() => {
+    if (!project) return []
+    if (Array.isArray(project.screenshots) && project.screenshots.length) return project.screenshots
+    return SHOT_LABELS.map((label) => makePlaceholder(label, project.accent || '#38bdf8'))
+  }, [project])
+
+  // Credentials: accept a single object, an array, or fall back to defaults
+  const credentials = useMemo(() => {
+    const c = project?.credentials
+    if (!c) return DEFAULT_CREDENTIALS
+    return Array.isArray(c) ? c : [c]
+  }, [project])
+
+  useEffect(() => setActiveShot(0), [project])
+
   const progress = Math.min(1, Math.max(0, scrollDistance / 4.8))
   const easeProgress = Math.pow(progress, 1.35)
   const scale = 1 + easeProgress * 12.0
@@ -428,27 +705,34 @@ export default function Overlay({
     }, 220)
   }
 
-  // Handle escape key with smooth exit animation
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'Escape' && selected && !isClosing) {
-        handleAnimatedClose()
-      }
+      if (e.key === 'Escape' && selected && !isClosing) handleAnimatedClose()
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [selected, isClosing])
 
+  // 3D tilt that follows the pointer (desktop only, respects reduced motion)
+  const canTilt = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  const handleMove = (e) => {
+    if (!tiltRef.current || !canTilt()) return
+    const x = e.clientX / window.innerWidth - 0.5
+    const y = e.clientY / window.innerHeight - 0.5
+    tiltRef.current.style.transform = `rotateX(${(-y * 5).toFixed(2)}deg) rotateY(${(x * 7).toFixed(2)}deg)`
+  }
+  const resetTilt = () => {
+    if (tiltRef.current) tiltRef.current.style.transform = 'rotateX(0deg) rotateY(0deg)'
+  }
+
   return (
     <>
-      {/* 1. Dynamic scaling text: opening entrance animation on page load, zooms out as tunnel opens, gradually returns to original size as tunnel closes */}
       {showIntro && (
-        <IntroScreen
-          $isDark={isDark}
-          $bgOpacity={bgOpacity}
-          $blur={blurAmount}
-          $progress={progress}
-        >
+        <IntroScreen $isDark={isDark} $bgOpacity={bgOpacity} $blur={blurAmount} $progress={progress}>
           <IntroWrapper className={isOpening ? 'is-opening' : ''}>
             <IntroTitle
               $isDark={isDark}
@@ -466,115 +750,140 @@ export default function Overlay({
         </IntroScreen>
       )}
 
-      {/* 2. Redesigned Project Details Modal with smooth exit animation */}
       {selected && typeof document !== 'undefined' && createPortal(
         <ModalBackdrop
           $isDark={isDark}
           $isClosing={isClosing}
           onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              handleAnimatedClose()
-            }
+            if (e.target === e.currentTarget) handleAnimatedClose()
           }}
+          onMouseMove={handleMove}
+          onMouseLeave={resetTilt}
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
         >
-          <ModalCard
-            $isDark={isDark}
-            $accent={selected.project.accent}
-            $isClosing={isClosing}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ModalTopBar>
-              <BadgeGroup>
-                <CategoryBadge $isDark={isDark}>
-                  {selected.project.index} · {selected.project.category}
-                </CategoryBadge>
-                <StatusDot>Production Live</StatusDot>
-              </BadgeGroup>
-
-              <CloseButton
+          <Scene>
+            <Tilt ref={tiltRef} $isDark={isDark} $accent={project.accent}>
+              <ModalCard
                 $isDark={isDark}
-                onClick={handleAnimatedClose}
-                aria-label="Close details"
+                $isClosing={isClosing}
+                role="dialog"
+                aria-modal="true"
+                aria-label={project.title}
+                onClick={(e) => e.stopPropagation()}
               >
-                <CloseIcon />
-              </CloseButton>
-            </ModalTopBar>
+                <TopBar>
+                  <Badges>
+                    <CategoryBadge $isDark={isDark}>
+                      {project.index} · {project.category}
+                    </CategoryBadge>
+                    <StatusDot>Production live</StatusDot>
+                  </Badges>
+                  <CloseButton
+                    $isDark={isDark}
+                    $accent={project.accent}
+                    onClick={handleAnimatedClose}
+                    aria-label="Close details"
+                  >
+                    <CloseIcon />
+                  </CloseButton>
+                </TopBar>
 
-            <ProjectTitle>{selected.project.title}</ProjectTitle>
-            <ProjectSubtitle $accent={selected.project.accent} $isDark={isDark}>
-              {selected.project.subtitle}
-            </ProjectSubtitle>
+                <Header>
+                  <ProjectTitle>{project.title}</ProjectTitle>
+                  <ProjectSubtitle $accent={project.accent} $isDark={isDark}>
+                    {project.subtitle}
+                  </ProjectSubtitle>
+                </Header>
 
-            <KeyFeaturesGrid $isDark={isDark}>
-              <div className="stat-item">
-                <strong>Core Focus</strong>
-                <span>{selected.project.stat || selected.project.category}</span>
-              </div>
-              <div className="stat-item">
-                <strong>Year</strong>
-                <span>{selected.project.year || '2026'}</span>
-              </div>
-              <div className="stat-item">
-                <strong>Deployment</strong>
-                <span>Interactive Live Demo</span>
-              </div>
-            </KeyFeaturesGrid>
+                <Layout>
+                  {/* Left: screenshots */}
+                  <Column>
+                    <BrowserFrame $isDark={isDark}>
+                      <BrowserBar $isDark={isDark}>
+                        <i /><i /><i />
+                        <span>{(project.link || 'your-project.com').replace(/^https?:\/\//, '')}</span>
+                      </BrowserBar>
+                      <ShotImage
+                        key={activeShot}
+                        $isDark={isDark}
+                        src={shots[activeShot]}
+                        alt={`${project.title} screenshot ${activeShot + 1}`}
+                      />
+                    </BrowserFrame>
 
-            <ProjectDescription $isDark={isDark}>
-              {selected.project.description}
-            </ProjectDescription>
+                    {shots.length > 1 && (
+                      <Thumbs>
+                        {shots.map((src, i) => (
+                          <Thumb
+                            key={i}
+                            $active={i === activeShot}
+                            $accent={project.accent}
+                            onClick={() => setActiveShot(i)}
+                            aria-label={`Show screenshot ${i + 1}`}
+                          >
+                            <img src={src} alt="" />
+                          </Thumb>
+                        ))}
+                      </Thumbs>
+                    )}
+                  </Column>
 
-            <TechSection $isDark={isDark}>
-              <div className="section-label">Architecture & Technologies</div>
-              <TechList>
-                {selected.project.tech.map((item) => (
-                  <TechPill key={item} $isDark={isDark}>
-                    {item}
-                  </TechPill>
-                ))}
-              </TechList>
-            </TechSection>
+                  {/* Right: details */}
+                  <Column>
+                    <Panel $isDark={isDark}>
+                      <Stats $isDark={isDark}>
+                        <div><strong>{project.stat || project.category}</strong>Focus</div>
+                        <div><strong>{project.year || '2026'}</strong>Year</div>
+                        <div><strong>Live demo</strong>Deployment</div>
+                      </Stats>
+                    </Panel>
 
-            <ActionRow $isDark={isDark}>
-              <PrimaryButton
-                href={selected.project.link}
-                $accent={selected.project.accent}
-                $isDark={isDark}
-              >
-                Live Demo <ExternalIcon />
-              </PrimaryButton>
+                    <ProjectDescription $isDark={isDark}>{project.description}</ProjectDescription>
 
-              <SecondaryButton
-                href={selected.project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                $isDark={isDark}
-              >
-                <GithubIcon /> Source Code
-              </SecondaryButton>
-            </ActionRow>
-          </ModalCard>
+                    <Credentials list={credentials} isDark={isDark} accent={project.accent} />
+
+                    <div>
+                      <PanelTitle $isDark={isDark}>Built with</PanelTitle>
+                      <TechList>
+                        {project.tech.map((item) => (
+                          <TechPill key={item} $isDark={isDark}>{item}</TechPill>
+                        ))}
+                      </TechList>
+                    </div>
+                  </Column>
+                </Layout>
+
+                <ActionRow $isDark={isDark}>
+                  <PrimaryButton
+                    href={project.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    $accent={project.accent}
+                    $isDark={isDark}
+                  >
+                    Open live demo <ExternalIcon />
+                  </PrimaryButton>
+                  <SecondaryButton
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    $isDark={isDark}
+                  >
+                    <GithubIcon /> Source code
+                  </SecondaryButton>
+                </ActionRow>
+              </ModalCard>
+            </Tilt>
+          </Scene>
         </ModalBackdrop>,
         document.body
       )}
 
-      {/* 3. Finite Tunnel End Indicator */}
-      {scrollDistance >= 58 && !selected && (
+      {scrollDistance >= effectiveMaxScroll - 1 && !selected && (
         <EndTunnelNotice $isDark={isDark}>
           <span>End of Projects · Scroll down for Skills</span>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </EndTunnelNotice>
