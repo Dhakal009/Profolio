@@ -14,9 +14,9 @@ export default function FloatingFolder() {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 640) {
-        setScale(0.38);
+        setScale(0.32);
       } else {
-        setScale(0.44);
+        setScale(0.2);
       }
     };
     handleResize();
@@ -80,7 +80,7 @@ export default function FloatingFolder() {
 
   return (
     <div
-      className="fixed bottom-3 right-6 sm:bottom-5 sm:right-5 z-[88] flex flex-col items-end pointer-events-none"
+      className="fixed bottom-3 right-8 sm:bottom-5 sm:right-10 z-[88] flex flex-col items-end pointer-events-none"
       aria-label="Floating quick navigation folder"
     >
       <div className="pointer-events-auto">

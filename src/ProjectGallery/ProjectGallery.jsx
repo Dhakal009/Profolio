@@ -11,6 +11,8 @@ import Tunnel from './Tunnel'
 import CameraRig from './CameraRig'
 import Overlay from './Overlay'
 
+export const INTRO_HOLD_VH = 25
+
 const GalleryContainer = styled.div`
   position: ${(props) => (props.$isEmbedded ? 'relative' : 'fixed')};
   ${(props) => (props.$isEmbedded ? 'width: 100%; height: 100%;' : 'inset: 0; width: 100vw; height: 100vh; z-index: 85;')}
@@ -98,9 +100,11 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
           const el = containerRef?.current || document.getElementById('projects')
           if (el) {
             const rect = el.getBoundingClientRect()
-            const totalDist = el.offsetHeight - window.innerHeight
+            const vh = window.innerHeight
+            const hold = (INTRO_HOLD_VH / 100) * vh
+            const totalDist = el.offsetHeight - vh - hold
             if (totalDist > 0) {
-              const p = Math.max(0, Math.min(1, -rect.top / totalDist))
+              const p = Math.max(0, Math.min(1, (-rect.top - hold) / totalDist))
               targetScrollRef.current = p * EFFECTIVE_MAX_SCROLL
             }
           }

@@ -1,0 +1,53 @@
+/* Parallax layers for the hero.
+   JS sets three unitless variables on .hero:
+     --hx, --hy : pointer position, -0.5 … 0.5
+     --hs       : scroll progress, 0 (hero in view) … 1 (hero scrolled past)
+
+   These rules use the standalone `translate`, `scale` and `rotate`
+   properties, which stack on top of any existing `transform` you already
+   have on these classes (centering, entrance animations), so nothing
+   there needs to change. If you already have rules using --hs, --hx or
+   --hy on these classes, replace them with the ones below. */
+
+.hero {
+  --hx: 0;
+  --hy: 0;
+  --hs: 0;
+}
+
+/* Back layer: the glow lags behind the page and grows a little. */
+.hero-glow {
+  translate:
+    calc(var(--hx) * 40px)
+    calc(var(--hy) * 28px + var(--hs) * 16vh);
+  scale: calc(1 + var(--hs) * 0.35);
+  opacity: calc(0.4 - var(--hs) * 0.25);
+  will-change: translate, scale;
+}
+
+/* Middle layer: the name sinks slowly and fades, so it feels far away. */
+.hero-name {
+  translate:
+    calc(var(--hx) * 28px)
+    calc(var(--hy) * 16px + var(--hs) * 12vh);
+  scale: calc(1 + var(--hs) * 0.1);
+  opacity: calc(1 - var(--hs) * 0.7);
+  will-change: translate, scale, opacity;
+}
+
+/* Front layer: the portrait moves straight up, faster than the page.
+   No sideways drift, tilt or zoom, and it ignores the pointer. */
+.hero-avatar-front {
+  translate: 0 calc(var(--hs) * -18vh);
+  filter: brightness(calc(1 - var(--hs) * 0.35));
+  will-change: translate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow,
+  .hero-name,
+  .hero-avatar-front {
+    translate: none;
+    will-change: auto;
+  }
+}

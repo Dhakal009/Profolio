@@ -1,4 +1,7 @@
 import { useEffect, useRef } from 'react';
+import './hero-parallax.css';
+
+const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
 
 // Split a word into masked characters for the staggered rise-in
 function SplitWord({ text, offset = 0 }) {
@@ -17,38 +20,93 @@ function Hero() {
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return undefined;
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) return undefined;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
 
+    const finePointer = window.matchMedia?.('(pointer: fine)').matches;
+
+    // target = where the value should be, cur = eased value actually shown
+    const target = { mx: 0, my: 0, sp: 0 };
+    const cur = { mx: 0, my: 0, sp: 0 };
+    const EPS = 0.0004;
+
+    let height = el.offsetHeight || window.innerHeight;
     let raf = 0;
-    const target = { mx: 0, my: 0 };
-    const current = { mx: 0, my: 0, sp: -1 };
+
+    // Scroll progress of the hero: 0 = fully in view, 1 = scrolled past.
+    const readScroll = () => {
+      target.sp = clamp(-el.getBoundingClientRect().top / height, 0, 1);
+    };
+
+    const write = () => {
+      el.style.setProperty('--hx', cur.mx.toFixed(4));
+      el.style.setProperty('--hy', cur.my.toFixed(4));
+      el.style.setProperty('--hs', cur.sp.toFixed(4));
+    };
+
+    // Runs only while something is still easing, then stops by itself.
+    const frame = () => {
+      cur.mx += (target.mx - cur.mx) * 0.06;
+      cur.my += (target.my - cur.my) * 0.06;
+      cur.sp += (target.sp - cur.sp) * 0.12;
+
+      const settled =
+        Math.abs(target.mx - cur.mx) < EPS &&
+        Math.abs(target.my - cur.my) < EPS &&
+        Math.abs(target.sp - cur.sp) < EPS;
+
+      if (settled) {
+        cur.mx = target.mx;
+        cur.my = target.my;
+        cur.sp = target.sp;
+        write();
+        raf = 0;
+        return;
+      }
+      write();
+      raf = requestAnimationFrame(frame);
+    };
+
+    const wake = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+
+    const onScroll = () => {
+      readScroll();
+      wake();
+    };
 
     const onPointer = (e) => {
       target.mx = e.clientX / window.innerWidth - 0.5;
       target.my = e.clientY / window.innerHeight - 0.5;
+      wake();
     };
 
-    const tick = () => {
-      current.mx += (target.mx - current.mx) * 0.06;
-      current.my += (target.my - current.my) * 0.06;
-      const h = el.offsetHeight || window.innerHeight;
-      const sp = Math.min(1, Math.max(0, window.scrollY / h));
-
-      el.style.setProperty('--hx', current.mx.toFixed(4));
-      el.style.setProperty('--hy', current.my.toFixed(4));
-      if (Math.abs(sp - current.sp) > 0.0005) {
-        el.style.setProperty('--hs', sp.toFixed(4));
-        current.sp = sp;
-      }
-      raf = requestAnimationFrame(tick);
+    const onLeave = () => {
+      target.mx = 0;
+      target.my = 0;
+      wake();
     };
 
-    window.addEventListener('pointermove', onPointer, { passive: true });
-    raf = requestAnimationFrame(tick);
+    const ro = new ResizeObserver(() => {
+      height = el.offsetHeight || window.innerHeight;
+      onScroll();
+    });
+    ro.observe(el);
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    if (finePointer) {
+      window.addEventListener('pointermove', onPointer, { passive: true });
+      document.documentElement.addEventListener('pointerleave', onLeave);
+    }
+
+    onScroll();
+
     return () => {
       cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('pointermove', onPointer);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
     };
   }, []);
 
@@ -80,7 +138,6 @@ function Hero() {
           {/* Fade into the next section - black fade */}
           <div className="hero-fade !from-[#070708] !to-transparent" aria-hidden="true" />
         </div>
-
       </div>
     </div>
   );

@@ -99,12 +99,12 @@ const IntroTitle = styled.h1.attrs((props) => ({
     letterSpacing: `${props.$letterSpacing}em`
   }
 }))`
-  font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+  font-size: clamp(2.75rem, 13vw, 13rem);
   font-weight: 900;
   line-height: 1.05;
   margin: 0;
   color: ${(props) => (props.$isDark ? '#ffffff' : '#09090b')};
-  max-width: 950px;
+  max-width: 1600px;
   transform-origin: center center;
   will-change: transform, opacity;
   user-select: none;
@@ -741,9 +741,7 @@ export default function Overlay({
               $textOpacity={textOpacity}
               $letterSpacing={letterSpacing}
             >
-              <span className="opening-word">SCROLL</span>{' '}
-              <span className="opening-word">TO</span>{' '}
-              <span className="opening-word">VIEW</span>{' '}
+              <span className="opening-word">EXPLORE</span>{''}<br/>
               <span className="opening-word">PROJECTS</span>
             </IntroTitle>
           </IntroWrapper>
@@ -880,14 +878,6 @@ export default function Overlay({
         document.body
       )}
 
-      {scrollDistance >= effectiveMaxScroll - 1 && !selected && (
-        <EndTunnelNotice $isDark={isDark}>
-          <span>End of Projects · Scroll down for Skills</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </EndTunnelNotice>
-      )}
     </>
   )
 }

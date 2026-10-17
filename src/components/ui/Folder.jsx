@@ -32,6 +32,8 @@ const DROP_TURN = [-6, 4, -3, 7, -5, 3];
 const BOOK_ANGLES = { open: -180, receive: -24, peek: -13, rest: 0 };
 const FLAP_ANGLES = { open: -64, receive: -30, peek: -15, rest: 0 };
 const LAYERS = { out: 50, drag: 80, focus: 90 };
+const OPEN_FIT = 2;
+const OPEN_SHIFT = 0.6;
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
@@ -813,18 +815,19 @@ const placeFlap = (rank, count, phase, layout, g, pointer) => {
   const rest = FLAP_REST[rank] ?? FLAP_REST[FLAP_REST.length - 1];
   const floor = g.tabH + g.h - 5 * g.scale - g.docH / 2;
   const mid = (count - 1) / 2;
-  if (phase === 'open') {
+    if (phase === 'open') {
     const lift = g.tabH - g.h * 0.02;
+    const shift = g.w * OPEN_SHIFT; // moves the whole spread to the left
     if (layout === 'stack') {
       const strip = Math.min(30 * g.scale, (g.h * 0.62) / Math.max(1, count - 1));
-      const fit = 1.45; // BIG on open
-      return { x: g.w / 2, y: g.tabH + g.h * 0.1 - rank * strip - (g.docH * (1.04 - fit)) / 2, z: -rank * 18 * g.scale, r: 0, ry: 0, s: fit };
+      const fit = OPEN_FIT;
+      return { x: g.w / 2 - shift, y: g.tabH + g.h * 0.1 - rank * strip - (g.docH * (1.04 - fit)) / 2, z: -rank * 18 * g.scale, r: 0, ry: 0, s: fit };
     }
     const gap = 14 * g.scale;
-    const fit = 1.55; // BIG on open
+    const fit = OPEN_FIT;
     const step = g.docW * fit + gap;
     const tidy = layout === 'row';
-    return { x: g.w / 2 + (rank - mid) * step, y: lift + (tidy ? -20 * g.scale : SPREAD_DROP[rank] * g.h * 0.7), z: 0, r: tidy ? 0 : SPREAD_TURN[rank] * 0.55, ry: 0, s: fit };
+    return { x: g.w / 2 + (rank - mid) * step - shift, y: lift + (tidy ? -20 * g.scale : SPREAD_DROP[rank] * g.h * 0.7), z: 0, r: tidy ? 0 : SPREAD_TURN[rank] * 0.55, ry: 0, s: fit };
   }
   const part = phase === 'receive' ? 1.7 : phase === 'peek' ? 1.3 : 1;
   const x = g.w / 2 + rest.x * g.w * part;

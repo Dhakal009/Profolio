@@ -223,12 +223,6 @@ export default function Skills({ showHeading = true }) {
 
   return (
     <Section aria-labelledby={showHeading ? "skills-heading" : undefined}>
-      {showHeading && (
-        <Head>
-          <h2 id="skills-heading">Skills</h2>
-          <p>Select a card to flip it and see how comfortable I am with each tool.</p>
-        </Head>
-      )}
 
       <Grid>
         {GROUPS.map((g, i) => (
