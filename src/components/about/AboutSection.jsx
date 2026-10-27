@@ -1,279 +1,291 @@
-"use client";
-
 import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import Lenis from "lenis";
+
+// Smooth scroll is owned by LenisProvider in the layout, which also keeps
+// ScrollTrigger in sync. This section must NOT create its own Lenis.
+// Font: import '@fontsource/inter/800.css' and '900.css' once (done in the layout).
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* -------------------------------------------------------------------------- */
-/*  Content                                                                   */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ Content ---------------------------------- */
 
 const TEXT =
-  "Based in Kathmandu Nepal, studying computer science, focused on full-stack development.";
+  "Rooted in Kathmandu, Trained in computer science, Driven to build for the web.";
 
-// Giant outlined word in the background. Keep it short and tied to the copy.
-const BACKDROP_WORD = "Who I Am";
+const LINES = [
+  "Rooted in Kathmandu,",
+  "Trained in computer",
+  "science, Driven to",
+  "build for the web.",
+];
 
-// Split after each comma so every phrase gets its own scrolling row.
-const LINES = TEXT.split(/(?<=,)\s+/);
+const FONT = "var(--font-heading, 'Inter Tight'), 'Inter', system-ui, sans-serif";
 
-/* -------------------------------------------------------------------------- */
-/*  Config (timeline units are relative; scroll length is derived from them)  */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------ Config ----------------------------------- */
 
 const CONFIG = {
-  // Timeline
-  hold: 0.06, // pause before/after each row travels
-  travelBase: 0.5, // minimum travel time per row
-  travelPerWord: 0.03, // extra travel time per word
-  transition: 0.55, // time to swap one row for the next
-  endHold: 0.35, // pause after the last row
+  scrollLength: 2.2, // section height in viewports
+  mobileScrollLength: 1.25,
+  scrub: 0.8, // higher = smoother, softer follow
+  ghost: 0.14, // opacity of rows that haven't been revealed yet
+  enterStart: "top 85%", // intro plays when the section reaches this point
+  revealStart: 0.04, // scroll reveal of rows 2+ (0–1 of the scroll)
+  revealEnd: 0.85, // all rows fully lit here; the rest is a resting hold
+  rowOverlap: 0.35, // 0 = rows wait for each other, 0.5 = heavy overlap
+  wordShare: 0.6, // share of a row's time that one word takes
+  fillWidth: 0.96,
+  lineBox: 1.0,
+  overlap: 0.08,
+};
 
-  // Scroll length: viewport heights of scrolling per timeline unit.
-  // Higher = more scrolling needed to finish the section.
-  scrollPerUnit: 0.6,
-  scrub: 0.6, // smoothing between scroll position and animation
+const LINE_SCALE = [1, 0.82, 0.76, 0.84];
 
-  // Row layout
-  rowStep: 0.55, // vertical spacing multiplier between stacked rows
-  rowShift: 1.25, // how far (in em) a row drifts while fading
-  maxBlur: 6, // px of blur while a row fades in/out
+/* ------------------------- Inline styles --------------------------------- */
+/* Inline on purpose: can't be purged by Tailwind in production builds.      */
 
-  // Parallax (percent / px travelled over the whole section)
-  parallax: {
-    backWordStart: 0.08, // giant word starts this fraction of its width to the right
-    backWordEndPad: 0.05, // gap (fraction of viewport width) left after its last letter
-    midGlowY: -18, // % of stage height
-    frontGlowY: -42, // % of stage height (faster = feels closer)
-    gridY: -8, // % of stage height
+const fill = { position: "absolute", inset: 0, pointerEvents: "none" };
+
+const S = {
+  stage: {
+    position: "sticky",
+    top: 0,
+    width: "100%",
+    height: "100vh",
+    minHeight: "100dvh",
+    overflow: "hidden",
+    background: "var(--bg)",
+    color: "var(--foam)",
   },
-
-  // Smooth scroll
-  lenis: {
-    duration: 1,
-    easing: (t) => 1 - Math.pow(1 - t, 4),
-    smoothWheel: true,
-    touchMultiplier: 1.5,
-    syncTouch: true,
-    gestureOrientation: "vertical",
+  photoWrap: {
+    ...fill,
+    overflow: "hidden",
+    clipPath: "inset(100% 0% 0% 0%)",
+    willChange: "clip-path",
+  },
+  photo: {
+    ...fill,
+    background:
+      "radial-gradient(circle at 72% 28%, var(--foam) 0 1px, transparent 2px), radial-gradient(circle at 72% 28%, transparent 0 11rem, var(--line-strong) 11.05rem 11.1rem, transparent 11.15rem 18rem, var(--line) 18.05rem 18.1rem, transparent 18.15rem), linear-gradient(135deg, transparent 0 49.8%, var(--line) 50%, transparent 50.2%), linear-gradient(45deg, transparent 0 49.8%, var(--line) 50%, transparent 50.2%), var(--bg)",
+    backgroundSize: "auto, auto, 100% 100%, 100% 100%, auto",
+    opacity: 0.9,
+    willChange: "transform",
+  },
+  shade: {
+    ...fill,
+    background:
+      "var(--media-shade)",
+  },
+  vignette: {
+    ...fill,
+    background:
+      "var(--media-vignette)",
+  },
+  content: {
+    position: "relative",
+    zIndex: 10,
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    boxSizing: "border-box",
+    padding: "calc(var(--header-h) + 1rem) clamp(1rem, 3vw, 2.5rem) calc(var(--dock-h) + 3.5rem)",
+    fontFamily: FONT,
+  },
+  h2: {
+    margin: 0,
+    width: "100%",
+    height: "auto",
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    fontWeight: 800,
+    letterSpacing: "-0.055em",
+    WebkitFontSmoothing: "antialiased",
+    userSelect: "none",
+  },
+  line: {
+    display: "block",
+    flexShrink: 0,
+    overflow: "hidden", // masks words as they rise
+    lineHeight: 0.86,
+    padding: "0.08em 0 0.18em",
+    whiteSpace: "nowrap",
+    fontSize: "10vw", // replaced by the fit function once mounted
+  },
+  fit: {
+    display: "inline-block",
+  },
+  word: {
+    display: "inline-block",
+    willChange: "transform, opacity",
   },
 };
 
-const wordCount = (line) => line.split(" ").length;
-
-/* -------------------------------------------------------------------------- */
-/*  Component                                                                 */
-/* -------------------------------------------------------------------------- */
+/* ----------------------------- Component --------------------------------- */
 
 export default function AboutSection() {
   const trackRef = useRef(null);
+  const photoWrapRef = useRef(null);
+  const photoRef = useRef(null);
+  const h2Ref = useRef(null);
   const stageRef = useRef(null);
-  const textRef = useRef(null);
-  const backWordRef = useRef(null);
-  const midGlowRef = useRef(null);
-  const frontGlowRef = useRef(null);
-  const gridRef = useRef(null);
+  const contentRef = useRef(null);
 
   useGSAP(
     () => {
-      const rows = gsap.utils.toArray(".row");
-      const rowWords = rows.map((row) => gsap.utils.toArray(".word", row));
       const track = trackRef.current;
-      const stage = stageRef.current;
+      const h2 = h2Ref.current;
+      const lines = Array.from(track.querySelectorAll(".line"));
+      const lineWords = lines.map((l) => Array.from(l.querySelectorAll(".word")));
+      const allWords = lineWords.flat();
       const mm = gsap.matchMedia();
 
+      /* ===== Fit every row to the full width ============================= */
+      const fit = () => {
+        const isMobile = window.innerWidth <= 640;
+        const availW = h2.clientWidth * (isMobile ? 0.92 : CONFIG.fillWidth);
+        const availH = h2.clientHeight;
+        h2.style.justifyContent = isMobile ? "flex-start" : "space-between";
+        h2.style.gap = isMobile ? "clamp(0.65rem, 2.8vw, 1rem)" : "";
+        h2.style.flex = isMobile ? "none" : "1";
+        if (contentRef.current) {
+          contentRef.current.style.height = isMobile ? "auto" : "100%";
+          contentRef.current.style.paddingBottom = isMobile
+            ? "1.25rem"
+            : "calc(var(--dock-h) + 3.5rem)";
+        }
+        if (stageRef.current) {
+          stageRef.current.style.height = isMobile ? "auto" : "100vh";
+          stageRef.current.style.minHeight = isMobile ? "0" : "100dvh";
+        }
+
+        const sizes = lines.map((line, i) => {
+          line.style.fontSize = "100px";
+          const w = line.firstElementChild.offsetWidth;
+          const scale = isMobile
+            ? [0.98, 0.74, 0.68, 0.76][i] || 0.72
+            : LINE_SCALE[i] || 1;
+          return ((100 * availW) / w) * scale;
+        });
+
+        const totalH = sizes.reduce(
+          (sum, s, i) => sum + s * (CONFIG.lineBox - (i > 0 ? CONFIG.overlap : 0)),
+          0
+        );
+        const k = totalH > availH ? availH / totalH : 1;
+
+        lines.forEach((line, i) => {
+          line.style.fontSize = `${sizes[i] * k}px`;
+        });
+      };
+
+      fit();
+      const onResize = () => {
+        fit();
+        ScrollTrigger.refresh();
+      };
+      window.addEventListener("resize", onResize);
+
+      /* ===== Reduced motion: everything visible, no animation ============ */
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(allWords, { opacity: 1 });
+        gsap.set(photoWrapRef.current, { clipPath: "inset(0% 0% 0% 0%)" });
+      });
+
+      /* ===== Full motion ================================================= */
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        /* ----- Smooth scroll ---------------------------------------------- */
-        const lenis = new Lenis(CONFIG.lenis);
-        lenis.on("scroll", ScrollTrigger.update);
-        const tick = (time) => lenis.raf(time * 1000);
-        gsap.ticker.add(tick);
-        gsap.ticker.lagSmoothing(0);
+        const isMobile = window.innerWidth <= 640;
+        track.style.height = `${(isMobile ? CONFIG.mobileScrollLength : CONFIG.scrollLength) * 100}vh`;
 
-        /* ----- Timeline plan: when each row travels / leaves -------------- */
-        const plan = [];
-        let cursor = 0;
-        rows.forEach((_, i) => {
-          const travel = CONFIG.travelBase + wordCount(LINES[i]) * CONFIG.travelPerWord;
-          const travelAt = cursor + CONFIG.hold;
-          const endAt = travelAt + travel + CONFIG.hold;
-          plan.push({ travelAt, travel, endAt });
-          cursor = i < rows.length - 1 ? endAt + CONFIG.transition : endAt;
-        });
-        const total = cursor + CONFIG.endHold;
-
-        /* ----- Measurements (re-run on every ScrollTrigger refresh) ------- */
-        let dist = rows.map(() => 0); // how far each row must slide
-        let wordX = rowWords.map((ws) => ws.map(() => 0)); // word centres in row
-
-        const fontPx = (row) => parseFloat(getComputedStyle(row).fontSize);
-        const shift = (row) => fontPx(row) * CONFIG.rowShift;
-        const restY = (i) => (i - (rows.length - 1) / 2) * fontPx(rows[i]) * CONFIG.rowStep;
-
-        const measure = () => {
-          dist = rows.map((r) => Math.max(0, r.offsetWidth - stage.clientWidth));
-          wordX = rowWords.map((ws, i) => {
-            const rowLeft = rows[i].getBoundingClientRect().left;
-            return ws.map((w) => {
-              const r = w.getBoundingClientRect();
-              return r.left - rowLeft + r.width / 2;
-            });
-          });
-          track.style.height = `${stage.offsetHeight * (1 + total * CONFIG.scrollPerUnit)}px`;
-        };
-        measure();
-
-        /* ----- Word focus: the word under the "reading point" is brightest -- */
-        const updateFocus = () => {
-          const vw = stage.clientWidth;
-          const falloff = vw * 0.26;
-
-          rows.forEach((row, i) => {
-            if (row.style.opacity === "0") return; // hidden row, skip work
-
-            const x = gsap.getProperty(row, "x");
-            const progress = dist[i] > 0 ? gsap.utils.clamp(0, 1, -x / dist[i]) : 0;
-            const point = vw * (0.22 + 0.62 * progress);
-
-            rowWords[i].forEach((word, j) => {
-              const d = Math.min(1, Math.abs((x + wordX[i][j] - point) / falloff));
-              const smooth = d * d * (3 - 2 * d); // smoothstep
-              word.style.opacity = (0.35 + (1 - smooth * 0.65) * 0.65).toFixed(3);
-            });
-          });
-        };
-
-        ScrollTrigger.addEventListener("refreshInit", measure);
-        ScrollTrigger.addEventListener("refresh", updateFocus);
-
-        /* ----- Intro reveal (plays once) ---------------------------------- */
-        gsap.from(textRef.current, {
-          opacity: 0,
-          y: 24,
-          duration: 0.8,
-          ease: "power3.out",
-          scrollTrigger: { trigger: textRef.current, start: "top 85%", once: true },
+        /* --- A. Intro: plays by time as the section enters the screen --- */
+        const intro = gsap.timeline({
+          scrollTrigger: { trigger: track, start: CONFIG.enterStart, once: true },
         });
 
-        /* ----- Master timeline, scrubbed by scroll ------------------------ */
+        // photo wipes up from the bottom
+        intro.to(
+          photoWrapRef.current,
+          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.2, ease: "expo.inOut" },
+          0
+        );
+
+        /* --- B. Scroll: remaining rows light up, photo zooms out -------- */
         const tl = gsap.timeline({
-          onUpdate: updateFocus,
-          defaults: { force3D: true, overwrite: "auto" },
+          defaults: { ease: "none" },
           scrollTrigger: {
             trigger: track,
             start: "top top",
             end: "bottom bottom",
             scrub: CONFIG.scrub,
-            fastScrollEnd: true,
             invalidateOnRefresh: true,
           },
         });
 
-        // Text rows
-        tl.set(rows[0], { y: () => restY(0) }, 0);
-
-        rows.forEach((row, i) => {
-          const { travelAt, travel, endAt } = plan[i];
-
-          tl.fromTo(
-            row,
-            { x: 0 },
-            { x: () => -dist[i], ease: "power3.inOut", duration: travel, immediateRender: false },
-            travelAt
-          );
-
-          if (i === rows.length - 1) return;
-          const next = rows[i + 1];
-
-          // current row drifts away
-          tl.fromTo(
-            row,
-            { y: () => restY(i), opacity: 1, filter: "blur(0px)" },
-            {
-              y: () => restY(i) + shift(row),
-              opacity: 0,
-              filter: `blur(${CONFIG.maxBlur}px)`,
-              ease: "power3.inOut",
-              duration: CONFIG.transition,
-              immediateRender: false,
-            },
-            endAt
-          );
-
-          // next row drifts in
-          tl.fromTo(
-            next,
-            { y: () => restY(i + 1) - shift(next), opacity: 0, filter: `blur(${CONFIG.maxBlur}px)` },
-            {
-              y: () => restY(i + 1),
-              opacity: 1,
-              filter: "blur(0px)",
-              ease: "power3.inOut",
-              duration: CONFIG.transition,
-              immediateRender: true,
-            },
-            endAt + CONFIG.transition * 0.1
-          );
-        });
-
-        // Parallax layers: each moves a different distance across the same
-        // scroll range, so they read as different depths.
-        const p = CONFIG.parallax;
-        const span = { ease: "none", duration: total };
-
-        // "Who I Am" travels exactly far enough to reveal its whole width,
-        // and finishes together with the last text row (before the end hold),
-        // so every letter has been on screen by the time the text is done.
-        const backWord = backWordRef.current;
         tl.fromTo(
-          backWord,
-          { x: () => backWord.offsetWidth * p.backWordStart },
+          photoRef.current,
+          { scale: 1.25 },
+          { scale: 1, duration: 0.95, ease: "power2.out" },
+          0
+        );
+
+        // Keep the opening line hidden until the section itself begins scrolling.
+        tl.fromTo(
+          lineWords[0],
+          { yPercent: 115, opacity: 0 },
           {
-            x: () =>
-              Math.min(
-                0,
-                -(backWord.offsetWidth - stage.clientWidth + stage.clientWidth * p.backWordEndPad)
-              ),
-            ease: "none",
-            duration: total - CONFIG.endHold,
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.2,
+            stagger: 0.09,
+            ease: "power3.out",
+            force3D: true,
           },
           0
         );
 
-        tl.fromTo(gridRef.current, { yPercent: 0 }, { yPercent: p.gridY, ...span }, 0);
-        tl.fromTo(midGlowRef.current, { yPercent: 20 }, { yPercent: p.midGlowY, ...span }, 0);
-        tl.fromTo(frontGlowRef.current, { yPercent: 60 }, { yPercent: p.frontGlowY, ...span }, 0);
+        // rows 2+ share the scroll equally and overlap a little
+        const rest = lineWords.slice(1);
+        const span = CONFIG.revealEnd - CONFIG.revealStart;
+        const rowSpan = span / (1 + (rest.length - 1) * (1 - CONFIG.rowOverlap));
+        const rowStep = rowSpan * (1 - CONFIG.rowOverlap);
 
-        updateFocus();
+        rest.forEach((words, r) => {
+          const wordDur = rowSpan * CONFIG.wordShare;
+          const stagger = words.length > 1 ? (rowSpan - wordDur) / (words.length - 1) : 0;
 
-        /* ----- Cleanup ---------------------------------------------------- */
-        return () => {
-          ScrollTrigger.removeEventListener("refreshInit", measure);
-          ScrollTrigger.removeEventListener("refresh", updateFocus);
-          gsap.ticker.remove(tick);
-          lenis.destroy();
-
-          rowWords.flat().forEach((w) => (w.style.opacity = ""));
-          gsap.set(
-            [
-              ...rows,
-              backWordRef.current,
-              gridRef.current,
-              midGlowRef.current,
-              frontGlowRef.current,
-            ],
-            { clearProps: "all" }
+          tl.fromTo(
+            words,
+            { opacity: CONFIG.ghost, yPercent: 30 },
+            {
+              opacity: 1,
+              yPercent: 0,
+              ease: "power3.out",
+              duration: wordDur,
+              stagger,
+              force3D: true,
+            },
+            CONFIG.revealStart + r * rowStep
           );
+        });
+
+        /* Resting hold at the end */
+        tl.set({}, {}, 1);
+
+        return () => {
           track.style.height = "";
         };
       });
 
-      // Re-measure once fonts and assets are ready.
-      const refresh = () => requestAnimationFrame(() => ScrollTrigger.refresh());
+      /* Re-fit and re-measure once fonts / assets are ready */
+      const refresh = () =>
+        requestAnimationFrame(() => {
+          fit();
+          ScrollTrigger.refresh();
+        });
       document.fonts?.ready.then(refresh);
 
       if (document.readyState === "complete") {
@@ -282,96 +294,63 @@ export default function AboutSection() {
         window.addEventListener("load", refresh, { once: true });
       }
 
-      return () => window.removeEventListener("load", refresh);
+      return () => {
+        window.removeEventListener("load", refresh);
+        window.removeEventListener("resize", onResize);
+      };
     },
     { scope: trackRef }
   );
 
   return (
-    <section ref={trackRef} aria-label="About" className="relative w-full">
-      <div
-        ref={stageRef}
-        className="sticky top-0 flex h-screen min-h-[100dvh] w-full items-center overflow-hidden bg-[#050507] text-white"
-      >
-        {/* ---- Parallax background layers (back to front) ---- */}
+    <section id="about" ref={trackRef} aria-label="About" className="relative w-full">
+      <div ref={stageRef} style={S.stage}>
+        {/* Abstract background, revealed by the wipe */}
+        <div ref={photoWrapRef} aria-hidden="true" style={S.photoWrap}>
+          <div ref={photoRef} style={S.photo} />
+          <div style={S.shade} />
+          <div style={S.vignette} />
+        </div>
 
-        {/* Faint grid, slowest */}
-        <div
-          ref={gridRef}
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -top-[10%] h-[120%] opacity-[0.07] will-change-transform"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
-            backgroundSize: "72px 72px",
-            WebkitMaskImage: "radial-gradient(ellipse at center, #000 20%, transparent 70%)",
-            maskImage: "radial-gradient(ellipse at center, #000 20%, transparent 70%)",
-          }}
-        />
-
-        {/* Giant outlined word, drifts sideways */}
-        <span
-          ref={backWordRef}
-          aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-[42vw] font-black leading-none tracking-[-0.06em] will-change-transform"
-          style={{
-            fontFamily: "'Inter', system-ui, sans-serif",
-            color: "transparent",
-            WebkitTextStroke: "1px rgba(255,255,255,0.09)",
-          }}
-        >
-          {BACKDROP_WORD}
-        </span>
-
-        {/* Soft light, medium speed */}
-        <div
-          ref={midGlowRef}
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-[10%] top-[30%] h-[60vmin] w-[60vmin] rounded-full opacity-40 blur-3xl will-change-transform"
-          style={{ background: "radial-gradient(circle, #3b4cff 0%, transparent 65%)" }}
-        />
-
-        {/* Soft light, fastest (feels closest) */}
-        <div
-          ref={frontGlowRef}
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-[8%] top-[40%] h-[45vmin] w-[45vmin] rounded-full opacity-30 blur-3xl will-change-transform"
-          style={{ background: "radial-gradient(circle, #ff4d6d 0%, transparent 65%)" }}
-        />
-
-        {/* ---- Foreground text ---- */}
-        <div
-          ref={textRef}
-          className="relative z-10 flex h-full w-full items-center"
-          style={{
-            WebkitMaskImage: "linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%)",
-            maskImage: "linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%)",
-          }}
-        >
-          <h2
-            aria-label={TEXT}
-            className="grid w-full select-none text-[12vw] font-extrabold leading-[1.05] tracking-[-0.07em] antialiased md:text-[10vw]"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-          >
-            {LINES.map((line, r) => (
-              <span
-                key={r}
-                aria-hidden="true"
-                className="row col-start-1 row-start-1 block w-max self-center whitespace-nowrap px-[9vw] will-change-transform"
-              >
-                {line.split(" ").map((word, i) => (
-                  <span key={i} className="word mr-[0.22em] inline-block will-change-[opacity]">
-                    {word}
+        {/* Foreground text */}
+        <div ref={contentRef} style={S.content}>
+          <h2 ref={h2Ref} aria-label={TEXT} style={S.h2}>
+            {LINES.map((line, r) => {
+              const words = line.split(" ");
+              return (
+                <span
+                  key={r}
+                  aria-hidden="true"
+                  className="line"
+                  style={{
+                    ...S.line,
+                    fontWeight: r === 0 ? 900 : 800,
+                    letterSpacing: r === 0 ? "-0.07em" : "-0.045em",
+                    marginTop: r > 0 ? `-${CONFIG.overlap}em` : 0,
+                  }}
+                >
+                  <span style={S.fit}>
+                    {words.map((word, i) => (
+                      <span
+                        key={i}
+                        className="word"
+                        style={{
+                          ...S.word,
+                          // row 1 is revealed by the intro, the rest start as faint ghost text
+                          opacity: r === 0 ? 0 : CONFIG.ghost,
+                          marginRight: i < words.length - 1 ? "0.18em" : 0,
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ))}
                   </span>
-                ))}
-              </span>
-            ))}
+                </span>
+              );
+            })}
           </h2>
         </div>
       </div>
-
-      {/* Prefer next/font in your layout; this is a fallback. */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@800;900&display=swap');`}</style>
     </section>
   );
 }

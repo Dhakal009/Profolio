@@ -4,7 +4,6 @@ import {
   useMotionValue,
   useReducedMotion,
   useScroll,
-  useSpring,
   useTransform,
 } from "framer-motion";
 
@@ -62,8 +61,8 @@ export default function ParallaxSection({
   title,
   children,
   background = null,
-  offset = 80,
-  bgSpeed = 0.6,
+  offset = 42,
+  bgSpeed = 0.25,
   fade = true,
   className = "",
 }) {
@@ -75,14 +74,9 @@ export default function ParallaxSection({
     offset: ["start end", "end start"], // section entering → leaving
   });
 
-  // One spring for everything: all layers share the same smoothing, so they
-  // stay in sync instead of each lagging differently.
-  const progress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 30,
-    mass: 0.4,
-    restDelta: 0.0005,
-  });
+  // Use the shared scroll progress directly. A second spring here makes
+  // section motion trail behind Lenis and produces a visibly laggy handoff.
+  const progress = scrollYProgress;
 
   // Content: travels up through the section.
   const y = useTransform(progress, [0, 1], [offset, -offset]);

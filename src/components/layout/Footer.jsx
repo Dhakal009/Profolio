@@ -1,11 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLenis } from '../../contexts/LenisContext';
+import { getScrollTarget } from '../../utils/scrollTarget';
 
 const SITEMAP = [
   { label: 'Home', to: '/', targetId: 'hero' },
   { label: 'Works', to: '/#projects', targetId: 'projects' },
   { label: 'About', to: '/#about', targetId: 'about' },
-  { label: 'Terminal', to: '/#about', targetId: 'about' },
 ];
 
 const SOCIALS = [
@@ -29,7 +29,8 @@ function Footer() {
     if (location.pathname === '/' && item.targetId) {
       const el = document.getElementById(item.targetId);
       if (el) {
-        if (lenis) lenis.scrollTo(el, { offset: -40, duration: 1.2 });
+        const destination = getScrollTarget(el);
+        if (lenis) lenis.scrollTo(destination, { offset: -40, duration: 0.9, force: true });
         else el.scrollIntoView({ behavior: 'smooth' });
         return;
       }

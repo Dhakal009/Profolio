@@ -5,6 +5,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ui/ThemeToggle';
 import SearchModal from '../search/SearchModal';
 import { DockMenu, THEMES } from '../ui/Dock';
+import { getScrollTarget } from '../../utils/scrollTarget';
+import { PROJECTS } from '../../data/projects';
 
 const navItems = [
   { id: 'about', label: 'About' },
@@ -27,6 +29,7 @@ const sections = [
 
 const routeTitles = {
   '/projects': 'Projects',
+  '/projects/tunnel': '3D Project Tunnel',
   '/resume': 'Resume',
   '/demo/ems': 'EMS · Live Demo',
   '/demo/live-chat': 'Live Chat · Live Demo',
@@ -79,39 +82,39 @@ function Header() {
       setIsDockHidden(false);
     };
 
-    const hideDock = (delay = 60) => {
+    const hideDock = () => {
       setIsDockHidden(true);
 
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
-      scrollTimeoutRef.current = setTimeout(showDock, delay);
     };
 
     const onScroll = () => {
       setIsScrolled(window.scrollY > 12);
       // If Lenis is actively coasting after user stopped interacting, avoid postponing dock reveal
       if (lenis && lenis.isScrolling) {
-        if (Date.now() - lastUserScrollTimeRef.current > 60) {
+        if (Date.now() - lastUserScrollTimeRef.current > 40) {
           return;
         }
       }
-      hideDock(60);
+      hideDock();
+      scrollTimeoutRef.current = window.setTimeout(showDock, 0);
     };
 
     const onWheel = () => {
       lastUserScrollTimeRef.current = Date.now();
-      hideDock(60);
+      hideDock();
     };
 
     const onTouchMove = () => {
       lastUserScrollTimeRef.current = Date.now();
-      hideDock(60);
+      hideDock();
     };
 
     const onTouchEnd = () => {
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      scrollTimeoutRef.current = setTimeout(showDock, 30);
+      showDock();
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -123,14 +126,14 @@ function Header() {
     if (lenis) {
       const onLenisScroll = (e) => {
         const vel = Math.abs(e.velocity);
-        // Once user stops active input and deceleration slows, immediately reveal dock without lag
-        if (vel < 0.8 && Date.now() - lastUserScrollTimeRef.current > 50) {
+          // Lenis velocity is the reliable settled signal, including trackpads.
+          if (vel < 1.2) {
           showDock();
           if (scrollTimeoutRef.current) {
             clearTimeout(scrollTimeoutRef.current);
           }
-        } else if (vel >= 0.8) {
-          hideDock(60);
+          } else {
+            hideDock();
         }
       };
       lenis.on('scroll', onLenisScroll);
@@ -151,60 +154,43 @@ function Header() {
 
   // Track which section is in view on the home page
   useEffect(() => {
-    if (location.pathname !== '/') return;
+    if (location.pathname !== '/') {
+      setActiveId('hero');
+      return;
+    }
 
-    let observer = null;
-
-    const setupObserver = () => {
-      if (!('IntersectionObserver' in window)) return;
-      if (observer) observer.disconnect();
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              setActiveId(entry.target.id);
-            }
-          });
-        },
-        { rootMargin: '-30% 0px -40% 0px' }
-      );
-
-      sections.forEach(({ id }) => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el);
-      });
-    };
-
-    const onScrollUpdate = () => {
-      if (location.pathname !== '/') return;
+    // Use the viewport position as the source of truth. IntersectionObserver
+    // can report several stacked/sticky sections in the same batch, causing a
+    // later section (such as Contact) to win while the page is still at the top.
+    const updateActiveSection = () => {
       if (window.scrollY < 100) {
         setActiveId('hero');
         return;
       }
-      const scrollPos = window.scrollY + window.innerHeight * 0.35;
+
+      const focusY = window.innerHeight * 0.35;
       let matched = 'hero';
       for (const { id } of sections) {
         const el = document.getElementById(id);
-        if (el) {
-          const top = el.offsetTop;
-          if (scrollPos >= top) {
-            matched = id;
-          }
-        }
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= focusY && rect.bottom > focusY) matched = id;
       }
       setActiveId(matched);
     };
 
+    const onScrollUpdate = () => {
+      if (location.pathname !== '/') return;
+      updateActiveSection();
+    };
+
     if (location.state?.scrollTo) {
       setActiveId(location.state.scrollTo);
-    } else if (window.scrollY < 100) {
-      setActiveId('hero');
     }
 
-    setupObserver();
-    const t1 = setTimeout(setupObserver, 80);
-    const t2 = setTimeout(setupObserver, 300);
+    updateActiveSection();
+    const t1 = setTimeout(updateActiveSection, 80);
+    const t2 = setTimeout(updateActiveSection, 300);
 
     window.addEventListener('scroll', onScrollUpdate, { passive: true });
     let unbindLenis = null;
@@ -214,7 +200,6 @@ function Header() {
     }
 
     return () => {
-      if (observer) observer.disconnect();
       clearTimeout(t1);
       clearTimeout(t2);
       window.removeEventListener('scroll', onScrollUpdate);
@@ -226,7 +211,8 @@ function Header() {
     (id) => {
       const target = document.getElementById(id);
       if (!target) return;
-      if (lenis) lenis.scrollTo(target, { offset: -40, duration: 1.2 });
+      const destination = getScrollTarget(target);
+      if (lenis) lenis.scrollTo(destination, { offset: -40, duration: 0.9, force: true });
       else target.scrollIntoView({ behavior: 'smooth' });
     },
     [lenis]
@@ -260,7 +246,7 @@ function Header() {
         navigate('/');
         return;
       }
-      if (lenis) lenis.scrollTo(0, { duration: 1.2 });
+      if (lenis) lenis.scrollTo(0, { duration: 0.9, force: true });
       else window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     [lenis, location.pathname, navigate]
@@ -273,7 +259,11 @@ function Header() {
     (item.id === 'skills' && currentId === 'education');
 
   const sectionIdx = sections.findIndex((s) => s.id === activeId);
-  const title = isHome ? sections[Math.max(0, sectionIdx)]?.title || 'Home' : routeTitles[location.pathname] || 'Page';
+  const projectId = location.pathname.startsWith('/projects/') ? location.pathname.split('/')[2] : null;
+  const projectTitle = PROJECTS.find((project) => project.id === projectId)?.shortTitle;
+  const title = isHome
+    ? sections[Math.max(0, sectionIdx)]?.title || 'Home'
+    : projectTitle || routeTitles[location.pathname] || 'Page';
 
   // React Bits 3D dock magnification & hop physics
   const slotRefs = useRef([]);

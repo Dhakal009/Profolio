@@ -70,11 +70,10 @@ const CheckIcon = () => (
 const IntroScreen = styled.div.attrs((props) => ({
   style: {
     opacity: props.$bgOpacity,
-    backdropFilter: `blur(${props.$blur}px)`,
-    WebkitBackdropFilter: `blur(${props.$blur}px)`,
+    transform: `translate3d(0, ${props.$translateY}px, 0)`,
     background: props.$isDark
-      ? `rgba(8, 8, 10, ${0.92 * props.$bgOpacity})`
-      : `rgba(244, 244, 247, ${0.92 * props.$bgOpacity})`,
+      ? `rgba(0, 0, 0, ${0.94 * props.$bgOpacity})`
+      : `rgba(244, 244, 246, ${0.94 * props.$bgOpacity})`,
     pointerEvents: 'none'
   }
 }))`
@@ -87,24 +86,25 @@ const IntroScreen = styled.div.attrs((props) => ({
   padding: 2rem;
   z-index: 20;
   overflow: hidden;
-  perspective: 1200px;
-  will-change: opacity, backdrop-filter;
-  transition: opacity 0.12s ease-out;
+  will-change: opacity, transform;
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
 `
 
 const IntroTitle = styled.h1.attrs((props) => ({
   style: {
-    transform: `translate3d(0, 0, ${props.$translateZ}px) scale(${props.$scale})`,
+    transform: `translate3d(0, 0, 0) scale(${props.$scale})`,
     opacity: props.$textOpacity,
     letterSpacing: `${props.$letterSpacing}em`
   }
 }))`
-  font-size: clamp(2.75rem, 13vw, 13rem);
-  font-weight: 900;
-  line-height: 1.05;
+  font-family: 'Inter Tight', Inter, system-ui, sans-serif;
+  font-size: clamp(3.5rem, 13vw, 11rem);
+  font-weight: 800;
+  line-height: 0.9;
   margin: 0;
   color: ${(props) => (props.$isDark ? '#ffffff' : '#09090b')};
-  max-width: 1600px;
+  letter-spacing: -0.07em;
+  max-width: 1200px;
   transform-origin: center center;
   will-change: transform, opacity;
   user-select: none;
@@ -118,7 +118,20 @@ const IntroWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1.4rem;
+  gap: 1.1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+
+  &::after {
+    content: '';
+    width: clamp(4rem, 12vw, 8rem);
+    height: 2px;
+    background: ${(p) => (p.$isDark ? '#38bdf8' : '#0284c7')};
+    transform-origin: left;
+    animation: introLine 0.8s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
   user-select: none;
 
   &.is-opening .opening-word {
@@ -135,6 +148,25 @@ const IntroWrapper = styled.div`
     0% { opacity: 0; transform: translateY(28px) scale(0.92); filter: blur(10px); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
   }
+
+  @keyframes introLine {
+    from { opacity: 0; transform: scaleX(0); }
+    to { opacity: 1; transform: scaleX(1); }
+  }
+
+  @media (max-width: 860px) {
+    height: auto;
+    max-height: calc(100dvh - 1rem);
+    overflow-y: auto;
+    padding: 1rem;
+  }
+`
+
+const IntroKicker = styled.span`
+  color: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.58)' : 'rgba(9,9,11,0.55)')};
+  font: 600 0.7rem/1 var(--font-mono, ui-monospace, monospace);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 `
 
 /* ------------------------------ Modal ------------------------------ */
@@ -158,7 +190,7 @@ const ModalBackdrop = styled.div`
 
 const Scene = styled.div`
   perspective: 1600px;
-  width: min(96vw, 1040px);
+  width: min(96vw, 1180px);
 `
 
 const Tilt = styled.div`
@@ -183,10 +215,13 @@ const Tilt = styled.div`
 
 const ModalCard = styled.div`
   position: relative;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 28px;
-  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  height: min(92dvh, 820px);
+  max-height: calc(100dvh - 2rem);
+  overflow: hidden;
+  border-radius: 24px;
+  padding: clamp(1rem, 2.2vw, 1.65rem);
   background: ${(p) =>
     p.$isDark
       ? 'linear-gradient(160deg, rgba(28, 29, 38, 0.97), rgba(14, 14, 19, 0.98))'
@@ -214,13 +249,13 @@ const TopBar = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.65rem;
 `
 
 const Badges = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
 `
 
@@ -272,11 +307,12 @@ const CloseButton = styled.button`
 `
 
 const Header = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.8rem;
+  flex: 0 0 auto;
 `
 
 const ProjectTitle = styled.h2`
-  font-size: clamp(1.9rem, 4.6vw, 3rem);
+  font-size: clamp(1.65rem, 3.4vw, 2.55rem);
   font-weight: 900;
   letter-spacing: -0.03em;
   line-height: 1.08;
@@ -284,7 +320,7 @@ const ProjectTitle = styled.h2`
 `
 
 const ProjectSubtitle = styled.p`
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
   margin: 0;
@@ -293,24 +329,37 @@ const ProjectSubtitle = styled.p`
 const Layout = styled.div`
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: clamp(1.25rem, 3vw, 2rem);
+  gap: clamp(1rem, 2vw, 1.5rem);
   align-items: start;
+  flex: 1;
+  height: auto;
+  min-height: 0;
 
   @media (max-width: 860px) {
     grid-template-columns: minmax(0, 1fr);
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding-right: 0.15rem;
   }
 `
 
 const Column = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.7rem;
   min-width: 0;
+  min-height: 0;
+
+  &:last-child {
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    scrollbar-width: thin;
+  }
 `
 
 /* ----- Screenshot viewer (browser frame with slight 3D lean) ----- */
 const BrowserFrame = styled.div`
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)')};
   background: ${(p) => (p.$isDark ? '#0d0e13' : '#fff')};
@@ -353,7 +402,7 @@ const BrowserBar = styled.div`
 const ShotImage = styled.img`
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 8.8;
   object-fit: cover;
   background: ${(p) => (p.$isDark ? '#12131a' : '#f1f1f5')};
   animation: shotIn 0.35s ease-out;
@@ -364,7 +413,7 @@ const ShotImage = styled.img`
 const Thumbs = styled.div`
   display: flex;
   gap: 0.6rem;
-  margin-top: 1rem;
+  margin-top: 0.45rem;
   overflow-x: auto;
   padding: 4px 2px 6px;
 `
@@ -389,7 +438,7 @@ const Thumb = styled.button`
 
 /* ------------------------ Info panels (right) ------------------------ */
 const Panel = styled.div`
-  padding: 1.1rem 1.2rem;
+  padding: 0.8rem 0.95rem;
   border-radius: 18px;
   background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)')};
   border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)')};
@@ -418,27 +467,27 @@ const Stats = styled.div`
 `
 
 const ProjectDescription = styled.p`
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.88rem;
+  line-height: 1.48;
   margin: 0;
   color: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.84)' : 'rgba(0,0,0,0.78)')};
 `
 
 const CredHint = styled.p`
-  margin: -0.3rem 0 0.8rem;
-  font-size: 0.82rem;
-  line-height: 1.5;
+  margin: -0.2rem 0 0.45rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
   color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')};
 `
 
 const CredBlock = styled.div`
-  & + & { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px dashed ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)')}; }
+  & + & { margin-top: 0.55rem; padding-top: 0.55rem; border-top: 1px dashed ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)')}; }
 `
 
 const CredRole = styled.div`
   font-size: 0.78rem;
   font-weight: 600;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.25rem;
   color: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
 `
 
@@ -510,8 +559,9 @@ const ActionRow = styled.div`
   align-items: center;
   gap: 0.8rem;
   flex-wrap: wrap;
-  margin-top: 1.75rem;
-  padding-top: 1.4rem;
+  flex: 0 0 auto;
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
   border-top: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')};
 `
 
@@ -689,12 +739,11 @@ export default function Overlay({
 
   const progress = Math.min(1, Math.max(0, scrollDistance / 4.8))
   const easeProgress = Math.pow(progress, 1.35)
-  const scale = 1 + easeProgress * 12.0
-  const translateZ = easeProgress * 380
-  const letterSpacing = -0.035 + progress * 0.35
-  const textOpacity = progress < 0.6 ? 1 : Math.max(0, 1 - (progress - 0.6) / 0.4)
+  const scale = 1 + easeProgress * 0.08
+  const translateY = easeProgress * -18
+  const letterSpacing = -0.07 + progress * 0.06
+  const textOpacity = Math.max(0, 1 - progress * 1.15)
   const bgOpacity = Math.max(0, 1 - Math.pow(progress, 1.15))
-  const blurAmount = Math.max(0, (1 - Math.pow(progress, 1.15)) * 18)
   const showIntro = (bgOpacity > 0.005 || textOpacity > 0.005) && !selected
 
   const handleAnimatedClose = () => {
@@ -732,12 +781,12 @@ export default function Overlay({
   return (
     <>
       {showIntro && (
-        <IntroScreen $isDark={isDark} $bgOpacity={bgOpacity} $blur={blurAmount} $progress={progress}>
+        <IntroScreen $isDark={isDark} $bgOpacity={bgOpacity} $translateY={translateY}>
           <IntroWrapper className={isOpening ? 'is-opening' : ''}>
+            <IntroKicker $isDark={isDark}>Selected work · 03 projects</IntroKicker>
             <IntroTitle
               $isDark={isDark}
               $scale={scale}
-              $translateZ={translateZ}
               $textOpacity={textOpacity}
               $letterSpacing={letterSpacing}
             >

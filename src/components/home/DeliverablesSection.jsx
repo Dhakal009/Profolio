@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import CircularCarousel from '../ui/CircularCarousel';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export const DELIVERABLES = [
   {
@@ -133,7 +134,7 @@ function wrapCanvasText(ctx, text, maxWidth) {
  * - Large, bold, centered title
  * - Zero clutter, zero garbled chips, zero bottom text
  */
-function generateDeliverableTexture(item) {
+function generateDeliverableTexture(item, isDark) {
   if (typeof document === 'undefined') return '';
   const canvas = document.createElement('canvas');
   const w = 1400;
@@ -146,31 +147,34 @@ function generateDeliverableTexture(item) {
   const padX = 100;
   const contentW = w - padX * 2;
 
-  // 1. Clean Matte Obsidian Background
-  ctx.fillStyle = '#08080c';
+  // 1. Theme-aware matte surface
+  const background = ctx.createLinearGradient(0, 0, 0, h);
+  background.addColorStop(0, isDark ? '#111318' : '#ffffff');
+  background.addColorStop(1, isDark ? '#08090d' : '#edf1f5');
+  ctx.fillStyle = background;
   ctx.fillRect(0, 0, w, h);
 
   // 2. Minimal Subtle Inset Border
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+  ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.14)';
   ctx.lineWidth = 3;
   ctx.beginPath();
   ctx.roundRect(24, 24, w - 48, h - 48, 36);
   ctx.stroke();
 
   // 3. Top Header: Clean Index & Subtitle
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(15, 23, 42, 0.6)';
   ctx.font = '600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textBaseline = 'top';
   ctx.fillText(`${item.index}`, padX, 88);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(15, 23, 42, 0.55)';
   ctx.font = '600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   const tagText = item.subtitle;
   const tagW = ctx.measureText(tagText).width;
   ctx.fillText(tagText, w - padX - tagW, 92);
 
   // 4. Center: Bold Pure White Title
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = isDark ? '#ffffff' : '#09090b';
   ctx.font = '800 122px "Inter Tight", "Space Grotesk", -apple-system, sans-serif';
   ctx.textBaseline = 'middle';
 
@@ -187,9 +191,12 @@ function generateDeliverableTexture(item) {
 }
 
 export default function DeliverablesSection() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [activeIndex, setActiveIndex] = useState(0);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [hasWebGL, setHasWebGL] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const carouselApiRef = useRef(null);
 
   // Check for WebGL support
@@ -203,16 +210,23 @@ export default function DeliverablesSection() {
     }
   }, []);
 
+  useEffect(() => {
+    const updateViewport = () => setIsMobile(window.innerWidth <= 640);
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
   // Generate carousel item data with custom canvas textures
   const carouselItems = useMemo(() => {
     return DELIVERABLES.map((d) => ({
       ...d,
-      src: generateDeliverableTexture(d, DELIVERABLES.length),
+      src: generateDeliverableTexture(d, isDark),
       alt: `${d.title} — ${d.subtitle}`,
       title: d.title,
       subtitle: d.subtitle
     }));
-  }, []);
+  }, [isDark]);
 
   const activeDeliverable = DELIVERABLES[activeIndex] || DELIVERABLES[0];
 
@@ -256,21 +270,22 @@ export default function DeliverablesSection() {
 
   return (
     <div
-      className="deliverables-section relative flex h-full min-h-[100dvh] w-full flex-col justify-center overflow-hidden select-none bg-[#050508]"
+      className="deliverables-section relative flex h-full min-h-[78dvh] w-full flex-col justify-center overflow-hidden select-none sm:min-h-[100dvh]"
+      style={{ background: 'var(--bg)', color: 'var(--foam)' }}
     >
       {/* 3D CircularCarousel from React Bits — 3D Cylinder Ring with Curvature & Depth */}
       {hasWebGL ? (
-        <div className="relative h-screen min-h-[100dvh] w-full overflow-hidden flex items-center justify-center">
+        <div className="relative h-[78dvh] min-h-[520px] w-full overflow-hidden flex items-center justify-center sm:h-screen sm:min-h-[100dvh]">
           <CircularCarousel
             carouselRef={carouselApiRef}
             items={carouselItems}
             preset="cylinder"
             intro="rise"
-            cardWidth={720}
-            aspectRatio={1.18}
-            gap={42}
+            cardWidth={isMobile ? 330 : 720}
+            aspectRatio={isMobile ? 1.05 : 1.18}
+            gap={isMobile ? 18 : 42}
             tilt={-4}
-            perspective={2400}
+            perspective={isMobile ? 1400 : 2400}
             speed={10}
             autoplay="drift"
             pauseOnHover={true}
@@ -282,7 +297,7 @@ export default function DeliverablesSection() {
             parallax={0.35}
             stretch={0.3}
             depthFade={0.72}
-            fadeColor="#000000"
+            fadeColor={isDark ? '#000000' : '#ebebeb'}
             innerShade={0.9}
             cornerRadius={24}
             captions={false}
@@ -295,7 +310,8 @@ export default function DeliverablesSection() {
           <button
             type="button"
             onClick={handlePrev}
-            className="pointer-events-auto absolute left-3 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/75 backdrop-blur-xl transition hover:border-white/40 hover:bg-black/90 hover:text-white hover:scale-105 active:scale-95 shadow-xl"
+            className="pointer-events-auto absolute left-3 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border backdrop-blur-xl transition hover:scale-105 active:scale-95 shadow-xl"
+            style={{ borderColor: 'var(--line-strong)', background: 'var(--chip-bg)', color: 'var(--foam)' }}
             aria-label="Previous deliverable"
           >
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -307,7 +323,8 @@ export default function DeliverablesSection() {
           <button
             type="button"
             onClick={handleNext}
-            className="pointer-events-auto absolute right-3 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-white/15 bg-black/60 text-white/75 backdrop-blur-xl transition hover:border-white/40 hover:bg-black/90 hover:text-white hover:scale-105 active:scale-95 shadow-xl"
+            className="pointer-events-auto absolute right-3 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border backdrop-blur-xl transition hover:scale-105 active:scale-95 shadow-xl"
+            style={{ borderColor: 'var(--line-strong)', background: 'var(--chip-bg)', color: 'var(--foam)' }}
             aria-label="Next deliverable"
           >
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -316,8 +333,9 @@ export default function DeliverablesSection() {
           </button>
 
           {/* Minimal Floating Bottom Bar: Pagination Dots positioned clearly above dock */}
-          <div className="pointer-events-none absolute bottom-16 sm:bottom-20 inset-x-0 z-20 flex justify-center">
-            <div className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/50 px-3.5 py-1.5 backdrop-blur-xl">
+          <div className="pointer-events-none absolute bottom-12 sm:bottom-20 inset-x-0 z-20 flex justify-center">
+          <div className="pointer-events-auto flex items-center gap-2 rounded-full border px-3.5 py-1.5 backdrop-blur-xl"
+            style={{ borderColor: 'var(--line)', background: 'var(--chip-bg)' }}>
               {DELIVERABLES.map((item, idx) => (
                 <button
                   key={item.id}
@@ -325,9 +343,10 @@ export default function DeliverablesSection() {
                   onClick={() => handleDotClick(idx)}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     idx === activeIndex
-                      ? 'w-7 bg-white shadow-sm'
-                      : 'w-1.5 bg-white/25 hover:bg-white/50'
+                      ? 'w-7 shadow-sm'
+                      : 'w-1.5'
                   }`}
+                  style={{ background: idx === activeIndex ? 'var(--foam)' : 'var(--subtle)' }}
                   aria-label={`Go to ${item.title}`}
                 />
               ))}
@@ -343,17 +362,18 @@ export default function DeliverablesSection() {
                 key={item.id}
                 type="button"
                 onClick={() => handleCardClick(idx)}
-                className="group flex flex-col justify-between rounded-3xl border border-white/10 bg-[#08080a] p-8 text-left transition hover:border-white/25 hover:bg-[#0e0e13] focus-visible:outline-2 focus-visible:outline-white shadow-xl"
+                className="group flex flex-col justify-between rounded-3xl border p-8 text-left transition focus-visible:outline-2 shadow-xl"
+                style={{ borderColor: 'var(--line)', background: 'var(--card-bg)', color: 'var(--foam)' }}
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-white/40">
-                    <span className="font-semibold text-white/60">{item.index}</span>
-                    <span className="text-white/50">{item.subtitle}</span>
+                  <div className="flex items-center justify-between text-xs" style={{ color: 'var(--subtle)' }}>
+                    <span className="font-semibold">{item.index}</span>
+                    <span>{item.subtitle}</span>
                   </div>
-                  <h3 className="mt-8 text-2xl font-bold text-white group-hover:text-white">
+                  <h3 className="mt-8 text-2xl font-bold">
                     {item.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/70">{item.description}</p>
+                  <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--muted)' }}>{item.description}</p>
                 </div>
               </button>
             ))}
@@ -367,12 +387,16 @@ export default function DeliverablesSection() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="deliverable-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-2xl animate-in fade-in duration-200"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 backdrop-blur-2xl animate-in fade-in duration-200"
+          style={{ background: 'var(--overlay)' }}
           onClick={handleCloseDetail}
         >
           <div
-            className="relative max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-[#0c0c12] p-6 shadow-2xl transition sm:p-9"
+            className="relative max-h-[calc(100dvh-9.5rem)] w-full max-w-lg overflow-y-auto rounded-3xl border p-3.5 shadow-2xl transition sm:max-h-[85dvh] sm:p-9"
             style={{
+              background: 'var(--surface)',
+              borderColor: 'var(--line-strong)',
+              color: 'var(--foam)',
               boxShadow: `0 30px 80px -20px ${activeDeliverable.accent}30`
             }}
             onClick={(e) => e.stopPropagation()}
@@ -381,14 +405,15 @@ export default function DeliverablesSection() {
             <button
               type="button"
               onClick={handleCloseDetail}
-              className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-white/60 transition hover:bg-white/15 hover:text-white"
+              className="absolute right-3.5 top-3.5 flex h-8 w-8 items-center justify-center rounded-full transition sm:right-5 sm:top-5"
+              style={{ background: 'var(--chip-bg)', color: 'var(--muted)' }}
               aria-label="Close details"
             >
               ✕
             </button>
 
             {/* Modal Header */}
-            <div className="flex items-center gap-2.5 font-mono text-xs text-white/50">
+            <div className="flex items-center gap-2.5 font-mono text-xs" style={{ color: 'var(--muted)' }}>
               <span className="font-semibold">{activeDeliverable.index}</span>
               <span>•</span>
               <span
@@ -404,29 +429,30 @@ export default function DeliverablesSection() {
 
             <h3
               id="deliverable-modal-title"
-              className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl"
+              className="mt-2 text-xl font-bold tracking-tight sm:mt-3 sm:text-3xl"
             >
               {activeDeliverable.title}
             </h3>
-            <p className="mt-1 text-xs text-white/50">{activeDeliverable.subtitle}</p>
+            <p className="mt-1 text-xs" style={{ color: 'var(--muted)' }}>{activeDeliverable.subtitle}</p>
 
             {/* Core Description */}
-            <div className="mt-5 rounded-2xl border border-white/5 bg-white/[0.025] p-5">
-              <p className="text-sm leading-relaxed text-white/85 sm:text-base">
+            <div className="mt-3 rounded-2xl border p-3.5 sm:mt-5 sm:p-5" style={{ borderColor: 'var(--line)', background: 'var(--chip-bg)' }}>
+              <p className="text-[0.82rem] leading-relaxed sm:text-base">
                 {activeDeliverable.description}
               </p>
             </div>
 
             {/* Key Capabilities Pills */}
-            <div className="mt-5">
-              <h4 className="font-mono text-xs uppercase tracking-wider text-white/40">
+            <div className="mt-4 sm:mt-5">
+              <h4 className="font-mono text-xs uppercase tracking-wider" style={{ color: 'var(--subtle)' }}>
                 Key Standards & Practices
               </h4>
-              <div className="mt-2.5 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap gap-1.5 sm:mt-2.5 sm:gap-2">
                 {activeDeliverable.highlights.map((h, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1 text-xs text-white/75"
+                    className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.7rem] sm:px-3 sm:text-xs"
+                    style={{ borderColor: 'var(--line)', background: 'var(--chip-bg)', color: 'var(--muted)' }}
                   >
                     <span
                       className="h-1.5 w-1.5 rounded-full"
@@ -439,12 +465,13 @@ export default function DeliverablesSection() {
             </div>
 
             {/* Modal Footer with Carousel Switcher Controls */}
-            <div className="mt-7 flex items-center justify-between border-t border-white/5 pt-5">
+            <div className="mt-5 flex items-center justify-between border-t pt-3.5 sm:mt-7 sm:pt-5" style={{ borderColor: 'var(--line)' }}>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="rounded-lg border border-white/10 px-3 py-1.5 font-mono text-xs text-white/70 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-lg border px-3 py-1.5 font-mono text-xs transition"
+                  style={{ borderColor: 'var(--line-strong)', color: 'var(--muted)' }}
                   aria-label="Previous deliverable"
                 >
                   ← Prev
@@ -452,7 +479,8 @@ export default function DeliverablesSection() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="rounded-lg border border-white/10 px-3 py-1.5 font-mono text-xs text-white/70 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-lg border px-3 py-1.5 font-mono text-xs transition"
+                  style={{ borderColor: 'var(--line-strong)', color: 'var(--muted)' }}
                   aria-label="Next deliverable"
                 >
                   Next →
@@ -462,7 +490,7 @@ export default function DeliverablesSection() {
               <button
                 type="button"
                 onClick={handleCloseDetail}
-                className="rounded-lg px-4 py-1.5 text-xs font-medium text-white transition hover:opacity-90"
+                className="rounded-lg px-4 py-1.5 text-xs font-medium transition hover:opacity-90"
                 style={{ backgroundColor: activeDeliverable.accent }}
               >
                 Close

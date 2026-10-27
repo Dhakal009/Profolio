@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import { LenisProvider, useLenis } from '../../contexts/LenisContext';
 import Header from './Header';
@@ -9,9 +10,13 @@ import SkipLink from '../ui/SkipLink';
 import BackToTop from '../ui/BackToTop';
 import Preloader from '../hero/Preloader';
 import FloatingFolder from '../ui/FloatingFolder';
+import { getScrollTarget } from '../../utils/scrollTarget';
+
+// Self-hosted font (npm i @fontsource/inter). Works the same in dev and production.
+import '@fontsource/inter/800.css';
+import '@fontsource/inter/900.css';
 
 // Adds `is-visible` to `.reveal` elements as they enter the viewport.
-// Elements entering together are staggered for a smooth cascade.
 function useGlobalReveal(pathname) {
   useEffect(() => {
     let observer = null;
@@ -52,23 +57,29 @@ function useGlobalReveal(pathname) {
     };
 
     observeUnrevealed();
-    const t1 = setTimeout(observeUnrevealed, 50);
-    const t2 = setTimeout(observeUnrevealed, 250);
-    const t3 = setTimeout(observeUnrevealed, 550);
+    const timers = [50, 250, 550].map((ms) => setTimeout(observeUnrevealed, ms));
 
-    const mutationObserver = new MutationObserver(() => {
-      observeUnrevealed();
-    });
+    const mutationObserver = new MutationObserver(observeUnrevealed);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+      timers.forEach(clearTimeout);
       mutationObserver.disconnect();
       if (observer) observer.disconnect();
     };
   }, [pathname]);
+}
+
+// Keeps GSAP ScrollTrigger in step with the app's single Lenis instance.
+function useLenisScrollTrigger() {
+  const { lenis } = useLenis();
+
+  useEffect(() => {
+    if (!lenis) return;
+    const onScroll = () => ScrollTrigger.update();
+    lenis.on('scroll', onScroll);
+    return () => lenis.off('scroll', onScroll);
+  }, [lenis]);
 }
 
 // Scroll to top (or to the #hash target) whenever the route changes
@@ -77,21 +88,16 @@ function useRouteScroll(pathname, hash, state) {
   const isInitialLoadRef = useRef(true);
 
   useEffect(() => {
-    // On fresh page reload/load, disable automatic browser scroll jump and scroll to top
     if (isInitialLoadRef.current) {
       isInitialLoadRef.current = false;
-      if (typeof window !== 'undefined') {
-        if ('scrollRestoration' in window.history) {
-          window.history.scrollRestoration = 'manual';
-        }
-        if (window.location.hash) {
-          window.history.replaceState(null, '', window.location.pathname);
-        }
-        window.scrollTo(0, 0);
-        if (lenis) {
-          lenis.scrollTo(0, { immediate: true });
-        }
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
       }
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+      if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
+      else window.scrollTo(0, 0);
       return;
     }
 
@@ -100,43 +106,52 @@ function useRouteScroll(pathname, hash, state) {
     const tryScroll = () => {
       if (!targetId) return false;
       const target = document.getElementById(targetId);
-      if (target) {
-        if (lenis) lenis.scrollTo(target, { offset: -40, duration: 1.2 });
-        else target.scrollIntoView({ behavior: 'smooth' });
-        return true;
-      }
-      return false;
+      if (!target) return false;
+      const destination = getScrollTarget(target);
+      if (lenis) lenis.scrollTo(destination, { offset: -40, duration: 0.9, force: true });
+      else target.scrollIntoView({ behavior: 'smooth' });
+      return true;
     };
 
     if (targetId) {
-      if (!tryScroll()) {
-        const t1 = setTimeout(() => {
-          if (!tryScroll()) {
-            const t2 = setTimeout(tryScroll, 200);
-            return () => clearTimeout(t2);
-          }
-        }, 80);
-        return () => clearTimeout(t1);
-      }
-    } else {
-      const frame = requestAnimationFrame(() => {
-        if (lenis) {
-          lenis.scrollTo(0, { immediate: true });
-          lenis.resize();
-        } else {
-          window.scrollTo(0, 0);
-        }
-      });
-      return () => cancelAnimationFrame(frame);
+      if (tryScroll()) return;
+      let t2;
+      const t1 = setTimeout(() => {
+        if (!tryScroll()) t2 = setTimeout(tryScroll, 200);
+      }, 80);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
     }
+
+    const frame = requestAnimationFrame(() => {
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true, force: true });
+        lenis.resize();
+      } else {
+        window.scrollTo(0, 0);
+      }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [pathname, hash, state, lenis]);
 }
 
 function Shell() {
   const { pathname, hash, state } = useLocation();
   const { lenis } = useLenis();
+  const isProjects = pathname.startsWith('/projects');
   useGlobalReveal(pathname);
+  useLenisScrollTrigger();
   useRouteScroll(pathname, hash, state);
+
+  // Re-measure once fonts are ready (fixes wrong scroll lengths in production)
+  useEffect(() => {
+    document.fonts?.ready.then(() => {
+      lenis?.resize();
+      ScrollTrigger.refresh();
+    });
+  }, [lenis]);
 
   return (
     <>
@@ -144,16 +159,17 @@ function Shell() {
       <Preloader />
       <Header />
       <main id="pageMain" role="main">
-        {/* Keyed wrapper re-mounts on navigation to play the page fade-in */}
-        <AnimatePresence mode="wait">
-          <motion.div 
+        <AnimatePresence initial={false} mode="sync">
+          <motion.div
             key={pathname}
-            initial={{ opacity: 0, y: pathname.startsWith('/projects') ? 0 : 8, filter: pathname.startsWith('/projects') ? 'none' : 'blur(3px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'none' }}
-            exit={{ opacity: 0, y: pathname.startsWith('/projects') ? 0 : -6, filter: pathname.startsWith('/projects') ? 'none' : 'blur(2px)' }}
-            transition={{ duration: pathname.startsWith('/projects') ? 0.15 : 0.22, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -24 }}
+            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
             onAnimationComplete={() => {
-              if (lenis) lenis.resize();
+              // Page is now at its final size: re-measure Lenis and every ScrollTrigger
+              lenis?.resize();
+              ScrollTrigger.refresh();
             }}
             className="page"
           >
@@ -161,8 +177,8 @@ function Shell() {
           </motion.div>
         </AnimatePresence>
       </main>
-      {!pathname.startsWith('/projects') && <Footer />}
-      {!pathname.startsWith('/projects') && <BackToTop />}
+      {!isProjects && <Footer />}
+      {!isProjects && <BackToTop />}
       <FloatingFolder />
     </>
   );

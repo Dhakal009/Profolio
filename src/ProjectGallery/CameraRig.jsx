@@ -5,6 +5,7 @@ import { CONFIG } from './data'
 
 export default function CameraRig({
   scrollDistance,
+  scrollDistanceRef,
   selected,
   isMobile,
   isRewinding = false
@@ -123,6 +124,9 @@ export default function CameraRig({
 
   // Roaming motion in useFrame
   useFrame(() => {
+    if (scrollDistanceRef) {
+      targetZ.current = CONFIG.CAMERA_Z_START - scrollDistanceRef.current
+    }
     if (!selected && !isFocused.current) {
       if (isRewinding) {
         // Direct synchronization with GSAP rewind curve for zero-lag gradual exit

@@ -1,16 +1,13 @@
-import { useRef } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import Hero from '../components/hero/Hero';
 import AboutSection from '../components/about/AboutSection';
 import LogoLoop from '../components/ui/LogoLoop';
 import { techLogos } from '../components/ui/TechLogos';
-import ProjectGallery from '../ProjectGallery/ProjectGallery';
 import DeliverablesSection from '../components/home/DeliverablesSection';
 import Skills from '../components/ui/Skills.jsx';
 import ParallaxSection from '../components/ui/ParallaxSection.jsx';
 import StackSection from '../components/ui/StackSection.jsx';
 
-import { ReactLenis, useLenis } from "lenis/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { motion } from "framer-motion";
 import {
   SECTION_NAV,
@@ -18,12 +15,10 @@ import {
 } from '../components/ui/SectionFocus.jsx';
 
 const SECTION_IDS = SECTION_NAV.map((s) => s.id);
+const ProjectGallery = lazy(() => import('../ProjectGallery/ProjectGallery'));
 
-// Keeps GSAP ScrollTrigger (used in AboutSection) in step with the one Lenis
-// instance that ReactLenis provides. Must render inside <ReactLenis>.
-function LenisScrollTriggerSync() {
-  useLenis(() => ScrollTrigger.update());
-  return null;
+function ProjectGalleryFallback() {
+  return <div className="project-gallery-fallback" aria-hidden="true" />;
 }
 
 function Home() {
@@ -31,15 +26,7 @@ function Home() {
   useSectionFocus(SECTION_IDS);
 
   return (
-    <ReactLenis root options={{
-      lerp: 0.07,
-      duration: 1.5,
-      smoothWheel: true,
-      smoothTouch: false,
-      gestureOrientation: "vertical"
-    }}>
-      <LenisScrollTriggerSync />
-
+    <>
       {/* All stacked sections must be siblings inside this one wrapper */}
       <div className="stack-root">
         {/* Hero with reveal animation */}
@@ -57,12 +44,12 @@ function Home() {
         </StackSection>
 
         {/* 1. rises from the bottom */}
-        <StackSection entrance="bottom">
+        <StackSection>
           <AboutSection />
         </StackSection>
 
         {/* 2. right → left (straight in from the right) */}
-        <StackSection entrance="rightMid">
+        <StackSection>
           <section
             id="projects"
             ref={projectsRef}
@@ -72,13 +59,15 @@ function Home() {
           >
             <h2 className="sr-only" id="projects-title">Featured Projects</h2>
             <div className="sticky top-0 w-full h-screen min-h-[100dvh] overflow-hidden">
-              <ProjectGallery isEmbedded={true} containerRef={projectsRef} />
+              <Suspense fallback={<ProjectGalleryFallback />}>
+                <ProjectGallery isEmbedded={true} containerRef={projectsRef} />
+              </Suspense>
             </div>
           </section>
         </StackSection>
 
         {/* 3. Projects fades out first, then Skills rises from the bottom */}
-        <StackSection entrance="fadeBottom">
+        <StackSection>
           <ParallaxSection id="skills" title="Skills" offset={80}>
             <Skills />
             <div className="reveal" style={{ marginTop: '2.5rem' }}>
@@ -99,14 +88,14 @@ function Home() {
         </StackSection>
 
         {/* 4. rises from the bottom */}
-        <StackSection entrance="bottom">
+        <StackSection>
           <ParallaxSection id="deliver" title="What I Deliver" offset={60}>
             <DeliverablesSection />
           </ParallaxSection>
         </StackSection>
 
         {/* 5. rises from the bottom */}
-        <StackSection entrance="bottom">
+        <StackSection>
           <ParallaxSection id="contact" title="Contact" offset={70}>
             <span className="contact-eyebrow font-mono text-xs uppercase tracking-widest text-muted mb-4 block reveal">
               Get In Touch
@@ -126,7 +115,7 @@ function Home() {
           </ParallaxSection>
         </StackSection>
       </div>
-    </ReactLenis>
+    </>
   );
 }
 

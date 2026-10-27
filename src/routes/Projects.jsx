@@ -14,8 +14,9 @@ function Projects() {
       <section className="page-hero" aria-label="Selected work header">
         <div className="container page-hero-content">
           <span className="section-index reveal">Selected Work</span>
+          <h1 className="page-title reveal">Projects that move<br />ideas forward.</h1>
           <p className="page-desc reveal">
-            A curated selection of my full-stack and frontend projects from the repository, complete with interactive live demos hosted right here and direct links to their source code.
+            A focused selection of full-stack products, interfaces, and experiments built with care for clarity, speed, and useful details.
           </p>
         </div>
       </section>

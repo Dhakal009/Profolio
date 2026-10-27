@@ -26,8 +26,8 @@ export function LenisProvider({ children }) {
     ensureResizeObserver();
 
     const instance = new Lenis({
-      duration: 0.65,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 0.5,
+      easing: (t) => 1 - Math.pow(1 - t, 4),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,

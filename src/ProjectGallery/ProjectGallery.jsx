@@ -17,7 +17,7 @@ const GalleryContainer = styled.div`
   position: ${(props) => (props.$isEmbedded ? 'relative' : 'fixed')};
   ${(props) => (props.$isEmbedded ? 'width: 100%; height: 100%;' : 'inset: 0; width: 100vw; height: 100vh; z-index: 85;')}
   overflow: hidden;
-  background: ${(props) => (props.$isDark ? '#08080a' : '#f4f4f6')};
+  background: ${(props) => (props.$isDark ? '#000000' : '#f4f4f6')};
   user-select: none;
 `
 
@@ -39,6 +39,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
 
   const targetScrollRef = useRef(0)
   const currentScrollRef = useRef(0)
+  const publishedScrollRef = useRef(0)
   const touchStartY = useRef(0)
   const animFrameRef = useRef(null)
   const isRewindingRef = useRef(false)
@@ -112,7 +113,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
 
         if (!isRewindingRef.current) {
           currentScrollRef.current +=
-            (targetScrollRef.current - currentScrollRef.current) * (isEmbedded ? 0.1 : CONFIG.LERP_FACTOR)
+            (targetScrollRef.current - currentScrollRef.current) * (isEmbedded ? 0.18 : CONFIG.LERP_FACTOR)
 
           // Clamp at entrance and end
           if (currentScrollRef.current < 0.05) currentScrollRef.current = 0
@@ -120,7 +121,16 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
             currentScrollRef.current = EFFECTIVE_MAX_SCROLL
           }
 
-          setScrollDistance(currentScrollRef.current)
+          // Keep the camera on the frame loop, but avoid reconciling the
+          // entire React/Three tree for imperceptible UI-only changes.
+          if (
+            Math.abs(currentScrollRef.current - publishedScrollRef.current) > 0.08 ||
+            currentScrollRef.current === 0 ||
+            currentScrollRef.current === EFFECTIVE_MAX_SCROLL
+          ) {
+            publishedScrollRef.current = currentScrollRef.current
+            setScrollDistance(currentScrollRef.current)
+          }
         }
 
         if (!isEmbedded) {
@@ -163,6 +173,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
         onUpdate: () => {
           currentScrollRef.current = tweenObj.val
           targetScrollRef.current = tweenObj.val
+          publishedScrollRef.current = tweenObj.val
           setScrollDistance(tweenObj.val)
         },
         onComplete: () => {
@@ -265,7 +276,8 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
       onTouchMove={isEmbedded ? undefined : handleTouchMove}
     >
       <Canvas
-        dpr={[1, isMobile ? 1.5 : 1.75]}
+        dpr={[1, isMobile ? 1.25 : 1.5]}
+        performance={{ min: 0.7 }}
         frameloop="always"
         camera={{
           position: [0, 0, CONFIG.CAMERA_Z_START],
@@ -273,23 +285,43 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
           near: 0.1,
           far: 90
         }}
-        gl={{ antialias: true, powerPreference: 'high-performance', alpha: false, stencil: false }}
+        gl={{ antialias: !isMobile, powerPreference: 'high-performance', alpha: false, stencil: false }}
         style={{
           width: '100%',
           height: '100%',
-          background: isDark ? '#08080a' : '#f4f4f6'
+          background: isDark ? '#000000' : '#f4f4f6'
         }}
       >
-        <color attach="background" args={[isDark ? '#08080a' : '#f4f4f6']} />
+        <color attach="background" args={[isDark ? '#000000' : '#f4f4f6']} />
         <fog
           attach="fog"
-          args={[isDark ? '#08080a' : '#f4f4f6', 16, 62]}
+          args={[isDark ? '#000000' : '#f4f4f6', 13, 58]}
         />
 
-        <ambientLight intensity={isDark ? 0.95 : 1.45} />
+        <ambientLight intensity={isDark ? 0.78 : 1.35} />
+        <hemisphereLight
+          skyColor={isDark ? '#172033' : '#ffffff'}
+          groundColor={isDark ? '#020204' : '#cbd5e1'}
+          intensity={isDark ? 0.65 : 0.8}
+        />
         <directionalLight
           position={[6, 9, 6]}
-          intensity={isDark ? 1.3 : 1.6}
+          intensity={isDark ? 1.15 : 1.6}
+          color={isDark ? '#dbeafe' : '#ffffff'}
+        />
+        <pointLight
+          position={[0, 0, 5]}
+          color={isDark ? '#ffffff' : '#f8fafc'}
+          intensity={isDark ? 1.15 : 0.65}
+          distance={16}
+          decay={2}
+        />
+        <pointLight
+          position={[0, 0, -42]}
+          color={isDark ? '#ffffff' : '#e2e8f0'}
+          intensity={isDark ? 1.4 : 0.75}
+          distance={26}
+          decay={2}
         />
 
         <Suspense fallback={null}>
@@ -304,6 +336,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
           />
           <CameraRig
             scrollDistance={scrollDistance}
+            scrollDistanceRef={currentScrollRef}
             selected={selected}
             isMobile={isMobile}
             isRewinding={isRewinding}

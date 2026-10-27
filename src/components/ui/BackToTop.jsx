@@ -13,7 +13,7 @@ function BackToTop() {
   }, []);
 
   const scrollToTop = () => {
-    if (lenis) lenis.scrollTo(0, { duration: 1.4 });
+    if (lenis) lenis.scrollTo(0, { duration: 0.9, force: true });
     else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

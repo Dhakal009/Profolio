@@ -111,14 +111,14 @@ function Hero() {
   }, []);
 
   return (
-    <div ref={heroRef} className="hero relative w-full h-[100dvh] overflow-hidden select-none bg-[#070708]" role="region" aria-label="Hero Section">
+    <div ref={heroRef} className="hero relative w-full h-[100dvh] overflow-hidden select-none" role="region" aria-label="Hero Section">
       <div className="hero-head">
         <div className="hero-composition">
           {/* Soft ambient glow behind the portrait */}
           <div className="hero-glow opacity-40" aria-hidden="true" />
 
           {/* Background name - CLEAN WHITE TEXT */}
-          <h1 className="hero-name text-white" id="hero-name" aria-label="Bikash Dhakal">
+          <h1 className="hero-name" id="hero-name" aria-label="Bikash Dhakal">
             <span className="hero-name-word hero-name-word--top">
               <span className="hero-name-shine" data-text="BIKASH">
                 <SplitWord text="BIKASH" />
@@ -136,7 +136,7 @@ function Hero() {
           <img className="hero-avatar-front" src="/avatar.png" alt="Bikash Dhakal" />
 
           {/* Fade into the next section - black fade */}
-          <div className="hero-fade !from-[#070708] !to-transparent" aria-hidden="true" />
+          <div className="hero-fade" aria-hidden="true" />
         </div>
       </div>
     </div>

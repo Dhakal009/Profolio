@@ -14,9 +14,9 @@ export default function FloatingFolder() {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 640) {
-        setScale(0.32);
+        setScale(0.3);
       } else {
-        setScale(0.2);
+        setScale(0.36);
       }
     };
     handleResize();
@@ -31,45 +31,71 @@ export default function FloatingFolder() {
 
   const isDark = theme === 'dark';
   // Black & white theme matching website
-  const folderColor = isDark ? '#1a1a1c' : '#262629';
+  const folderColor = isDark ? '#1a1a1c' : '#d4d4d8';
+  const paperColor = isDark ? '#f4f4f5' : '#ffffff';
 
-  const items = useMemo(
-    () => [
-      {
-        id: 'projects',
-        title: 'View Projects',
-        description: 'Selected works & gallery',
-        path: '/projects',
-        content: (
-          <div className="h-full w-full p-2 flex flex-col justify-start bg-white text-zinc-900 select-none text-left">
-            <div className="text-[9.5px] font-bold text-zinc-950 leading-tight">
-              View Projects
+  const items = useMemo(() => [
+    {
+      id: 'all-projects',
+      title: 'All Projects',
+      path: '/projects',
+      content: (
+        <div
+          className="h-full w-full flex flex-col justify-between select-none text-left"
+          style={{
+            background: 'var(--card-bg)',
+            color: 'var(--foam)',
+            padding: 'calc(13px * var(--folder-scale))'
+          }}
+        >
+          <div>
+            <div className="font-mono uppercase tracking-[0.12em]" style={{ fontSize: 'calc(7px * var(--folder-scale))', color: 'var(--muted)' }}>
+              01 / Work
             </div>
-            <div className="text-[7.5px] text-zinc-500 leading-snug mt-1">
-              Selected works & gallery
-            </div>
-          </div>
-        )
-      },
-      {
-        id: 'resume',
-        title: 'View Resume Page',
-        description: 'Career history & PDF CV',
-        path: '/resume',
-        content: (
-          <div className="h-full w-full p-2 flex flex-col justify-start bg-white text-zinc-900 select-none text-left">
-            <div className="text-[9.5px] font-bold text-zinc-950 leading-tight">
-              View Resume Page
-            </div>
-            <div className="text-[7.5px] text-zinc-500 leading-snug mt-1">
-              Career history & PDF CV
+            <div className="mt-1 font-semibold leading-tight" style={{ fontSize: 'calc(11px * var(--folder-scale))' }}>
+              All Projects
             </div>
           </div>
-        )
-      }
-    ],
-    []
-  );
+          <div>
+            <div style={{ height: '1px', background: 'var(--line)', marginBottom: 'calc(6px * var(--folder-scale))' }} />
+            <div className="leading-tight" style={{ fontSize: 'calc(7px * var(--folder-scale))', color: 'var(--muted)' }}>
+              Explore selected work
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'resume',
+      title: 'Resume',
+      path: '/resume',
+      content: (
+        <div
+          className="h-full w-full flex flex-col justify-between select-none text-left"
+          style={{
+            background: 'var(--card-bg)',
+            color: 'var(--foam)',
+            padding: 'calc(13px * var(--folder-scale))'
+          }}
+        >
+          <div>
+            <div className="font-mono uppercase tracking-[0.12em]" style={{ fontSize: 'calc(7px * var(--folder-scale))', color: 'var(--muted)' }}>
+              02 / Profile
+            </div>
+            <div className="mt-1 font-semibold leading-tight" style={{ fontSize: 'calc(11px * var(--folder-scale))' }}>
+              Resume
+            </div>
+          </div>
+          <div>
+            <div style={{ height: '1px', background: 'var(--line)', marginBottom: 'calc(6px * var(--folder-scale))' }} />
+            <div className="leading-tight" style={{ fontSize: 'calc(7px * var(--folder-scale))', color: 'var(--muted)' }}>
+              Experience &amp; skills
+            </div>
+          </div>
+        </div>
+      )
+    }
+  ], []);
 
   const handleItemClick = (item) => {
     if (item?.path) {
@@ -80,7 +106,7 @@ export default function FloatingFolder() {
 
   return (
     <div
-      className="fixed bottom-3 right-8 sm:bottom-5 sm:right-10 z-[88] flex flex-col items-end pointer-events-none"
+      className="floating-folder fixed bottom-[5.75rem] right-3 sm:bottom-5 sm:right-10 z-[88] flex flex-col items-end pointer-events-none"
       aria-label="Floating quick navigation folder"
     >
       <div className="pointer-events-auto">
@@ -89,7 +115,7 @@ export default function FloatingFolder() {
           mode="flap"
           variant="solid"
           color={folderColor}
-          paperColor="#ffffff"
+          paperColor={paperColor}
           items={items}
           open={isOpen}
           onOpenChange={setIsOpen}

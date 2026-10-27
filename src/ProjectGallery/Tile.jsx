@@ -73,99 +73,55 @@ function createProjectCardTexture(project, isDark) {
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
 
-  const accent = project.accent || '#38bdf8'
   const radius = 28
-  const isBlack = !isDark // INVERTED: light theme = black card, dark theme = white card
+  const isBlack = isDark
 
   // --- BACKGROUND INVERTED ---
   ctx.beginPath()
   ctx.roundRect(0, 0, 1024, 640, radius)
-  ctx.fillStyle = isBlack ? '#09090b' : '#ffffff'
+  const background = ctx.createLinearGradient(0, 0, 1024, 640)
+  background.addColorStop(0, isBlack ? '#111318' : '#ffffff')
+  background.addColorStop(1, isBlack ? '#050608' : '#eef2f7')
+  ctx.fillStyle = background
   ctx.fill()
 
-  ctx.strokeStyle = isBlack ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'
+  ctx.strokeStyle = isBlack ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.12)'
   ctx.lineWidth = 2
   ctx.stroke()
 
+  // Soft monochrome wash keeps the cards consistent with the site theme.
+  const wash = ctx.createRadialGradient(860, 110, 0, 860, 110, 430)
+  wash.addColorStop(0, isBlack ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)')
+  wash.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = wash
+  ctx.fillRect(0, 0, 1024, 640)
+
   // Top accent bar
-  ctx.fillStyle = accent
+  const accentBar = ctx.createLinearGradient(0, 0, 1024, 0)
+  accentBar.addColorStop(0, isBlack ? '#ffffff' : '#111111')
+  accentBar.addColorStop(1, isBlack ? 'rgba(255,255,255,0.25)' : 'rgba(17,17,17,0.2)')
+  ctx.fillStyle = accentBar
   ctx.beginPath()
   ctx.roundRect(0, 0, 1024, 8, [radius, radius, 0, 0])
   ctx.fill()
 
-  // --- Category Pill ---
-  ctx.font = '800 20px Inter, system-ui, sans-serif'
-  const catText = project.category.toUpperCase()
-  const catWidth = ctx.measureText(catText).width + 40
-  ctx.fillStyle = accent
-  ctx.beginPath()
-  ctx.roundRect(36, 38, catWidth, 32, 16)
-  ctx.fill()
-  ctx.fillStyle = '#ffffff'
-  ctx.fillText(catText, 56, 60)
-
-  // Index
-  ctx.fillStyle = isBlack ? 'rgba(255,255,255,0.5)' : '#94a3b8'
-  ctx.font = '700 20px Inter, system-ui, sans-serif'
-  ctx.textAlign = 'right'
-  ctx.fillText(project.index, 988, 60)
-  ctx.textAlign = 'left'
-
-  // --- TITLE - BOLD SHORT ---
+  // The tunnel card intentionally uses only the project name.
   ctx.fillStyle = isBlack ? '#ffffff' : '#09090b'
-  let title = project.title.toUpperCase()
-  if(title.length > 18) title = title.slice(0, 18) + '…'
-  ctx.font = '900 68px Inter, system-ui, sans-serif'
-  ctx.fillText(title, 36, 250)
-
-  // --- Subtitle - BOLD SHORT ---
-  let shortDesc = project.subtitle || ''
-  if(shortDesc.length > 32) shortDesc = shortDesc.slice(0, 32) + '…'
-  ctx.fillStyle = isBlack ? '#a1a1aa' : '#52525b'
-  ctx.font = '800 26px Inter, system-ui, sans-serif'
-  ctx.fillText(shortDesc, 36, 310)
-
-  // --- Tech Pills - BOLD SHORT ---
-  const techs = (project.tech || []).slice(0, 3)
-  let pillX = 36
-  const pillY = 380
-  ctx.font = '800 17px Inter, system-ui, sans-serif'
-  techs.forEach(t => {
-    let shortTech = t.toUpperCase()
-    if(shortTech.length > 10) shortTech = shortTech.slice(0, 10)
-    const w = ctx.measureText(shortTech).width + 28
-    ctx.fillStyle = isBlack ? 'rgba(255,255,255,0.10)' : '#f4f4f5'
-    ctx.strokeStyle = isBlack ? 'rgba(255,255,255,0.14)' : '#e4e4e7'
-    ctx.lineWidth = 1.5
-    ctx.beginPath()
-    ctx.roundRect(pillX, pillY, w, 30, 15)
-    ctx.fill()
-    ctx.stroke()
-    ctx.fillStyle = isBlack ? '#ffffff' : '#18181b'
-    ctx.fillText(shortTech, pillX + 14, pillY + 20)
-    pillX += w + 10
-  })
-
-  // --- Bottom Bar ---
-  ctx.strokeStyle = isBlack ? 'rgba(255,255,255,0.12)' : '#e4e4e7'
+  const title = project.title.toUpperCase()
+  let titleSize = 92
+  ctx.textAlign = 'center'
+  do {
+    ctx.font = `900 ${titleSize}px Inter Tight, Inter, system-ui, sans-serif`
+    titleSize -= 2
+  } while (ctx.measureText(title).width > 900 && titleSize > 42)
+  ctx.font = `900 ${titleSize}px Inter Tight, Inter, system-ui, sans-serif`
+  ctx.fillText(title, 512, 340)
+  ctx.strokeStyle = isBlack ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.14)'
   ctx.lineWidth = 2
   ctx.beginPath()
-  ctx.moveTo(36, 550)
-  ctx.lineTo(988, 550)
+  ctx.moveTo(270, 400)
+  ctx.lineTo(754, 400)
   ctx.stroke()
-
-  ctx.fillStyle = isBlack ? '#ffffff' : '#09090b'
-  ctx.font = '900 22px Inter, system-ui, sans-serif'
-  ctx.fillText('VIEW PROJECT', 36, 600)
-
-  ctx.fillStyle = accent
-  ctx.beginPath()
-  ctx.arc(956, 588, 24, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.fillStyle = '#ffffff'
-  ctx.font = '900 24px Inter, system-ui, sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText('→', 956, 597)
   ctx.textAlign = 'left'
 
   const texture = new THREE.CanvasTexture(canvas)
@@ -222,6 +178,14 @@ function ProjectTileMesh({ position, rotation, project, isDimmed, isSelected, on
 
   return (
     <group ref={groupRef} position={position} rotation={rotation}>
+      <mesh geometry={planeGeometry} position={[0, 0, -0.035]} scale={[1.035, 1.06, 1]}>
+        <meshBasicMaterial
+          color={isDark ? '#ffffff' : '#111111'}
+          transparent
+          opacity={isDimmed ? 0.04 : 0.18}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
       <mesh
         ref={meshRef}
         geometry={planeGeometry}
@@ -239,12 +203,14 @@ function ProjectTileMesh({ position, rotation, project, isDimmed, isSelected, on
           map={texture}
           transparent={false}
           roughness={0.45}
-          metalness={0.0}
+          metalness={0.08}
+          emissive={isDark ? '#ffffff' : '#111111'}
+          emissiveIntensity={isDimmed ? 0.02 : 0.055}
           side={THREE.DoubleSide}
         />
       </mesh>
-     <lineSegments geometry={borderGeometry} position={[0, 0, 0.02]}>
-    <lineBasicMaterial color={project.accent || '#0ea5e9'} transparent opacity={0.95} />
+      <lineSegments geometry={borderGeometry} position={[0, 0, 0.02]}>
+        <lineBasicMaterial color={isDark ? '#ffffff' : '#111111'} transparent opacity={isDimmed ? 0.25 : 0.88} />
       </lineSegments>
     </group>
   )

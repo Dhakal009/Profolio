@@ -15,19 +15,21 @@
 }
 
 .has-section-focus .focus-section .section-content {
-  opacity: 0.45;
+  opacity: 0.68;
   transition:
-    opacity 0.4s var(--focus-ease),
-    transform 0.45s var(--focus-ease);
+    opacity 0.65s var(--focus-ease),
+    transform 0.7s var(--focus-ease);
   will-change: opacity, transform;
 }
 
 /* Sections below the viewport wait slightly lower and rise into place;
    sections already read drift up a little. */
 .has-section-focus .focus-section[data-state='upcoming'] .section-content {
-  transform: translate3d(0, 16px, 0) scale(0.99);
+  opacity: 0.58;
+  transform: translate3d(0, 12px, 0) scale(0.99);
 }
 .has-section-focus .focus-section[data-state='past'] .section-content {
+  opacity: 0.62;
   transform: translate3d(0, -8px, 0) scale(0.995);
 }
 

@@ -820,11 +820,11 @@ const placeFlap = (rank, count, phase, layout, g, pointer) => {
     const shift = g.w * OPEN_SHIFT; // moves the whole spread to the left
     if (layout === 'stack') {
       const strip = Math.min(30 * g.scale, (g.h * 0.62) / Math.max(1, count - 1));
-      const fit = OPEN_FIT;
+      const fit = g.scale <= 0.31 ? 1.65 : OPEN_FIT;
       return { x: g.w / 2 - shift, y: g.tabH + g.h * 0.1 - rank * strip - (g.docH * (1.04 - fit)) / 2, z: -rank * 18 * g.scale, r: 0, ry: 0, s: fit };
     }
     const gap = 14 * g.scale;
-    const fit = OPEN_FIT;
+    const fit = g.scale <= 0.31 ? 1.65 : OPEN_FIT;
     const step = g.docW * fit + gap;
     const tidy = layout === 'row';
     return { x: g.w / 2 + (rank - mid) * step - shift, y: lift + (tidy ? -20 * g.scale : SPREAD_DROP[rank] * g.h * 0.7), z: 0, r: tidy ? 0 : SPREAD_TURN[rank] * 0.55, ry: 0, s: fit };

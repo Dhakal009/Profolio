@@ -43,8 +43,8 @@
 :root,
 [data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0c0c0c;
-  --bg-alt: #111111;
+  --bg: #000000;
+  --bg-alt: #000000;
   --surface: #151515;
   --surface-2: #1c1c1c;
   --line: rgba(255, 255, 255, 0.08);
@@ -58,23 +58,30 @@
   --success: #4ade80;
   --btn-bg: #ededed;
   --btn-fg: #0c0c0c;
-  --header-bg: rgba(12, 12, 12, 0.72);
+  --header-bg: rgba(0, 0, 0, 0.72);
   --chip-bg: rgba(255, 255, 255, 0.04);
   --dock-bg: rgba(28, 28, 28, 0.86);
   --dock-item: rgba(255, 255, 255, 0.06);
   --dock-item-hover: rgba(255, 255, 255, 0.12);
   --dock-border: rgba(255, 255, 255, 0.08);
   --dock-fg: #d6d6d6;
-  --dock-logo-bg: #0c0c0c;
+  --dock-logo-bg: #000000;
   --dock-cta-bg: #f2f2f2;
   --dock-cta-fg: #111111;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
-  --hero-name-color: #2a2a2a;
-  --hero-name-shine: #d9d9d9;
-  --hero-glow: rgba(255, 255, 255, 0.07);
+  --hero-name-color: #ffffff;
+  --hero-name-shine: #ffffff;
+  --hero-glow: transparent;
   --card-bg: #131313;
   --card-bg-hover: #181818;
   --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 50px -24px rgba(0, 0, 0, 0.8);
+  --card: var(--card-bg);
+  --overlay: rgba(0, 0, 0, 0.72);
+  --media-shade: linear-gradient(90deg, rgba(0,0,0,0.82), rgba(0,0,0,0.52) 50%, rgba(0,0,0,0.28));
+  --media-vignette: linear-gradient(180deg, rgba(0,0,0,0.5), transparent 25%, transparent 70%, rgba(0,0,0,0.72));
+  --media-brightness: 0.78;
+  --section-edge: rgba(255, 255, 255, 0.22);
+  --dim-surface: #000000;
 }
 
 /* ---------- Light ---------- */
@@ -106,12 +113,19 @@
   --dock-cta-bg: #f4f4f4;
   --dock-cta-fg: #222222;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 12px 32px -12px rgba(0, 0, 0, 0.14);
-  --hero-name-color: #d2d2d2;
-  --hero-name-shine: #8a8a8a;
+  --hero-name-color: #09090b;
+  --hero-name-shine: #09090b;
   --hero-glow: rgba(255, 255, 255, 0.85);
   --card-bg: #f7f7f7;
   --card-bg-hover: #ffffff;
   --card-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 18px 40px -22px rgba(0, 0, 0, 0.18);
+  --card: var(--card-bg);
+  --overlay: rgba(15, 23, 42, 0.2);
+  --media-shade: linear-gradient(90deg, rgba(255,255,255,0.86), rgba(255,255,255,0.48) 50%, rgba(255,255,255,0.2));
+  --media-vignette: linear-gradient(180deg, rgba(255,255,255,0.62), transparent 25%, transparent 70%, rgba(255,255,255,0.3));
+  --media-brightness: 0.92;
+  --section-edge: rgba(0, 0, 0, 0.16);
+  --dim-surface: #e4e4e4;
 }
 
 /* ============================================================

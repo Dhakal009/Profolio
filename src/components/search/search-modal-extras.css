@@ -1,5 +1,4 @@
-/* Additions for the upgraded SearchModal.
-   Your existing .search-* styles stay as they are; import this after them. */
+/* Search modal filters and result affordances. */
 
 /* ---------- Category filters ---------- */
 .search-filters {
@@ -68,16 +67,6 @@
   color: var(--subtle, rgba(237, 237, 237, 0.5));
   font-size: 0.7rem;
   letter-spacing: 0.04em;
-}
-.search-result-cmd {
-  display: inline-block;
-  margin-top: 0.3rem;
-  padding: 0.05rem 0.4rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--accent, #4ade80);
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.74rem;
 }
 .search-result-action {
   flex: 0 0 auto;

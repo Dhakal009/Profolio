@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLenis } from '../../contexts/LenisContext';
+import { getScrollTarget } from '../../utils/scrollTarget';
 import './search-modal-extras.css';
 
 /* ------------------------------------------------------------------ */
@@ -8,7 +9,6 @@ import './search-modal-extras.css';
 /*    target  – section id(s) on the home page (array = fallbacks)     */
 /*    route   – a page route                                           */
 /*    href    – external link                                          */
-/*    command – terminal command to run after jumping to #about        */
 /* ------------------------------------------------------------------ */
 const SEARCH_DATABASE = [
   // Pages & sections
@@ -23,10 +23,10 @@ const SEARCH_DATABASE = [
   {
     id: 'sec-about',
     category: 'section',
-    title: 'About Section (Linux Terminal)',
-    desc: 'Interactive Linux terminal shell, bio, facts, background, Kathmandu Nepal.',
+    title: 'About',
+    desc: 'Developer background, experience, interests, and Kathmandu, Nepal.',
     target: 'about',
-    keywords: ['about', 'bio', 'terminal', 'linux', 'bash', 'developer', 'kathmandu', 'nepal', 'whoami'],
+    keywords: ['about', 'bio', 'developer', 'kathmandu', 'nepal', 'whoami'],
   },
   {
     id: 'sec-experience',
@@ -169,71 +169,6 @@ const SEARCH_DATABASE = [
     keywords: ['docker', 'git', 'github', 'actions', 'cicd', 'aws', 'vercel', 'devops'],
   },
 
-  // Terminal commands (jump to the terminal AND run the command)
-  {
-    id: 'term-facts',
-    category: 'terminal',
-    title: 'cat facts.json (Linux Terminal)',
-    desc: 'Prints quick profile facts as syntax-highlighted JSON.',
-    target: 'about',
-    command: 'cat facts.json',
-    keywords: ['facts', 'json', 'profile', 'terminal', 'cat', 'summary'],
-  },
-  {
-    id: 'term-neofetch',
-    category: 'terminal',
-    title: 'neofetch (Linux Terminal)',
-    desc: 'Displays system specifications, OS edition, tech stack, and ASCII logo inside the About terminal.',
-    target: 'about',
-    command: 'neofetch',
-    keywords: ['neofetch', 'fastfetch', 'terminal', 'ascii', 'specs', 'system'],
-  },
-  {
-    id: 'term-bio',
-    category: 'terminal',
-    title: 'cat bio.txt (Linux Terminal)',
-    desc: 'Reads Bikash’s developer bio and engineering philosophy inside the terminal.',
-    target: 'about',
-    command: 'cat bio.txt',
-    keywords: ['bio', 'terminal', 'cat', 'txt', 'story', 'philosophy'],
-  },
-  {
-    id: 'term-skills',
-    category: 'terminal',
-    title: 'skills (Linux Terminal)',
-    desc: 'Shows proficiency levels as bars, grouped by frontend, backend, animation, and devops.',
-    target: 'about',
-    command: 'skills',
-    keywords: ['skills', 'terminal', 'bars', 'levels', 'proficiency', 'tech', 'list'],
-  },
-  {
-    id: 'term-help',
-    category: 'terminal',
-    title: 'help (Linux Terminal)',
-    desc: 'Lists every command the portfolio terminal understands.',
-    target: 'about',
-    command: 'help',
-    keywords: ['help', 'commands', 'terminal', 'man', 'usage'],
-  },
-  {
-    id: 'term-theme',
-    category: 'terminal',
-    title: 'theme toggle (Linux Terminal)',
-    desc: 'Switches the whole portfolio between dark and light mode.',
-    target: 'about',
-    command: 'theme toggle',
-    keywords: ['theme', 'dark', 'light', 'mode', 'toggle', 'terminal', 'colors'],
-  },
-  {
-    id: 'term-nav',
-    category: 'terminal',
-    title: 'cd projects (Terminal Navigation)',
-    desc: 'Command line shortcut to navigate directly to the Projects page.',
-    target: 'about',
-    command: 'cd projects',
-    keywords: ['cd', 'projects', 'navigate', 'goto', 'terminal'],
-  },
-
   // Contact & socials
   {
     id: 'contact-mail',
@@ -275,7 +210,7 @@ const QUICK_IDS = [
   'page-home',
   'sec-about',
   'sec-experience',
-  'page-projects',
+  'sec-projects',
   'sec-skills',
   'sec-contact',
   'contact-github',
@@ -287,12 +222,10 @@ const CATEGORIES = [
   { id: 'section', label: 'Sections' },
   { id: 'project', label: 'Projects' },
   { id: 'skill', label: 'Skills' },
-  { id: 'terminal', label: 'Terminal' },
   { id: 'contact', label: 'Contact' },
 ];
 const CATEGORY_TITLE = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]));
 
-const TERMINAL_EVENT = 'portfolio:terminal-run';
 const RECENT_KEY = 'portfolio-search-recent';
 const MAX_RECENT = 4;
 
@@ -414,7 +347,6 @@ function highlightMatch(text, tokens) {
 
 const actionLabel = (item) => {
   if (item.href) return 'Open link';
-  if (item.command) return 'Run command';
   if (item.route && !item.target) return 'Go to page';
   return 'Jump to section';
 };
@@ -543,7 +475,7 @@ export default function SearchModal({ isOpen, onClose }) {
       const l = lenisRef.current;
       if (l) {
         l.start();
-        l.scrollTo(el, { offset: -40, duration: 1.2, force: true });
+        l.scrollTo(getScrollTarget(el), { offset: -40, duration: 0.85, force: true });
       } else {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -581,18 +513,11 @@ export default function SearchModal({ isOpen, onClose }) {
       }
 
       const here = location.pathname;
-      const runCommand = item.command
-        ? () =>
-            setTimeout(
-              () => window.dispatchEvent(new CustomEvent(TERMINAL_EVENT, { detail: { command: item.command } })),
-              900
-            )
-        : undefined;
 
       if (item.target) {
         const needsNav = here !== '/';
         if (needsNav) navigate(`/#${[].concat(item.target)[0]}`);
-        goToSection(item.target, { wait: needsNav ? 350 : 60, onArrive: runCommand });
+        goToSection(item.target, { wait: needsNav ? 350 : 60 });
         return;
       }
 
@@ -697,7 +622,7 @@ export default function SearchModal({ isOpen, onClose }) {
             ref={inputRef}
             type="text"
             className="search-input-field"
-            placeholder="Search projects, skills, terminal commands, pages..."
+            placeholder="Search pages, projects, skills, or contact..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleInputKeyDown}
@@ -791,7 +716,6 @@ export default function SearchModal({ isOpen, onClose }) {
                         <span className="search-result-category">{item.category}</span>
                       </div>
                       <span className="search-result-desc">{highlightMatch(item.desc, tokens)}</span>
-                      {item.command && <code className="search-result-cmd">$ {item.command}</code>}
                     </div>
 
                     <span className="search-result-action">{actionLabel(item)}</span>
@@ -837,7 +761,7 @@ export default function SearchModal({ isOpen, onClose }) {
                 {filter !== 'all'
                   ? 'Try the “All” filter, or search for '
                   : 'Try shorter words, or search for '}
-                &ldquo;terminal&rdquo;, &ldquo;react&rdquo;, &ldquo;projects&rdquo; or &ldquo;contact&rdquo;.
+                &ldquo;react&rdquo;, &ldquo;projects&rdquo;, &ldquo;skills&rdquo; or &ldquo;contact&rdquo;.
               </span>
             </div>
           )}

@@ -244,9 +244,9 @@ export default function Skills({ showHeading = true }) {
 /*  Styles – map the CSS variables to your site's theme tokens         */
 /* ------------------------------------------------------------------ */
 const Section = styled.div`
-  --sk-fg: var(--fg, #fafafa);
+  --sk-fg: var(--foam, #fafafa);
   --sk-muted: var(--muted, #8b8b92);
-  --sk-border: var(--border, rgba(255, 255, 255, 0.1));
+  --sk-border: var(--line, rgba(255, 255, 255, 0.1));
   --sk-card: var(--card, #121212);
   --sk-mono: var(--font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
 
@@ -300,7 +300,7 @@ const Flip = styled(motion.div)`
   transform-style: preserve-3d;
   border-radius: 16px;
   box-shadow: ${({ $open }) =>
-    $open ? "0 40px 70px -28px rgba(0,0,0,0.85)" : "0 0 0 rgba(0,0,0,0)"};
+    $open ? 'var(--card-shadow)' : '0 0 0 rgba(0,0,0,0)'};
   transition: box-shadow 0.6s ease;
 `;
 
@@ -324,7 +324,7 @@ const Front = styled.button`
   transition: border-color 0.3s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.24);
+    border-color: var(--line-strong);
   }
   &:focus-visible {
     outline: 2px solid #ff9a2e;
@@ -335,7 +335,7 @@ const Front = styled.button`
 const Back = styled.div`
   ${face}
   transform: rotateY(180deg);
-  border: 1px solid rgba(255, 154, 46, 0.4);
+  border: 1px solid color-mix(in srgb, #ff9a2e 40%, var(--line));
   cursor: pointer;
 `;
 
@@ -458,7 +458,7 @@ const Close = styled.button`
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--chip-bg);
   }
   &:hover span {
     opacity: 1;
@@ -515,5 +515,5 @@ const Bar = styled(motion.div)`
   width: 100%;
   border-radius: 3px;
   transform-origin: left center;
-  background: linear-gradient(90deg, rgba(250, 250, 250, 0.3), var(--sk-fg));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--sk-fg) 30%, transparent), var(--sk-fg));
 `;

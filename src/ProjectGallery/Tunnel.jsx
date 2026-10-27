@@ -208,6 +208,13 @@ export default function Tunnel({
           opacity={isDark ? 0.6 : 0.75}
         />
       </lineSegments>
+      <lineSegments geometry={railGeometry}>
+        <lineBasicMaterial
+          color={isDark ? '#ffffff' : '#111111'}
+          transparent
+          opacity={isDark ? 0.13 : 0.1}
+        />
+      </lineSegments>
 
       {/* Finite rows arranged statically along the tunnel depth */}
       {rows.map((row) => (
@@ -231,9 +238,9 @@ export default function Tunnel({
       <group position={[0, 0, -totalLength]}>
         <lineSegments geometry={ringGeometry}>
           <lineBasicMaterial
-            color={isDark ? '#38bdf8' : '#0284c7'}
+            color={isDark ? '#ffffff' : '#111111'}
             transparent
-            opacity={0.85}
+            opacity={isDark ? 0.7 : 0.48}
           />
         </lineSegments>
       </group>
