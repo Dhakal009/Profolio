@@ -10,9 +10,7 @@ const ProjectDemo = lazy(() => import('./routes/ProjectDemo'));
 
 function RouteFallback() {
   return (
-    <div className="route-fallback" role="status" aria-live="polite">
-      Loading…
-    </div>
+    <div className="route-fallback" aria-hidden="true" />
   );
 }
 
