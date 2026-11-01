@@ -7,6 +7,7 @@ const Projects = lazy(() => import('./routes/Projects'));
 const ProjectGallery = lazy(() => import('./ProjectGallery/ProjectGallery'));
 const Resume = lazy(() => import('./routes/Resume'));
 const ProjectDemo = lazy(() => import('./routes/ProjectDemo'));
+const NotFound = lazy(() => import('./routes/NotFound'));
 
 function RouteFallback() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/projects/tunnel" element={<ProjectGallery />} />
             <Route path="/projects/:id" element={<ProjectGallery />} />
             <Route path="/resume" element={<Resume />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/demo/:projectId" element={<ProjectDemo />} />
         </Routes>

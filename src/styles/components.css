@@ -70,6 +70,45 @@
   overflow: clip;
 }
 
+.not-found-page {
+  min-height: calc(100dvh - var(--header-h));
+  display: grid;
+  align-items: center;
+  border-top: 1px solid var(--line);
+}
+
+.not-found-content {
+  padding-block: clamp(6rem, 16vw, 11rem);
+}
+
+.not-found-code {
+  margin-bottom: 1.5rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.12em;
+}
+
+.not-found-title {
+  max-width: 760px;
+  font-size: clamp(3rem, 8vw, 7rem);
+  letter-spacing: -0.07em;
+}
+
+.not-found-description {
+  max-width: 480px;
+  margin-top: 1.5rem;
+  color: var(--muted);
+  font-size: var(--fs-lead);
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2.25rem;
+}
+
 .route-fallback,
 .project-gallery-fallback {
   min-height: 100dvh;
