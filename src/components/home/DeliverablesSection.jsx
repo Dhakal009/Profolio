@@ -134,15 +134,24 @@ function wrapCanvasText(ctx, text, maxWidth) {
  * - Large, bold, centered title
  * - Zero clutter, zero garbled chips, zero bottom text
  */
+const deliverableTextureCache = new Map();
+
 function generateDeliverableTexture(item, isDark) {
   if (typeof document === 'undefined') return '';
+  const key = `${item.id}-${isDark ? 'dark' : 'light'}`;
+  if (deliverableTextureCache.has(key)) {
+    return deliverableTextureCache.get(key);
+  }
+
   const canvas = document.createElement('canvas');
   const w = 1400;
   const h = 1180;
-  canvas.width = w;
-  canvas.height = h;
+  const scale = 0.5;
+  canvas.width = w * scale;
+  canvas.height = h * scale;
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
+  ctx.scale(scale, scale);
 
   const padX = 100;
   const contentW = w - padX * 2;
@@ -187,7 +196,9 @@ function generateDeliverableTexture(item, isDark) {
     ctx.fillText(line, padX, startY + i * lineH + lineH / 2);
   });
 
-  return canvas.toDataURL('image/png');
+  const dataUrl = canvas.toDataURL('image/webp', 0.86);
+  deliverableTextureCache.set(key, dataUrl);
+  return dataUrl;
 }
 
 export default function DeliverablesSection() {

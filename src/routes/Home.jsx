@@ -1,4 +1,6 @@
-import { lazy, Suspense, useRef } from 'react';
+import { lazy, Suspense, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { getPerfProfile } from '../utils/perf';
 import Hero from '../components/hero/Hero';
 import AboutSection from '../components/about/AboutSection';
 import LogoLoop from '../components/ui/LogoLoop';
@@ -8,7 +10,7 @@ import Skills from '../components/ui/Skills.jsx';
 import ParallaxSection from '../components/ui/ParallaxSection.jsx';
 import StackSection from '../components/ui/StackSection.jsx';
 
-import { motion } from "framer-motion";
+import { handleMailClick } from '../utils/mailto';
 import {
   SECTION_NAV,
   useSectionFocus,
@@ -21,6 +23,26 @@ function ProjectGalleryFallback() {
   return <div className="project-gallery-fallback" aria-hidden="true" />;
 }
 
+// Starts loading the 3D gallery right away (like before) so it's ready by the
+// time you scroll to it; skipped only on data-saver / very slow connections.
+function GalleryGate({ containerRef }) {
+  const { no3d } = useMemo(() => getPerfProfile(), []);
+
+  if (no3d) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-4 text-center">
+        <p className="text-muted">3D gallery is paused to save data.</p>
+        <Link to="/projects" className="btn">View projects</Link>
+      </div>
+    );
+  }
+  return (
+    <Suspense fallback={<ProjectGalleryFallback />}>
+      <ProjectGallery isEmbedded={true} containerRef={containerRef} />
+    </Suspense>
+  );
+}
+
 function Home() {
   const projectsRef = useRef(null);
   useSectionFocus(SECTION_IDS);
@@ -29,18 +51,11 @@ function Home() {
     <>
       {/* All stacked sections must be siblings inside this one wrapper */}
       <div className="stack-root">
-        {/* Hero with reveal animation */}
+        {/* Hero */}
         <StackSection radius={0}>
-          <motion.section
-            id="hero"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
-            aria-labelledby="hero-name"
-          >
+          <section id="hero" aria-labelledby="hero-name">
             <Hero />
-          </motion.section>
+          </section>
         </StackSection>
 
         {/* 1. rises from the bottom */}
@@ -59,9 +74,7 @@ function Home() {
           >
             <h2 className="sr-only" id="projects-title">Featured Projects</h2>
             <div className="sticky top-0 w-full h-screen min-h-[100dvh] overflow-hidden">
-              <Suspense fallback={<ProjectGalleryFallback />}>
-                <ProjectGallery isEmbedded={true} containerRef={projectsRef} />
-              </Suspense>
+              <GalleryGate containerRef={projectsRef} />
             </div>
           </section>
         </StackSection>
@@ -103,7 +116,7 @@ function Home() {
             <p className="contact-lead reveal">
               Whether you have a project in mind, a freelance opportunity, or just want to connect — my inbox is always open. Let&apos;s build something extraordinary together.
             </p>
-            <a href="mailto:bikashdhakal546@gmail.com" className="contact-email reveal" aria-label="Email Bikash">
+            <a href="mailto:bikashdhakal546@gmail.com" onClick={handleMailClick} className="contact-email reveal" aria-label="Email Bikash">
               bikashdhakal546@gmail.com
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M7 17L17 7M17 7H9M17 7v8" />

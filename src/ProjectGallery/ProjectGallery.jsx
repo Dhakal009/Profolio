@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import gsap from 'gsap'
 import { useTheme } from '../contexts/ThemeContext'
 import { useOptionalLenis } from '../contexts/LenisContext'
+import { getPerfProfile } from '../utils/perf'
 import { PROJECTS, CONFIG } from './data'
 import Tunnel from './Tunnel'
 import CameraRig from './CameraRig'
@@ -26,6 +27,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
   const { theme } = useTheme()
   const { lenis } = useOptionalLenis() || {}
   const isDark = theme === 'dark'
+  const lite = getPerfProfile().lite
 
   const [selected, setSelected] = useState(null)
   const [hoveredId, setHoveredId] = useState(null)
@@ -42,7 +44,51 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
   const publishedScrollRef = useRef(0)
   const touchStartY = useRef(0)
   const animFrameRef = useRef(null)
+  const startLoopRef = useRef(null)
   const isRewindingRef = useRef(false)
+
+  // Perf: the embedded gallery lives inside a tall scroll section. Only render
+  // WebGL while that section is near the viewport and its StackSection is active.
+  const [inView, setInView] = useState(!isEmbedded)
+  const inViewRef = useRef(!isEmbedded)
+
+  useEffect(() => {
+    if (!isEmbedded || typeof IntersectionObserver === 'undefined') return
+    const el = containerRef?.current || document.getElementById('projects')
+    if (!el) return
+    const stackSection = el.closest('.stack-section')
+    let ioVisible = false
+    let stackVisible = stackSection ? stackSection.dataset.stackActive !== 'false' : true
+
+    const syncActive = () => {
+      const active = ioVisible && stackVisible
+      inViewRef.current = active
+      setInView(active)
+      if (active) startLoopRef.current?.()
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        ioVisible = entry.isIntersecting
+        syncActive()
+      },
+      { rootMargin: '20% 0px 20% 0px' }
+    )
+    io.observe(el)
+
+    const onStackActiveChange = (e) => {
+      stackVisible = Boolean(e.detail?.active)
+      syncActive()
+    }
+    stackSection?.addEventListener('stackactivechange', onStackActiveChange)
+
+    return () => {
+      io.disconnect()
+      stackSection?.removeEventListener('stackactivechange', onStackActiveChange)
+    }
+  }, [isEmbedded, containerRef])
+
+  const renderLoop = !isEmbedded || inView || !!selected ? 'always' : 'never'
 
   // Mobile detection
   useEffect(() => {
@@ -96,6 +142,10 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
   // Virtual smooth scroll loop
   useEffect(() => {
     const loop = () => {
+      if (isEmbedded && !inViewRef.current && !selected) {
+        animFrameRef.current = null
+        return
+      }
       if (!selected) {
         if (isEmbedded) {
           const el = containerRef?.current || document.getElementById('projects')
@@ -144,9 +194,22 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
       animFrameRef.current = requestAnimationFrame(loop)
     }
 
-    animFrameRef.current = requestAnimationFrame(loop)
+    const startLoop = () => {
+      if (!animFrameRef.current) {
+        animFrameRef.current = requestAnimationFrame(loop)
+      }
+    }
+    startLoopRef.current = startLoop
+
+    if (!isEmbedded || inViewRef.current || selected) {
+      startLoop()
+    }
     return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+      startLoopRef.current = null
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current)
+        animFrameRef.current = null
+      }
     }
   }, [selected, isEmbedded, containerRef, EFFECTIVE_MAX_SCROLL])
 
@@ -276,16 +339,16 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
       onTouchMove={isEmbedded ? undefined : handleTouchMove}
     >
       <Canvas
-        dpr={[1, isMobile ? 1.25 : 1.5]}
+        dpr={[1, lite ? 1 : isMobile ? 1.25 : 1.5]}
         performance={{ min: 0.7 }}
-        frameloop="always"
+        frameloop={renderLoop}
         camera={{
           position: [0, 0, CONFIG.CAMERA_Z_START],
           fov: isMobile ? CONFIG.FOV_MOBILE : CONFIG.FOV_DESKTOP,
           near: 0.1,
           far: 90
         }}
-        gl={{ antialias: !isMobile, powerPreference: 'high-performance', alpha: false, stencil: false }}
+        gl={{ antialias: !isMobile && !lite, powerPreference: 'high-performance', alpha: false, stencil: false }}
         style={{
           width: '100%',
           height: '100%',
@@ -340,6 +403,7 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
             selected={selected}
             isMobile={isMobile}
             isRewinding={isRewinding}
+            active={renderLoop === 'always'}
           />
           <Preload all />
         </Suspense>

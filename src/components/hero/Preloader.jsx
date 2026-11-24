@@ -27,11 +27,26 @@ function Word({ text, state }) {
   );
 }
 
+// Evaluated once per page load: has the intro already played this session?
+let SEEN = false;
+try {
+  SEEN = sessionStorage.getItem('preloaderSeen') === '1';
+  sessionStorage.setItem('preloaderSeen', '1');
+} catch { /* storage unavailable */ }
+if (SEEN && typeof document !== 'undefined') {
+  document.body.classList.add('is-loaded');
+}
+
 function Preloader() {
-  const [phase, setPhase] = useState('first');
+  const [phase, setPhase] = useState(SEEN ? 'done' : 'first');
   const [count, setCount] = useState(0);
 
   useEffect(() => {
+    // Returning visitors in the same session: no intro at all.
+    if (SEEN) {
+      document.body.classList.add('is-loaded');
+      return undefined;
+    }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const t = reduce ? { second: 150, exit: 300, done: 500 } : TIMING;
 

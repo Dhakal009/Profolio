@@ -771,13 +771,16 @@ export default function Dock({
     };
 
     wakeRef.current = () => {
-      const enabled = settingsRef.current.autoHide;
+      const s = settingsRef.current;
+      const enabled = s.autoHide;
       if (enabled !== hiding) {
         hiding = enabled;
         if (enabled) hide();
         else show();
       }
-      wake();
+      if (pointer.inside || held !== null || focused >= 0 || s.base !== lastBase) {
+        wake();
+      }
     };
 
     actionsRef.current = {

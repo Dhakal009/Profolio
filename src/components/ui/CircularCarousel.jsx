@@ -126,7 +126,7 @@ const PRESETS = {
 };
 
 const INTRO_LENGTH = { assemble: 1500, rise: 1400, spin: 1800, none: 0 };
-const TILES = 8;
+const TILES = 5;
 const OVERLAP = 2.5;
 const DRAG_THRESHOLD = 5;
 const SPRING = 118;
@@ -435,7 +435,10 @@ const CircularCarousel = ({
     if (!root || !stage || !camera || !ring) return undefined;
     const state = stateRef.current;
     let raf = 0;
-    let visible = true;
+    const stackSection = root.closest('.stack-section');
+    let ioVisible = false;
+    let stackVisible = stackSection ? stackSection.dataset.stackActive !== 'false' : true;
+    let visible = ioVisible && stackVisible;
 
     const nearest = (angle) => Math.round(angle / settingsRef.current.step) * settingsRef.current.step;
 
@@ -683,16 +686,27 @@ const CircularCarousel = ({
     });
     resize.observe(root);
 
-    const io = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
+    const updateVisible = () => {
+      visible = ioVisible && stackVisible;
       if (visible) wake();
       else {
         cancelAnimationFrame(raf);
         raf = 0;
         state.last = 0;
       }
+    };
+
+    const io = new IntersectionObserver(([entry]) => {
+      ioVisible = entry.isIntersecting;
+      updateVisible();
     });
     io.observe(root);
+
+    const onStackActiveChange = (event) => {
+      stackVisible = Boolean(event.detail?.active);
+      updateVisible();
+    };
+    stackSection?.addEventListener('stackactivechange', onStackActiveChange);
 
     // Two-finger (trackpad) horizontal swipe turns the carousel. Vertical scrolling
     // is left alone, so the page keeps scrolling normally over the carousel.
@@ -727,6 +741,7 @@ const CircularCarousel = ({
       cancelAnimationFrame(raf);
       resize.disconnect();
       io.disconnect();
+      stackSection?.removeEventListener('stackactivechange', onStackActiveChange);
       clearTimeout(state.wheelTimer);
       root.removeEventListener('wheel', onWheel);
       document.removeEventListener('visibilitychange', onVisibility);

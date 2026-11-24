@@ -46,7 +46,6 @@ export default function Resume() {
               className="resume-action"
             >
               <span>View Projects</span>
-              <span>→</span>
             </Link>
           </div>
         </div>

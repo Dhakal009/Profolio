@@ -1,11 +1,12 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import Home from './routes/Home';
 
-const Home = lazy(() => import('./routes/Home'));
 const Projects = lazy(() => import('./routes/Projects'));
 const ProjectGallery = lazy(() => import('./ProjectGallery/ProjectGallery'));
 const Resume = lazy(() => import('./routes/Resume'));
+const TechStack = lazy(() => import('./routes/TechStack'));
 const ProjectDemo = lazy(() => import('./routes/ProjectDemo'));
 const NotFound = lazy(() => import('./routes/NotFound'));
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/projects/tunnel" element={<ProjectGallery />} />
             <Route path="/projects/:id" element={<ProjectGallery />} />
             <Route path="/resume" element={<Resume />} />
+            <Route path="/tech-stack" element={<TechStack />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/demo/:projectId" element={<ProjectDemo />} />

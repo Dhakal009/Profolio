@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLenis } from '../../contexts/LenisContext';
 import { getScrollTarget } from '../../utils/scrollTarget';
+import { openMail } from '../../utils/mailto';
 import './search-modal-extras.css';
 
 /* ------------------------------------------------------------------ */
@@ -507,7 +508,7 @@ export default function SearchModal({ isOpen, onClose }) {
       onClose();
 
       if (item.href) {
-        if (item.href.startsWith('mailto:')) window.location.href = item.href;
+        if (item.href.startsWith('mailto:')) openMail(item.href.slice(7));
         else window.open(item.href, '_blank', 'noopener,noreferrer');
         return;
       }

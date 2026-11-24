@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 
 const ThemeContext = createContext(null);
 
@@ -31,25 +32,53 @@ export function ThemeProvider({ children }) {
     localStorage.setItem('intensity', intensity.toString());
   }, [intensity]);
 
-  const toggleTheme = useCallback(() => {
-    setIsTransitioning(true);
+  const toggleTheme = useCallback((event) => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    const root = document.documentElement;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-    // Use View Transition API if available
-    if (document.startViewTransition) {
-      document.startViewTransition(() => {
-        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-      }).finished.then(() => {
-        setIsTransitioning(false);
-      }).catch(() => {
-        setIsTransitioning(false);
-      });
-    } else {
-      // Fallback for browsers without View Transitions
-      setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-      // Small delay to allow CSS transition
-      setTimeout(() => setIsTransitioning(false), 650);
+    const apply = () => {
+      // Update the DOM synchronously so the "new" snapshot is already themed.
+      root.setAttribute('data-theme', next);
+      flushSync(() => setTheme(next));
+    };
+
+    if (!document.startViewTransition || reduce) {
+      root.classList.add('theme-fade');
+      apply();
+      setTimeout(() => root.classList.remove('theme-fade'), 500);
+      return;
     }
-  }, []);
+
+    // Reveal circle grows from the clicked button (or screen centre).
+    const el = event?.currentTarget;
+    const rect = el?.getBoundingClientRect?.();
+    const x = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const y = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+    setIsTransitioning(true);
+    root.classList.add('theme-vt');
+    const transition = document.startViewTransition(apply);
+
+    transition.ready
+      .then(() => {
+        root.animate(
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          {
+            duration: 700,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            pseudoElement: '::view-transition-new(root)',
+          }
+        );
+      })
+      .catch(() => {});
+
+    transition.finished.finally(() => {
+      root.classList.remove('theme-vt');
+      setIsTransitioning(false);
+    });
+  }, [theme]);
 
   const setIntensityValue = useCallback((value) => {
     const clamped = Math.max(0.7, Math.min(1.4, value));

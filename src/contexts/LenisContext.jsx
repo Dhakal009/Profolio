@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useCallback, useState } from 'react';
 import Lenis from '@studio-freight/lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const LenisContext = createContext(null);
 
@@ -26,17 +28,22 @@ export function LenisProvider({ children }) {
     ensureResizeObserver();
 
     const instance = new Lenis({
-      duration: 0.5,
-      easing: (t) => 1 - Math.pow(1 - t, 4),
+      lerp: 0.14,
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
+      wheelMultiplier: 1,
       touchMultiplier: 1.0,
       infinite: false,
     });
 
     lenisRef.current = instance;
     setLenis(instance);
+    const hasScrollTriggerEnv = typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+    if (hasScrollTriggerEnv) {
+      gsap.registerPlugin(ScrollTrigger);
+      instance.on('scroll', ScrollTrigger.update);
+    }
 
     let frameId = 0;
     function raf(time) {
@@ -49,6 +56,9 @@ export function LenisProvider({ children }) {
 
     return () => {
       cancelAnimationFrame(frameId);
+      if (hasScrollTriggerEnv) {
+        instance.off('scroll', ScrollTrigger.update);
+      }
       instance.destroy();
       lenisRef.current = null;
       setLenis(null);

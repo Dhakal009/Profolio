@@ -103,7 +103,17 @@ const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHover
       };
     }
 
+    const stackSection = track.closest('.stack-section');
+    let ioVisible = typeof IntersectionObserver === 'undefined';
+    let stackVisible = stackSection ? stackSection.dataset.stackActive !== 'false' : true;
+    let isVisible = ioVisible && stackVisible;
+
     const animate = timestamp => {
+      if (!isVisible || document.hidden) {
+        rafRef.current = null;
+        lastTimestampRef.current = null;
+        return;
+      }
       if (lastTimestampRef.current === null) {
         lastTimestampRef.current = timestamp;
       }
@@ -130,14 +140,48 @@ const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHover
       rafRef.current = requestAnimationFrame(animate);
     };
 
-    rafRef.current = requestAnimationFrame(animate);
-
-    return () => {
+    const stopLoop = () => {
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
       lastTimestampRef.current = null;
+    };
+
+    const syncVisibility = () => {
+      isVisible = ioVisible && stackVisible;
+      if (isVisible && !document.hidden) {
+        if (rafRef.current === null) {
+          rafRef.current = requestAnimationFrame(animate);
+        }
+      } else {
+        stopLoop();
+      }
+    };
+
+    let io = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(([entry]) => {
+        ioVisible = entry.isIntersecting;
+        syncVisibility();
+      });
+      io.observe(track);
+    }
+
+    const onStackActiveChange = event => {
+      stackVisible = Boolean(event.detail?.active);
+      syncVisibility();
+    };
+    stackSection?.addEventListener('stackactivechange', onStackActiveChange);
+    document.addEventListener('visibilitychange', syncVisibility);
+
+    syncVisibility();
+
+    return () => {
+      stopLoop();
+      io?.disconnect();
+      stackSection?.removeEventListener('stackactivechange', onStackActiveChange);
+      document.removeEventListener('visibilitychange', syncVisibility);
     };
   }, [targetVelocity, seqWidth, seqHeight, isHovered, hoverSpeed, isVertical, trackRef]);
 };

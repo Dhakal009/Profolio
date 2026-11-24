@@ -63,7 +63,7 @@ export const PROJECTS = [
     techString: 'React · Express · MongoDB',
     stat: 'Full-Stack Storefront',
     link: '/demo/ecommerce-app',
-    github: 'https://github.com/Dhakal009/Profolio/tree/master/Projects/ecommerce-app',
+    github: 'https://github.com/Dhakal009/Profolio/tree/master/Projects/POSHAK',
     status: 'Live',
     accent: '#f59e0b',
     // Later: ['/shots/shop-1.png', '/shots/shop-2.png', '/shots/shop-3.png']

@@ -8,7 +8,8 @@ export default function CameraRig({
   scrollDistanceRef,
   selected,
   isMobile,
-  isRewinding = false
+  isRewinding = false,
+  active = true
 }) {
   const { camera } = useThree()
   const mouse = useRef({ x: 0, y: 0 })
@@ -28,8 +29,9 @@ export default function CameraRig({
     quickYaw.current = gsap.quickTo(camera.rotation, 'y', { duration: 0.5, ease: 'power3.out' })
     quickPitch.current = gsap.quickTo(camera.rotation, 'x', { duration: 0.5, ease: 'power3.out' })
 
+    if (!active || selected) return undefined
+
     const handlePointerMove = (e) => {
-      if (selected) return
       const x = (e.clientX / window.innerWidth - 0.5) * 2
       const y = (e.clientY / window.innerHeight - 0.5) * 2
       mouse.current.x = x
@@ -44,7 +46,7 @@ export default function CameraRig({
 
     window.addEventListener('pointermove', handlePointerMove, { passive: true })
     return () => window.removeEventListener('pointermove', handlePointerMove)
-  }, [camera, selected, isMobile])
+  }, [camera, selected, isMobile, active])
 
   // Camera focus animation facing the tile
   useEffect(() => {

@@ -1,9 +1,8 @@
-import { createContext, useContext, useRef } from "react";
+import { createContext, useContext } from "react";
 import {
   motion,
   useMotionValue,
   useReducedMotion,
-  useScroll,
   useTransform,
 } from "framer-motion";
 
@@ -11,8 +10,6 @@ import {
 /*  Shared progress                                                           */
 /* -------------------------------------------------------------------------- */
 
-// ParallaxSection publishes its smoothed scroll progress (0 → 1) here so any
-// ParallaxLayer inside can move at its own speed, from the same source.
 const ProgressContext = createContext(null);
 
 const LAYER_DISTANCE = 120; // px a layer travels each way at speed = 1
@@ -51,70 +48,38 @@ export function ParallaxLayer({ speed = 0, as = "div", className = "", children,
 /* -------------------------------------------------------------------------- */
 
 /**
- * @param offset   px the content travels each way while crossing the screen
- * @param background  optional node drawn behind the content that lags the page
- * @param bgSpeed  how far the background lags (0 = none, 1 = same as offset)
- * @param fade     fade/scale content in and out at the section edges
+ * Static section container; scroll transitions are handled by StackSection.
  */
 export default function ParallaxSection({
   id,
   title,
   children,
   background = null,
-  offset = 42,
-  bgSpeed = 0.25,
-  fade = true,
   className = "",
 }) {
-  const ref = useRef(null);
-  const reduce = useReducedMotion();
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"], // section entering → leaving
-  });
-
-  // Use the shared scroll progress directly. A second spring here makes
-  // section motion trail behind Lenis and produces a visibly laggy handoff.
-  const progress = scrollYProgress;
-
-  // Content: travels up through the section.
-  const y = useTransform(progress, [0, 1], [offset, -offset]);
-  const opacity = useTransform(progress, [0, 0.15, 0.85, 1], fade ? [0, 1, 1, 0] : [1, 1, 1, 1]);
-  const scale = useTransform(progress, [0, 0.15, 0.85, 1], fade ? [0.96, 1, 1, 0.96] : [1, 1, 1, 1]);
-
-  // Background: lags the page, so it reads as further away.
-  const bgDistance = offset * bgSpeed * 1.5;
-  const bgY = useTransform(progress, [0, 1], [-bgDistance, bgDistance]);
-
   return (
-    <ProgressContext.Provider value={progress}>
+    <ProgressContext.Provider value={null}>
       <section
-        ref={ref}
         id={id}
         data-transition-section
         className={`section focus-section relative overflow-hidden ${className}`}
         aria-labelledby={`${id}-title`}
       >
         {background && (
-          <motion.div
+          <div
             aria-hidden="true"
-            style={reduce ? undefined : { y: bgY }}
-            className="pointer-events-none absolute inset-x-0 -inset-y-[20%] -z-10 will-change-transform"
+            className="pointer-events-none absolute inset-x-0 -inset-y-[20%] -z-10"
           >
             {background}
-          </motion.div>
+          </div>
         )}
 
-        <motion.div
-          style={reduce ? undefined : { y, opacity, scale }}
-          className="container section-centered will-change-transform"
-        >
+        <div className="container section-centered">
           <h2 className="sr-only" id={`${id}-title`}>
             {title}
           </h2>
           <div className="section-content">{children}</div>
-        </motion.div>
+        </div>
       </section>
     </ProgressContext.Provider>
   );

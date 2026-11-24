@@ -1,13 +1,5 @@
 import { Link } from 'react-router-dom';
 
-function ArrowIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-6-6 6 6-6 6" />
-    </svg>
-  );
-}
-
 export default function NotFound() {
   return (
     <section className="not-found-page" aria-labelledby="not-found-title">
@@ -22,7 +14,6 @@ export default function NotFound() {
         <div className="not-found-actions">
           <Link to="/" className="btn btn--primary">
             Back to home
-            <ArrowIcon />
           </Link>
           <Link to="/projects" className="btn btn--ghost">
             Explore projects

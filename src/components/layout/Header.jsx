@@ -6,6 +6,7 @@ import ThemeToggle from '../ui/ThemeToggle';
 import SearchModal from '../search/SearchModal';
 import { DockMenu, THEMES } from '../ui/Dock';
 import { getScrollTarget } from '../../utils/scrollTarget';
+import { openMail, handleMailClick } from '../../utils/mailto';
 import { PROJECTS } from '../../data/projects';
 
 const navItems = [
@@ -22,7 +23,6 @@ const sections = [
   { id: 'about', title: 'About' },
   { id: 'projects', title: 'Projects' },
   { id: 'skills', title: 'Skills' },
-  { id: 'education', title: 'Education' },
   { id: 'deliver', title: 'What I Deliver' },
   { id: 'contact', title: 'Contact' },
 ];
@@ -31,6 +31,7 @@ const routeTitles = {
   '/projects': 'Projects',
   '/projects/tunnel': '3D Project Tunnel',
   '/resume': 'Resume',
+  '/tech-stack': 'Tech Stack',
   '/demo/ems': 'EMS · Live Demo',
   '/demo/live-chat': 'Live Chat · Live Demo',
   '/demo/ecommerce-app': 'E-Commerce · Live Demo',
@@ -79,32 +80,37 @@ function Header() {
 
   useEffect(() => {
     const showDock = () => {
-      setIsDockHidden(false);
+      setIsDockHidden((prev) => (prev ? false : prev));
     };
 
     const hideDock = () => {
-      setIsDockHidden(true);
+      setIsDockHidden((prev) => (prev ? prev : true));
 
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
 
+    let scrollRaf = 0;
     const onScroll = () => {
-      setIsScrolled(window.scrollY > 12);
-      // If Lenis is actively coasting after user stopped interacting, avoid postponing dock reveal
-      if (lenis && lenis.isScrolling) {
-        if (Date.now() - lastUserScrollTimeRef.current > 40) {
-          return;
-        }
+      if (!scrollRaf) {
+        scrollRaf = requestAnimationFrame(() => {
+          scrollRaf = 0;
+          const scrolled = window.scrollY > 12;
+          setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
+        });
+      }
+      if (lenis && lenis.isScrolling && Date.now() - lastUserScrollTimeRef.current > 40) {
+        return;
       }
       hideDock();
-      scrollTimeoutRef.current = window.setTimeout(showDock, 0);
+      scrollTimeoutRef.current = window.setTimeout(showDock, 140);
     };
 
     const onWheel = () => {
       lastUserScrollTimeRef.current = Date.now();
       hideDock();
+      scrollTimeoutRef.current = window.setTimeout(showDock, 160);
     };
 
     const onTouchMove = () => {
@@ -114,7 +120,7 @@ function Header() {
 
     const onTouchEnd = () => {
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-      showDock();
+      scrollTimeoutRef.current = window.setTimeout(showDock, 120);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -126,14 +132,11 @@ function Header() {
     if (lenis) {
       const onLenisScroll = (e) => {
         const vel = Math.abs(e.velocity);
-          // Lenis velocity is the reliable settled signal, including trackpads.
-          if (vel < 1.2) {
+        if (vel < 1.2) {
           showDock();
           if (scrollTimeoutRef.current) {
             clearTimeout(scrollTimeoutRef.current);
           }
-          } else {
-            hideDock();
         }
       };
       lenis.on('scroll', onLenisScroll);
@@ -141,6 +144,7 @@ function Header() {
     }
 
     return () => {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('touchmove', onTouchMove);
@@ -159,12 +163,11 @@ function Header() {
       return;
     }
 
-    // Use the viewport position as the source of truth. IntersectionObserver
-    // can report several stacked/sticky sections in the same batch, causing a
-    // later section (such as Contact) to win while the page is still at the top.
+    let rafId = 0;
     const updateActiveSection = () => {
+      rafId = 0;
       if (window.scrollY < 100) {
-        setActiveId('hero');
+        setActiveId((prev) => (prev === 'hero' ? prev : 'hero'));
         return;
       }
 
@@ -176,12 +179,12 @@ function Header() {
         const rect = el.getBoundingClientRect();
         if (rect.top <= focusY && rect.bottom > focusY) matched = id;
       }
-      setActiveId(matched);
+      setActiveId((prev) => (prev === matched ? prev : matched));
     };
 
     const onScrollUpdate = () => {
-      if (location.pathname !== '/') return;
-      updateActiveSection();
+      if (location.pathname !== '/' || rafId) return;
+      rafId = requestAnimationFrame(updateActiveSection);
     };
 
     if (location.state?.scrollTo) {
@@ -200,6 +203,7 @@ function Header() {
     }
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       clearTimeout(t1);
       clearTimeout(t2);
       window.removeEventListener('scroll', onScrollUpdate);
@@ -576,7 +580,7 @@ function Header() {
         {
           label: 'Email: bikashdhakal546@gmail.com',
           onClick: () => {
-            window.location.href = 'mailto:bikashdhakal546@gmail.com';
+            openMail();
           },
         },
         {
@@ -593,7 +597,7 @@ function Header() {
       {
         label: 'Send Email',
         onClick: () => {
-          window.location.href = 'mailto:bikashdhakal546@gmail.com';
+          openMail();
         },
       },
       {
@@ -636,18 +640,6 @@ function Header() {
                   aria-label="Back to Home"
                   onClick={handleHome}
                 >
-                  <svg
-                    className="header-home-icon"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                  </svg>
                   Home
                 </button>
                 <span className="header-page-sep" aria-hidden="true">/</span>
@@ -784,7 +776,10 @@ function Header() {
             <a
               href="mailto:bikashdhakal546@gmail.com"
               className="dock-cta dock-tile"
-              onClick={() => triggerHop(navItems.length + 1)}
+              onClick={(e) => {
+                handleMailClick(e);
+                triggerHop(navItems.length + 1);
+              }}
               ref={(el) => (tileRefs.current[navItems.length + 1] = el)}
               onContextMenu={(e) => openContextMenu(e, navItems.length + 1, ctaMenuData)}
               onPointerDown={(e) => handlePointerDown(e, navItems.length + 1, ctaMenuData)}

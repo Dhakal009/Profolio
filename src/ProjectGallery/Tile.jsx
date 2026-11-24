@@ -67,11 +67,13 @@ function getEmptyMaterials(isDark) {
 
 function createProjectCardTexture(project, isDark) {
   if (typeof document === 'undefined') return null
+  const scale = 0.75
   const canvas = document.createElement('canvas')
-  canvas.width = 1024
-  canvas.height = 640
+  canvas.width = Math.round(1024 * scale)
+  canvas.height = Math.round(640 * scale)
   const ctx = canvas.getContext('2d')
   if (!ctx) return null
+  ctx.scale(scale, scale)
 
   const radius = 28
   const isBlack = isDark

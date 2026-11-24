@@ -247,6 +247,13 @@ function step(en, dt, vh) {
     P.hideCovered && nx && nx.ready && c >= 0.999 && nx.enter >= 0.999 && nx.h >= vh - 1;
   put(en, "vis", en.panel, "visibility", hidden ? "hidden" : "visible");
 
+  const active = !hidden && (en.enter > 0.001 || en.enterT > 0.001);
+  if (en.active !== active) {
+    en.active = active;
+    en.el.dataset.stackActive = active ? "true" : "false";
+    en.el.dispatchEvent(new CustomEvent("stackactivechange", { detail: { active } }));
+  }
+
   return busy;
 }
 
@@ -285,8 +292,8 @@ export default function StackSection({
   exit = 1, // how far the covered section moves out (0 = pinned)
   tilt = 0, // flat slider motion is cheaper and clearer
   perspective = 1400,
-  smoothing = 1.15, // responsive slider settling
-  bounce = 11, // short magnetic nudge from scroll velocity, in pixels
+  smoothing = 2.4, // track Lenis tightly without secondary lag
+  bounce = 0, // avoid competing bounce on top of Lenis inertia
   hideCovered = true, // stop painting a section once it is fully covered
   background = "var(--bg, #000000)", // must be opaque
   className = "",
@@ -324,6 +331,7 @@ export default function StackSection({
       bounce: 0, lastTarget: 1,
       lastE: -1, lastC: -1, lastT: -1,
       rounded: null,
+      active: null,
       w: {}, // last written values
     };
     en.shadow.style.boxShadow = SHADOW_UP;

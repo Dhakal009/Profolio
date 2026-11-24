@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLenis } from '../../contexts/LenisContext';
+import { handleMailClick } from '../../utils/mailto';
 import { getScrollTarget } from '../../utils/scrollTarget';
 
 const SITEMAP = [
@@ -80,6 +81,7 @@ function Footer() {
                       href={item.href}
                       target={item.href.startsWith('mailto:') ? '_self' : '_blank'}
                       rel="noopener noreferrer"
+                      onClick={item.href.startsWith('mailto:') ? (e) => handleMailClick(e, item.href.slice(7)) : undefined}
                       className="footer-link-text"
                     >
                       {item.label}
@@ -102,6 +104,7 @@ function Footer() {
                         href={item.href}
                         target={item.href.startsWith('mailto:') ? '_self' : '_blank'}
                         rel="noopener noreferrer"
+                        onClick={item.href.startsWith('mailto:') ? (e) => handleMailClick(e, item.href.slice(7)) : undefined}
                         className="footer-link-text"
                       >
                         {item.label}

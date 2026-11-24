@@ -1,7 +1,5 @@
 /* ==========================================================
-   Section focus + transitions
-   Everything below only applies once JS adds .has-section-focus
-   to <html>, so the page is fully readable without it.
+   Section focus
    ========================================================== */
 
 :root {
@@ -9,42 +7,6 @@
   --focus-accent: var(--accent, #38bdf8);
 }
 
-/* ---------- Focus: the section at screen centre is lit, others recede ---------- */
-.has-section-focus .focus-section {
+.focus-section {
   position: relative;
-}
-
-.has-section-focus .focus-section .section-content {
-  opacity: 0.68;
-  transition:
-    opacity 0.65s var(--focus-ease),
-    transform 0.7s var(--focus-ease);
-  will-change: opacity, transform;
-}
-
-/* Sections below the viewport wait slightly lower and rise into place;
-   sections already read drift up a little. */
-.has-section-focus .focus-section[data-state='upcoming'] .section-content {
-  opacity: 0.58;
-  transform: translate3d(0, 12px, 0) scale(0.99);
-}
-.has-section-focus .focus-section[data-state='past'] .section-content {
-  opacity: 0.62;
-  transform: translate3d(0, -8px, 0) scale(0.995);
-}
-
-.has-section-focus .focus-section[data-state='active'] .section-content,
-.has-section-focus .focus-section:hover .section-content,
-.has-section-focus .focus-section:focus-within .section-content {
-  opacity: 1;
-  transform: none;
-}
-
-/* ---------- Reduced motion: no dimming, no movement ---------- */
-@media (prefers-reduced-motion: reduce) {
-  .has-section-focus .focus-section .section-content {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none;
-  }
 }

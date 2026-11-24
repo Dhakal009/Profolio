@@ -1,0 +1,658 @@
+.ts-page {
+  position: relative;
+  padding: clamp(5.2rem, 9vh, 6.5rem) clamp(1.25rem, 4vw, 3.5rem) 4.5rem;
+  overflow: clip;
+}
+
+.ts-glow {
+  position: absolute;
+  top: -8rem;
+  left: 50%;
+  width: min(70rem, 120vw);
+  height: 32rem;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, var(--hero-glow, rgba(255, 255, 255, 0.12)), transparent 72%);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: tsGlow 9s ease-in-out infinite alternate;
+}
+@keyframes tsGlow {
+  to {
+    translate: -46% 1.5rem;
+    scale: 1.08;
+  }
+}
+
+.ts-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+/* ---------- compact top bar ---------- */
+.ts-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid var(--line);
+}
+.ts-crumb {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ts-crumb a {
+  color: inherit;
+  transition: color 0.3s;
+}
+.ts-crumb a:hover,
+.ts-crumb b {
+  color: var(--foam);
+}
+.ts-crumb b {
+  font-weight: 500;
+}
+.ts-crumb-meta {
+  opacity: 0.75;
+}
+
+.ts-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.52rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card-bg);
+  color: var(--foam);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 0.4s var(--ease-out), background 0.3s, color 0.3s, border-color 0.3s;
+}
+.ts-download:hover {
+  transform: translateY(-2px);
+  background: var(--foam);
+  color: var(--bg);
+  border-color: var(--foam);
+}
+.ts-download:active {
+  transform: translateY(0) scale(0.98);
+}
+.ts-download.is-done {
+  background: var(--foam);
+  color: var(--bg);
+  border-color: var(--foam);
+}
+.ts-download svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 0.4s var(--ease-out);
+}
+.ts-download:hover svg {
+  transform: translateY(2px);
+}
+.ts-download.is-done svg {
+  transform: scale(1.1);
+}
+
+/* ---------- layout: sticky index + tree ---------- */
+.ts-layout {
+  --rail-w: 11rem;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  gap: clamp(1.25rem, 3.5vw, 2.75rem);
+  margin-top: 2rem;
+  align-items: start;
+  transition: grid-template-columns 0.55s var(--ease-out), gap 0.55s var(--ease-out);
+}
+.ts-layout.is-collapsed {
+  --rail-w: 2.35rem;
+}
+
+.ts-rail {
+  position: sticky;
+  top: 6.5rem;
+  width: var(--rail-w);
+  overflow: hidden;
+  transition: width 0.55s var(--ease-out);
+}
+.ts-rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+  min-height: 2.15rem;
+}
+.ts-rail-title {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 7rem;
+  transition: opacity 0.3s, max-width 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+}
+.ts-rail-toggle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.15rem;
+  height: 2.15rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--foam);
+  cursor: pointer;
+  transition: color 0.3s, border-color 0.3s, background 0.3s, transform 0.4s var(--ease-out);
+}
+.ts-rail-toggle:hover {
+  border-color: var(--foam);
+  transform: scale(1.06);
+}
+.ts-rail-toggle:active {
+  transform: scale(0.94);
+}
+/* Animated burger icon (morphs between ≡ and ×) */
+.ts-burger {
+  position: relative;
+  width: 0.9rem;
+  height: 0.68rem;
+  display: block;
+}
+.ts-burger span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: center;
+  transition: transform 0.45s var(--ease-out), opacity 0.25s ease, width 0.35s var(--ease-out), top 0.45s var(--ease-out);
+}
+.ts-burger span:nth-child(1) {
+  top: 0;
+}
+.ts-burger span:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ts-burger span:nth-child(3) {
+  bottom: 0;
+}
+.ts-rail-toggle:not(.is-open):hover .ts-burger span:nth-child(2) {
+  width: 70%;
+}
+.ts-rail-toggle.is-open .ts-burger span:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+.ts-rail-toggle.is-open .ts-burger span:nth-child(2) {
+  opacity: 0;
+  transform: translateY(-50%) scaleX(0);
+}
+.ts-rail-toggle.is-open .ts-burger span:nth-child(3) {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%) rotate(-45deg);
+}
+
+.ts-rail ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--line);
+  transform-origin: left top;
+  transition: opacity 0.35s ease, transform 0.5s var(--ease-out), max-height 0.5s var(--ease-out);
+  max-height: 28rem;
+}
+.is-collapsed .ts-rail-title {
+  opacity: 0;
+  max-width: 0;
+  transform: translateX(-0.4rem);
+  pointer-events: none;
+}
+.is-collapsed .ts-rail ol {
+  opacity: 0;
+  transform: translateX(-0.9rem);
+  max-height: 0;
+  pointer-events: none;
+}
+.ts-rail li {
+  position: relative;
+}
+.ts-rail button.ts-rail-link {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.38rem 0 0.38rem 0.8rem;
+  background: none;
+  border: 0;
+  text-align: left;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.ts-rail-link small {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+.ts-rail-link:hover {
+  color: var(--foam);
+}
+/* active marker sits exactly on the rail line */
+.ts-rail li::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  background: var(--foam);
+  translate: 0 -50%;
+  transition: height 0.4s var(--ease-out);
+}
+.ts-rail li.is-active::before {
+  height: 1.1rem;
+}
+.ts-rail li.is-active .ts-rail-link {
+  color: var(--foam);
+}
+/* ---------- tree ---------- */
+.ts-root {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 1.05rem;
+  border: 1px solid var(--foam);
+  border-radius: 0.9rem;
+  background: var(--card-bg);
+  width: fit-content;
+  max-width: 100%;
+}
+.ts-root-badge {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.65rem;
+  background: var(--foam);
+  color: var(--bg);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+.ts-root-name {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foam);
+}
+.ts-root-sub {
+  margin-top: 0.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ts-trunk {
+  position: relative;
+  margin-left: 1.35rem;
+  padding-left: 1.6rem;
+}
+/* main vertical line, draws downward */
+.ts-trunk::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 1.25rem;
+  width: 1px;
+  background: linear-gradient(var(--line), var(--muted));
+  transform-origin: top;
+  animation: tsDraw 1.2s var(--ease-out) 0.4s both;
+}
+@keyframes tsDraw {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.ts-branch {
+  position: relative;
+  padding: 1.35rem 0 0.25rem;
+  scroll-margin-top: 5.5rem;
+}
+/* horizontal elbow into the category node */
+.ts-branch::before {
+  content: '';
+  position: absolute;
+  left: -1.6rem;
+  top: 2.35rem;
+  width: 1.6rem;
+  height: 1px;
+  background: var(--muted);
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.6s var(--ease-out) 0.08s;
+}
+.ts-branch.is-in::before {
+  transform: scaleX(1);
+}
+.ts-branch::after {
+  content: '';
+  position: absolute;
+  left: -1.6rem;
+  top: 2.35rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--foam);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--line);
+  translate: -50% -50%;
+}
+
+.ts-node {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--card-bg);
+  width: fit-content;
+  max-width: 100%;
+}
+.ts-node-num {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.ts-node-title {
+  font-family: var(--font-heading);
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--foam);
+}
+.ts-node-count {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  padding: 0.14rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* leaves: compact multi-column grid inside each branch */
+.ts-leaves {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0.85rem 0 0 1.25rem;
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
+}
+.ts-leaves::before {
+  content: '';
+  position: absolute;
+  left: 0.45rem;
+  top: 0;
+  bottom: 0.6rem;
+  width: 1px;
+  background: var(--line);
+}
+
+.ts-leaf {
+  --mx: 50%;
+  --my: 50%;
+  --rx: 0deg;
+  --ry: 0deg;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.8rem 0.95rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: var(--card-bg);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transform: perspective(650px) rotateX(0deg) rotateY(0deg) translateY(0) scale(1);
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.45s ease;
+}
+.ts-leaf-wrap {
+  position: relative;
+  display: flex;
+}
+.ts-leaf-wrap > .ts-leaf {
+  width: 100%;
+}
+.ts-leaf::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(15rem circle at var(--mx) var(--my), var(--hero-glow, rgba(255, 255, 255, 0.18)), transparent 62%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+/* Top-edge highlight sweep on hover */
+.ts-leaf::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--foam), transparent);
+  opacity: 0;
+  transform: scaleX(0.35);
+  transition: opacity 0.4s ease, transform 0.55s var(--ease-out);
+  pointer-events: none;
+}
+.ts-leaf:hover {
+  transform: perspective(650px) rotateX(var(--ry)) rotateY(var(--rx)) translateY(-5px) scale(1.015);
+  border-color: var(--muted);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.42);
+  will-change: transform;
+}
+.ts-leaf:active {
+  transform: perspective(650px) translateY(-2px) scale(0.99);
+}
+.ts-leaf:hover::before {
+  opacity: 1;
+}
+.ts-leaf:hover::after {
+  opacity: 0.75;
+  transform: scaleX(1);
+}
+
+.ts-leaf-top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.ts-ext {
+  margin-left: auto;
+  flex: none;
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--muted);
+  opacity: 0.45;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s, color 0.3s;
+}
+.ts-leaf:hover .ts-ext {
+  opacity: 1;
+  color: var(--foam);
+  transform: translate(3px, -3px) scale(1.1);
+}
+.ts-badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.55rem;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--foam);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.35s, color 0.35s, border-color 0.35s;
+}
+.ts-leaf:hover .ts-badge {
+  transform: rotate(-10deg) scale(1.12);
+  background: var(--foam);
+  color: var(--bg);
+  border-color: var(--foam);
+}
+.ts-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--foam);
+  transition: transform 0.4s var(--ease-out);
+}
+.ts-leaf:hover .ts-name {
+  transform: translateX(2px);
+}
+.ts-desc {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+/* third level: where it is used */
+.ts-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: auto 0 0;
+  padding: 0.15rem 0 0;
+  list-style: none;
+}
+.ts-tags li {
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.03em;
+  transition: color 0.3s, border-color 0.3s;
+}
+.ts-leaf:hover .ts-tags li {
+  color: var(--foam);
+  border-color: var(--muted);
+}
+
+.ts-cta {
+  margin-top: 4.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.ts-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--foam);
+  font-weight: 500;
+  transition: transform 0.4s var(--ease-out), background 0.3s, color 0.3s;
+}
+.ts-btn:hover {
+  transform: translateY(-2px);
+  background: var(--foam);
+  color: var(--bg);
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 900px) {
+  .ts-layout,
+  .ts-layout.is-collapsed {
+    grid-template-columns: 1fr;
+    --rail-w: 100%;
+  }
+  .ts-rail {
+    position: static;
+    width: 100%;
+  }
+  .ts-rail ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    border: 0;
+  }
+  .ts-rail li::before {
+    display: none;
+  }
+  .ts-rail button.ts-rail-link {
+    width: auto;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--card-bg);
+  }
+  .ts-rail li.is-active .ts-rail-link {
+    border-color: var(--foam);
+  }
+  .is-collapsed .ts-rail ol {
+    display: none;
+  }
+}@media (max-width: 560px) {
+  .ts-trunk {
+    margin-left: 0.5rem;
+    padding-left: 1.1rem;
+  }
+  .ts-branch::before {
+    left: -1.1rem;
+    width: 1.1rem;
+  }
+  .ts-branch::after {
+    left: -1.1rem;
+  }
+  .ts-leaves {
+    padding-left: 0.9rem;
+  }
+  .ts-leaves::before {
+    left: 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-glow,
+  .ts-title-word--accent,
+  .ts-trunk::before {
+    animation: none;
+  }
+}

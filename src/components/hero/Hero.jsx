@@ -22,6 +22,9 @@ function Hero() {
     if (!el) return undefined;
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
 
+    const stackSection = el.closest('.stack-section');
+    let stackActive = stackSection ? stackSection.dataset.stackActive !== 'false' : true;
+
     const finePointer = window.matchMedia?.('(pointer: fine)').matches;
 
     // target = where the value should be, cur = eased value actually shown
@@ -67,15 +70,17 @@ function Hero() {
     };
 
     const wake = () => {
-      if (!raf) raf = requestAnimationFrame(frame);
+      if (!raf && stackActive) raf = requestAnimationFrame(frame);
     };
 
     const onScroll = () => {
+      if (!stackActive) return;
       readScroll();
       wake();
     };
 
     const onPointer = (e) => {
+      if (!stackActive) return;
       target.mx = e.clientX / window.innerWidth - 0.5;
       target.my = e.clientY / window.innerHeight - 0.5;
       wake();
@@ -87,12 +92,23 @@ function Hero() {
       wake();
     };
 
+    const onStackActiveChange = (e) => {
+      stackActive = Boolean(e.detail?.active);
+      if (!stackActive) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        onScroll();
+      }
+    };
+
     const ro = new ResizeObserver(() => {
       height = el.offsetHeight || window.innerHeight;
       onScroll();
     });
     ro.observe(el);
 
+    stackSection?.addEventListener('stackactivechange', onStackActiveChange);
     window.addEventListener('scroll', onScroll, { passive: true });
     if (finePointer) {
       window.addEventListener('pointermove', onPointer, { passive: true });
@@ -104,6 +120,7 @@ function Hero() {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      stackSection?.removeEventListener('stackactivechange', onStackActiveChange);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('pointermove', onPointer);
       document.documentElement.removeEventListener('pointerleave', onLeave);
@@ -111,7 +128,12 @@ function Hero() {
   }, []);
 
   return (
-    <div ref={heroRef} className="hero relative w-full h-[100dvh] overflow-hidden select-none" role="region" aria-label="Hero Section">
+    <div
+      ref={heroRef}
+      className="hero relative w-full h-[100dvh] overflow-hidden select-none"
+      role="region"
+      aria-label="Hero Section"
+    >
       <div className="hero-head">
         <div className="hero-composition">
           {/* Soft ambient glow behind the portrait */}
