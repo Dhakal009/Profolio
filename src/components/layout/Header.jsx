@@ -215,6 +215,7 @@ function Header() {
     (id) => {
       const target = document.getElementById(id);
       if (!target) return;
+      if (lenis) lenis.resize();
       const destination = getScrollTarget(target);
       if (lenis) lenis.scrollTo(destination, { offset: -40, duration: 0.9, force: true });
       else target.scrollIntoView({ behavior: 'smooth' });

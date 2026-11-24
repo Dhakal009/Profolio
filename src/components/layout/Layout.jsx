@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useLocation, useOutlet } from 'react-router-dom';
+import { AnimatePresence, motion, useIsPresent, useReducedMotion } from 'framer-motion';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ThemeProvider } from '../../contexts/ThemeContext';
 import { LenisProvider, useLenis } from '../../contexts/LenisContext';
@@ -16,8 +16,20 @@ import { getScrollTarget } from '../../utils/scrollTarget';
 import '@fontsource/inter/800.css';
 import '@fontsource/inter/900.css';
 
+// Freezes the exiting route element during AnimatePresence transitions
+// so the old page never flashes the incoming route's content while fading out.
+function AnimatedOutlet() {
+  const outlet = useOutlet();
+  const isPresent = useIsPresent();
+  const frozenOutletRef = useRef(outlet);
+  if (isPresent) {
+    frozenOutletRef.current = outlet;
+  }
+  return frozenOutletRef.current;
+}
+
 // Adds `is-visible` to `.reveal` elements as they enter the viewport.
-function useGlobalReveal(pathname) {
+function useGlobalReveal(pathname, readyTick) {
   useEffect(() => {
     let observer = null;
 
@@ -67,7 +79,7 @@ function useGlobalReveal(pathname) {
       mutationObserver.disconnect();
       if (observer) observer.disconnect();
     };
-  }, [pathname]);
+  }, [pathname, readyTick]);
 }
 
 // Keeps GSAP ScrollTrigger in step with the app's single Lenis instance.
@@ -83,13 +95,15 @@ function useLenisScrollTrigger() {
 }
 
 // Scroll to top (or to the #hash target) whenever the route changes
-function useRouteScroll(pathname, hash, state) {
+function useRouteScroll(pathname, hash, state, readyTick) {
   const { lenis } = useLenis();
   const isInitialLoadRef = useRef(true);
+  const prevPathRef = useRef(pathname);
 
   useEffect(() => {
     if (isInitialLoadRef.current) {
       isInitialLoadRef.current = false;
+      prevPathRef.current = pathname;
       if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'manual';
       }
@@ -101,12 +115,20 @@ function useRouteScroll(pathname, hash, state) {
       return;
     }
 
+    // Defer scroll reset/jump on pathname change until AnimatePresence finishes
+    // exiting the previous page so it doesn't snap to top mid-fade-out.
+    if (prevPathRef.current !== pathname) {
+      prevPathRef.current = pathname;
+      return;
+    }
+
     const targetId = state?.scrollTo || (hash ? hash.slice(1) : null);
 
     const tryScroll = () => {
       if (!targetId) return false;
       const target = document.getElementById(targetId);
       if (!target) return false;
+      if (lenis) lenis.resize();
       const destination = getScrollTarget(target);
       if (lenis) lenis.scrollTo(destination, { offset: -40, duration: 0.9, force: true });
       else target.scrollIntoView({ behavior: 'smooth' });
@@ -116,12 +138,20 @@ function useRouteScroll(pathname, hash, state) {
     if (targetId) {
       if (tryScroll()) return;
       let t2;
+      let t3;
       const t1 = setTimeout(() => {
-        if (!tryScroll()) t2 = setTimeout(tryScroll, 200);
+        if (!tryScroll()) {
+          t2 = setTimeout(() => {
+            if (!tryScroll()) {
+              t3 = setTimeout(tryScroll, 260);
+            }
+          }, 160);
+        }
       }, 80);
       return () => {
         clearTimeout(t1);
         clearTimeout(t2);
+        clearTimeout(t3);
       };
     }
 
@@ -134,16 +164,18 @@ function useRouteScroll(pathname, hash, state) {
       }
     });
     return () => cancelAnimationFrame(frame);
-  }, [pathname, hash, state, lenis]);
+  }, [pathname, hash, state, readyTick, lenis]);
 }
 
 function Shell() {
   const { pathname, hash, state } = useLocation();
   const { lenis } = useLenis();
+  const reduceMotion = useReducedMotion();
+  const [readyTick, setReadyTick] = useState(0);
   const isProjects = pathname.startsWith('/projects');
-  useGlobalReveal(pathname);
+  useGlobalReveal(pathname, readyTick);
   useLenisScrollTrigger();
-  useRouteScroll(pathname, hash, state);
+  useRouteScroll(pathname, hash, state, readyTick);
 
   // Re-measure once fonts are ready (fixes wrong scroll lengths in production)
   useEffect(() => {
@@ -153,27 +185,47 @@ function Shell() {
     });
   }, [lenis]);
 
+  const handleExitComplete = () => {
+    if (!hash && !state?.scrollTo) {
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true, force: true });
+      } else {
+        window.scrollTo(0, 0);
+      }
+    }
+    lenis?.resize();
+    ScrollTrigger.refresh();
+    setReadyTick((n) => n + 1);
+  };
+
   return (
     <>
       <SkipLink />
       <Preloader />
       <Header />
       <main id="pageMain" role="main">
-        <AnimatePresence initial={false} mode="sync">
+        <AnimatePresence initial={false} mode="wait" onExitComplete={handleExitComplete}>
           <motion.div
             key={pathname}
-            initial={{ opacity: 0, y: 24 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-            onAnimationComplete={() => {
+            exit={
+              reduceMotion
+                ? { opacity: 0, transition: { duration: 0.01 } }
+                : { opacity: 0, y: -12, transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }
+            }
+            transition={{ duration: reduceMotion ? 0.01 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+            onAnimationComplete={(definition) => {
+              if (definition && definition.opacity === 0) return;
               // Page is now at its final size: re-measure Lenis and every ScrollTrigger
               lenis?.resize();
               ScrollTrigger.refresh();
             }}
             className="page"
           >
-            <Outlet />
+            <Suspense fallback={<div className="route-fallback" aria-hidden="true" />}>
+              <AnimatedOutlet />
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>

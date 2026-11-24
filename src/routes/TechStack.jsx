@@ -155,7 +155,7 @@ function Leaf({ item, index, reduce }) {
       className="ts-leaf-wrap"
       initial={reduce ? false : { opacity: 0, x: -18 }}
       whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+      viewport={{ once: true, amount: 'some' }}
       transition={{ duration: 0.7, ease: EASE, delay: index * 0.06 }}
     >
       <a
@@ -194,7 +194,7 @@ function Branch({ group, index, reduce }) {
       aria-labelledby={`h-${slug(group.title)}`}
       initial={reduce ? false : { opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+      viewport={{ once: true, amount: 'some' }}
       transition={{ duration: 0.8, ease: EASE }}
       onViewportEnter={(entry) => entry?.target?.classList.add('is-in')}
     >
@@ -325,7 +325,7 @@ export default function TechStack() {
               className="ts-root"
               initial={reduce ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: EASE, delay: 0.55 }}
+              transition={{ duration: 0.8, ease: EASE, delay: 0.12 }}
             >
               <span className="ts-root-badge" aria-hidden="true">B.</span>
               <div>

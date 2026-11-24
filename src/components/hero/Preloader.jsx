@@ -65,11 +65,15 @@ function Preloader() {
     const timers = [
       setTimeout(() => setPhase('second'), t.second),
       setTimeout(() => {
+        SEEN = true;
         setPhase('exit');
         document.body.classList.remove('is-preloading');
         document.body.classList.add('is-loaded');
       }, t.exit),
-      setTimeout(() => setPhase('done'), t.done),
+      setTimeout(() => {
+        SEEN = true;
+        setPhase('done');
+      }, t.done),
     ];
 
     return () => {

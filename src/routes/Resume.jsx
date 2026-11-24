@@ -51,28 +51,11 @@ export default function Resume() {
         </div>
 
         <div className="resume-viewer">
-          <object
-            data="/resume.pdf#view=FitH"
-            type="application/pdf"
-            className="w-full h-[78vh] min-h-[580px] block"
-          >
-            <iframe
-              src="/resume.pdf#view=FitH"
-              title="Bikash Dhakal Resume"
-              className="w-full h-[78vh] min-h-[580px] border-0"
-            >
-              <div className="resume-fallback">
-                <p className="text-foam text-base font-medium mb-3">Your browser does not support inline PDF viewing.</p>
-                <a
-                  href="/resume.pdf"
-                  download
-                  className="inline-block px-5 py-2.5 rounded-lg bg-foam text-bg text-sm font-semibold"
-                >
-                  Download Resume PDF
-                </a>
-              </div>
-            </iframe>
-          </object>
+          <iframe
+            src="/resume.pdf#view=FitH"
+            title="Bikash Dhakal Resume"
+            className="w-full h-[78vh] min-h-[580px] border-0 block"
+          />
         </div>
       </div>
     </div>
