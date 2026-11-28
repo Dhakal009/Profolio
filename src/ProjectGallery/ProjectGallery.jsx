@@ -7,7 +7,7 @@ import gsap from 'gsap'
 import { useTheme } from '../contexts/ThemeContext'
 import { useOptionalLenis } from '../contexts/LenisContext'
 import { getPerfProfile } from '../utils/perf'
-import { PROJECTS, CONFIG } from './data'
+import { PROJECTS, PROJECT_SLOTS, CONFIG } from './data'
 import Tunnel from './Tunnel'
 import CameraRig from './CameraRig'
 import Overlay from './Overlay'
@@ -35,9 +35,9 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
   const [scrollDistance, setScrollDistance] = useState(0)
   const [isRewinding, setIsRewinding] = useState(false)
 
-  // REDUCED TUNNEL LENGTH - 30% shorter, must match Tunnel.jsx
-  const EFFECTIVE_ROWS = Math.floor(CONFIG.ROWS * 0.7)
-  const EFFECTIVE_MAX_SCROLL = (EFFECTIVE_ROWS - 1) * CONFIG.ROW_SPACING - 2
+  // Compact tunnel length matching Tunnel.jsx
+  const EFFECTIVE_ROWS = CONFIG.ROWS
+  const EFFECTIVE_MAX_SCROLL = (EFFECTIVE_ROWS - 1) * CONFIG.ROW_SPACING - 1.5
 
   const targetScrollRef = useRef(0)
   const currentScrollRef = useRef(0)
@@ -111,17 +111,15 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
 
   // Freeze Lenis and page scroll when a project modal is open
   useEffect(() => {
-    if (!isEmbedded) return
-    if (selected) {
-      if (lenis) lenis.stop()
-      const prevOverflow = document.body.style.overflow
-      document.body.style.overflow = 'hidden'
-      return () => {
-        document.body.style.overflow = prevOverflow
-        if (lenis) lenis.start()
-      }
+    if (!selected) return
+    if (lenis) lenis.stop()
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevOverflow
+      if (lenis) lenis.start()
     }
-  }, [isEmbedded, selected, lenis])
+  }, [selected, lenis])
 
   // Deep-link matching from URL parameter
   useEffect(() => {
@@ -129,11 +127,11 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
       const matchIndex = PROJECTS.findIndex((p) => p.id === id)
       if (matchIndex !== -1) {
         const match = PROJECTS[matchIndex]
-        const r = [1, 3, 5][matchIndex % 3]
+        const slot = PROJECT_SLOTS[matchIndex] || { row: 1.5 + matchIndex * 3, wall: 'left' }
         setSelected({
           project: match,
-          position: [-CONFIG.TUNNEL_W / 2, 0, -r * CONFIG.ROW_SPACING],
-          rotation: [0, Math.PI / 2, 0]
+          position: [0, 0, -slot.row * CONFIG.ROW_SPACING],
+          rotation: [0, 0, 0]
         })
       }
     }
@@ -358,34 +356,10 @@ export default function ProjectGallery({ isEmbedded = false, containerRef = null
         <color attach="background" args={[isDark ? '#000000' : '#f4f4f6']} />
         <fog
           attach="fog"
-          args={[isDark ? '#000000' : '#f4f4f6', 13, 58]}
+          args={[isDark ? '#000000' : '#f4f4f6', 14, 44]}
         />
-
-        <ambientLight intensity={isDark ? 0.78 : 1.35} />
-        <hemisphereLight
-          skyColor={isDark ? '#172033' : '#ffffff'}
-          groundColor={isDark ? '#020204' : '#cbd5e1'}
-          intensity={isDark ? 0.65 : 0.8}
-        />
-        <directionalLight
-          position={[6, 9, 6]}
-          intensity={isDark ? 1.15 : 1.6}
-          color={isDark ? '#dbeafe' : '#ffffff'}
-        />
-        <pointLight
-          position={[0, 0, 5]}
-          color={isDark ? '#ffffff' : '#f8fafc'}
-          intensity={isDark ? 1.15 : 0.65}
-          distance={16}
-          decay={2}
-        />
-        <pointLight
-          position={[0, 0, -42]}
-          color={isDark ? '#ffffff' : '#e2e8f0'}
-          intensity={isDark ? 1.4 : 0.75}
-          distance={26}
-          decay={2}
-        />
+        <ambientLight intensity={isDark ? 0.9 : 1.3} />
+        <directionalLight position={[4, 8, 10]} intensity={isDark ? 1.4 : 1.2} color="#ffffff" />
 
         <Suspense fallback={null}>
           <Tunnel

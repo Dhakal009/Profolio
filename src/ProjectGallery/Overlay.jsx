@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
@@ -195,7 +195,7 @@ const Scene = styled.div`
 
 const Tilt = styled.div`
   position: relative;
-  transform-style: preserve-3d;
+  isolation: isolate;
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform 0.25s ease-out;
   will-change: transform;
@@ -209,7 +209,7 @@ const Tilt = styled.div`
     background: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
     opacity: ${(p) => (p.$isDark ? 0.22 : 0.18)};
     filter: blur(46px);
-    transform: translateZ(-70px);
+    z-index: -1;
     pointer-events: none;
   }
 `
@@ -237,7 +237,6 @@ const ModalCard = styled.div`
   transform: ${(p) => (p.$isClosing ? 'scale(0.95) translateY(20px)' : 'none')};
   opacity: ${(p) => (p.$isClosing ? 0 : 1)};
   animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  scrollbar-width: thin;
 
   /* soft light that follows the pointer, gives the glass-card depth */
   &::after {
@@ -372,20 +371,72 @@ const Column = styled.div`
   min-height: 0;
 
   &:first-child { overflow: hidden; }
-  @media (max-width: 860px) {
-    &:first-child { overflow: visible; }
-    &:last-child { height: auto; max-height: none; overflow: visible; }
-  }
 
   &:last-child {
     overflow-y: auto;
+    overflow-x: hidden;
     height: 100%;
     max-height: 100%;
     min-height: 0;
-    gap: 1.35rem;
+    gap: 1.05rem;
     overscroll-behavior: contain;
-    padding: 0.1rem 0.5rem 1rem 0;
-    scrollbar-width: thin;
+    padding: 0.1rem 0.7rem 1.25rem 0;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+
+    > * {
+      flex-shrink: 0;
+    }
+
+    ${(p) => {
+      if (!p.$fadeTop && !p.$fadeBottom) return ''
+      const topStop = p.$fadeTop ? 'transparent 0%, #000 18px' : '#000 0%'
+      const bottomStop = p.$fadeBottom ? '#000 calc(100% - 28px), transparent 100%' : '#000 100%'
+      const mask = `linear-gradient(to bottom, ${topStop}, ${bottomStop})`
+      return `
+        -webkit-mask-image: ${mask};
+        mask-image: ${mask};
+      `
+    }}
+
+    @supports selector(::-webkit-scrollbar) {
+      &::-webkit-scrollbar {
+        width: 5px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: ${(p) => (p.$isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(0, 0, 0, 0.18)')};
+        border-radius: 999px;
+      }
+      &::-webkit-scrollbar-thumb:hover {
+        background: ${(p) => (p.$isDark ? 'rgba(255, 255, 255, 0.32)' : 'rgba(0, 0, 0, 0.32)')};
+      }
+      &::-webkit-scrollbar-button {
+        display: none;
+        width: 0;
+        height: 0;
+      }
+    }
+
+    @supports not selector(::-webkit-scrollbar) {
+      scrollbar-width: thin;
+      scrollbar-color: ${(p) =>
+        p.$isDark ? 'rgba(255, 255, 255, 0.18) transparent' : 'rgba(0, 0, 0, 0.2) transparent'};
+    }
+  }
+
+  @media (max-width: 860px) {
+    &:first-child { overflow: visible; }
+    &:last-child {
+      height: auto;
+      max-height: none;
+      overflow: visible;
+      padding: 0;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
   }
 `
 
@@ -495,14 +546,14 @@ const Stats = styled.div`
   border-bottom: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')};
 
   > div {
-    padding: 0.8rem 0.9rem 0.8rem 0;
+    padding: 0.65rem 0.85rem 0.65rem 0;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.2rem;
     min-width: 0;
   }
   > div + div {
-    padding-left: 0.9rem;
+    padding-left: 0.85rem;
     border-left: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')};
   }
   span {
@@ -530,8 +581,8 @@ const SectionLabel = styled.h3`
 `
 
 const ProjectDescription = styled.p`
-  font-size: 1rem;
-  line-height: 1.65;
+  font-size: 0.95rem;
+  line-height: 1.6;
   margin: 0;
   color: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.86)' : 'rgba(0,0,0,0.8)')};
 `
@@ -829,6 +880,38 @@ export default function Overlay({
   const tiltRef = useRef(null)
   const detailsRef = useRef(null)
   const tiltRaf = useRef(0)
+  const [scrollFade, setScrollFade] = useState({ top: false, bottom: false })
+
+  const syncScrollFades = useCallback(() => {
+    const el = detailsRef.current
+    if (!el) return
+    const maxScroll = el.scrollHeight - el.clientHeight
+    const nextTop = maxScroll > 2 && el.scrollTop > 4
+    const nextBottom = maxScroll > 2 && el.scrollTop < maxScroll - 4
+    setScrollFade((prev) =>
+      prev.top === nextTop && prev.bottom === nextBottom
+        ? prev
+        : { top: nextTop, bottom: nextBottom }
+    )
+  }, [])
+
+  useEffect(() => {
+    if (!selected) return
+    const el = detailsRef.current
+    if (el) el.scrollTop = 0
+    const rafId = requestAnimationFrame(syncScrollFades)
+    window.addEventListener('resize', syncScrollFades)
+    let ro
+    if (el && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(syncScrollFades)
+      ro.observe(el)
+    }
+    return () => {
+      cancelAnimationFrame(rafId)
+      window.removeEventListener('resize', syncScrollFades)
+      ro?.disconnect()
+    }
+  }, [selected, project, syncScrollFades])
   const handleMove = (e) => {
     const el = tiltRef.current
     if (!el || tiltRaf.current) return
@@ -887,9 +970,12 @@ export default function Overlay({
           onMouseLeave={resetTilt}
           onWheel={(e) => {
             e.stopPropagation()
-            // wheel anywhere over the popup scrolls the details column
+            // wheel anywhere over the popup scrolls the details column (desktop 2-col layout)
             const col = detailsRef.current
-            if (col && !col.contains(e.target)) col.scrollTop += e.deltaY
+            if (!col || col.contains(e.target) || col.scrollHeight <= col.clientHeight) return
+            const delta =
+              e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * col.clientHeight : e.deltaY
+            col.scrollTop += delta
           }}
           onTouchMove={(e) => e.stopPropagation()}
         >
@@ -961,7 +1047,13 @@ export default function Overlay({
                   </Column>
 
                   {/* Right: details */}
-                  <Column ref={detailsRef}>
+                  <Column
+                    ref={detailsRef}
+                    $isDark={isDark}
+                    $fadeTop={scrollFade.top}
+                    $fadeBottom={scrollFade.bottom}
+                    onScroll={syncScrollFades}
+                  >
                     <Stats $isDark={isDark}>
                       <div><span>Focus</span><strong>{project.stat || project.category}</strong></div>
                       <div><span>Year</span><strong>{project.year || '2026'}</strong></div>

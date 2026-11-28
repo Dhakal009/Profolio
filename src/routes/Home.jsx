@@ -58,18 +58,18 @@ function Home() {
           </section>
         </StackSection>
 
-        {/* 1. rises from the bottom */}
-        <StackSection>
+        {/* 1. rises from the bottom with a smooth curved arch transition */}
+        <StackSection curvedTop background="var(--surface)">
           <AboutSection />
         </StackSection>
 
-        {/* 2. right → left (straight in from the right) */}
-        <StackSection>
+        {/* 2. rises over About with matching downward-curving bottom edge */}
+        <StackSection curvedTop="concave" depth={0} dim={0} smoothing={1.6}>
           <section
             id="projects"
             ref={projectsRef}
             className="relative w-full focus-section"
-            style={{ height: '350vh' }}
+            style={{ height: '260vh' }}
             aria-labelledby="projects-title"
           >
             <h2 className="sr-only" id="projects-title">Featured Projects</h2>
@@ -79,9 +79,9 @@ function Home() {
           </section>
         </StackSection>
 
-        {/* 3. Projects fades out first, then Skills rises from the bottom */}
-        <StackSection>
-          <ParallaxSection id="skills" title="Skills" offset={80}>
+        {/* 3. Seamless tunnel fade into blank breath, then Skills glides in cleanly */}
+        <StackSection entrance="portal" radius={0} smoothing={1.6}>
+          <ParallaxSection id="skills" title="Skills" offset={80} className="border-t-0">
             <Skills />
             <div className="reveal" style={{ marginTop: '2.5rem' }}>
               <LogoLoop

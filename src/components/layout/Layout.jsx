@@ -82,21 +82,9 @@ function useGlobalReveal(pathname, readyTick) {
   }, [pathname, readyTick]);
 }
 
-// Keeps GSAP ScrollTrigger in step with the app's single Lenis instance.
-function useLenisScrollTrigger() {
-  const { lenis } = useLenis();
-
-  useEffect(() => {
-    if (!lenis) return;
-    const onScroll = () => ScrollTrigger.update();
-    lenis.on('scroll', onScroll);
-    return () => lenis.off('scroll', onScroll);
-  }, [lenis]);
-}
-
 // Scroll to top (or to the #hash target) whenever the route changes
 function useRouteScroll(pathname, hash, state, readyTick) {
-  const { lenis } = useLenis();
+  const { lenis, scrollTo } = useLenis();
   const isInitialLoadRef = useRef(true);
   const prevPathRef = useRef(pathname);
 
@@ -130,7 +118,7 @@ function useRouteScroll(pathname, hash, state, readyTick) {
       if (!target) return false;
       if (lenis) lenis.resize();
       const destination = getScrollTarget(target);
-      if (lenis) lenis.scrollTo(destination, { offset: -40, duration: 0.9, force: true });
+      if (lenis) scrollTo(destination, { offset: -40, duration: 1.15, force: true });
       else target.scrollIntoView({ behavior: 'smooth' });
       return true;
     };
@@ -164,7 +152,7 @@ function useRouteScroll(pathname, hash, state, readyTick) {
       }
     });
     return () => cancelAnimationFrame(frame);
-  }, [pathname, hash, state, readyTick, lenis]);
+  }, [pathname, hash, state, readyTick, lenis, scrollTo]);
 }
 
 function Shell() {
@@ -174,7 +162,6 @@ function Shell() {
   const [readyTick, setReadyTick] = useState(0);
   const isProjects = pathname.startsWith('/projects');
   useGlobalReveal(pathname, readyTick);
-  useLenisScrollTrigger();
   useRouteScroll(pathname, hash, state, readyTick);
 
   // Re-measure once fonts are ready (fixes wrong scroll lengths in production)

@@ -138,7 +138,7 @@ const deliverableTextureCache = new Map();
 
 function generateDeliverableTexture(item, isDark) {
   if (typeof document === 'undefined') return '';
-  const key = `${item.id}-${isDark ? 'dark' : 'light'}`;
+  const key = `v3-${item.id}-${isDark ? 'dark' : 'light'}`;
   if (deliverableTextureCache.has(key)) {
     return deliverableTextureCache.get(key);
   }
@@ -146,14 +146,15 @@ function generateDeliverableTexture(item, isDark) {
   const canvas = document.createElement('canvas');
   const w = 1400;
   const h = 1180;
-  const scale = 0.5;
-  canvas.width = w * scale;
-  canvas.height = h * scale;
+  const scale = 0.85;
+  canvas.width = Math.round(w * scale);
+  canvas.height = Math.round(h * scale);
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
   ctx.scale(scale, scale);
 
-  const padX = 100;
+  const padX = 160;
+  const padY = 128;
   const contentW = w - padX * 2;
 
   // 1. Theme-aware matte surface
@@ -163,40 +164,49 @@ function generateDeliverableTexture(item, isDark) {
   ctx.fillStyle = background;
   ctx.fillRect(0, 0, w, h);
 
-  // 2. Minimal Subtle Inset Border
+  // 2. Minimal subtle inset border
   ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(15, 23, 42, 0.14)';
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.roundRect(24, 24, w - 48, h - 48, 36);
+  ctx.roundRect(36, 36, w - 72, h - 72, 40);
   ctx.stroke();
 
-  // 3. Top Header: Clean Index & Subtitle
+  // 3. Top Header: Clean Index & Subtitle with balanced side/top padding
   ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(15, 23, 42, 0.6)';
-  ctx.font = '600 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '600 34px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.textBaseline = 'top';
-  ctx.fillText(`${item.index}`, padX, 88);
+  ctx.textAlign = 'left';
+  ctx.fillText(item.index, padX, padY);
 
   ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(15, 23, 42, 0.55)';
-  ctx.font = '600 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  const tagText = item.subtitle;
-  const tagW = ctx.measureText(tagText).width;
-  ctx.fillText(tagText, w - padX - tagW, 92);
+  ctx.font = '600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(item.subtitle, w - padX, padY + 4);
 
-  // 4. Center: Bold Pure White Title
+  // 4. Center: Bold Title with generous left, right, top, and bottom breathing room
+  ctx.textAlign = 'left';
   ctx.fillStyle = isDark ? '#ffffff' : '#09090b';
-  ctx.font = '800 122px "Inter Tight", "Space Grotesk", -apple-system, sans-serif';
-  ctx.textBaseline = 'middle';
+  let titleSize = 104;
+  let titleLines = [];
+  do {
+    ctx.font = `800 ${titleSize}px "Inter Tight", "Space Grotesk", -apple-system, sans-serif`;
+    titleLines = wrapCanvasText(ctx, item.title, contentW);
+    if (titleLines.length <= 2) break;
+    titleSize -= 4;
+  } while (titleSize > 66);
 
-  const titleLines = wrapCanvasText(ctx, item.title, contentW);
-  const lineH = 140;
+  const lineH = titleSize * 1.18;
   const totalTitleH = titleLines.length * lineH;
-  const startY = h / 2 - totalTitleH / 2 + 12;
+  const bodyTop = padY + 90;
+  const bodyBottom = h - padY;
+  const startY = bodyTop + (bodyBottom - bodyTop - totalTitleH) / 2;
 
+  ctx.textBaseline = 'top';
   titleLines.forEach((line, i) => {
-    ctx.fillText(line, padX, startY + i * lineH + lineH / 2);
+    ctx.fillText(line, padX, startY + i * lineH);
   });
 
-  const dataUrl = canvas.toDataURL('image/webp', 0.86);
+  const dataUrl = canvas.toDataURL('image/webp', 0.9);
   deliverableTextureCache.set(key, dataUrl);
   return dataUrl;
 }
@@ -292,11 +302,11 @@ export default function DeliverablesSection() {
             items={carouselItems}
             preset="cylinder"
             intro="rise"
-            cardWidth={isMobile ? 330 : 720}
-            aspectRatio={isMobile ? 1.05 : 1.18}
-            gap={isMobile ? 18 : 42}
+            cardWidth={isMobile ? 480 : 960}
+            aspectRatio={isMobile ? 0.96 : 1.15}
+            gap={isMobile ? 24 : 52}
             tilt={-4}
-            perspective={isMobile ? 1400 : 2400}
+            perspective={isMobile ? 1200 : 2200}
             speed={10}
             autoplay="drift"
             pauseOnHover={true}
@@ -316,32 +326,6 @@ export default function DeliverablesSection() {
             onItemClick={(_item, idx) => handleCardClick(idx)}
             className="w-full h-full"
           />
-
-          {/* Floating Left Navigation Arrow Button */}
-          <button
-            type="button"
-            onClick={handlePrev}
-            className="pointer-events-auto absolute left-3 sm:left-6 lg:left-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border backdrop-blur-xl transition hover:scale-105 active:scale-95 shadow-xl"
-            style={{ borderColor: 'var(--line-strong)', background: 'var(--chip-bg)', color: 'var(--foam)' }}
-            aria-label="Previous deliverable"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          {/* Floating Right Navigation Arrow Button */}
-          <button
-            type="button"
-            onClick={handleNext}
-            className="pointer-events-auto absolute right-3 sm:right-6 lg:right-12 top-1/2 -translate-y-1/2 z-30 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full border backdrop-blur-xl transition hover:scale-105 active:scale-95 shadow-xl"
-            style={{ borderColor: 'var(--line-strong)', background: 'var(--chip-bg)', color: 'var(--foam)' }}
-            aria-label="Next deliverable"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
 
           {/* Minimal Floating Bottom Bar: Pagination Dots positioned clearly above dock */}
           <div className="pointer-events-none absolute bottom-12 sm:bottom-20 inset-x-0 z-20 flex justify-center">

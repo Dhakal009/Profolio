@@ -262,16 +262,16 @@ export default function FloatingFolder() {
   const { theme } = useTheme();
   const { lenis } = useOptionalLenis() || {};
   const [isOpen, setIsOpen] = useState(false);
-  const [scale, setScale] = useState(() => (typeof window !== 'undefined' && window.innerWidth < 640 ? 0.3 : 0.36));
+  const [scale, setScale] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 768 ? 0.17 : 0.27));
   const releaseScrollRef = useRef(() => {});
 
-  // Responsive scale: compact and proportional
+  // Responsive scale: extra compact on mobile, small on desktop
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setScale(0.3);
+      if (window.innerWidth <= 768) {
+        setScale(0.17);
       } else {
-        setScale(0.36);
+        setScale(0.27);
       }
     };
     handleResize();
@@ -421,7 +421,7 @@ export default function FloatingFolder() {
   return (
     <>
       <div
-        className="floating-folder fixed bottom-[6.75rem] right-3 sm:bottom-5 sm:right-10 z-[88] flex flex-col items-end pointer-events-none"
+        className="floating-folder fixed z-[92] flex flex-col items-center justify-center pointer-events-none"
         aria-label="Floating quick navigation folder"
       >
         <motion.div

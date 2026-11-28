@@ -30,6 +30,7 @@ const ENTRANCES = {
   right: [1, 1, 0, 0],
   bottom: [0, 1, 0, 0],
   zoom: [0, 0.9, 0, 0],
+  portal: [0, 1, 1, 0],
   leftMid: [-1, 1, 1, 0],
   rightMid: [1, 1, 1, 0],
   fadeBottom: [0, 1, 0, 0.3],
@@ -197,9 +198,13 @@ function step(en, dt, vh) {
   const ia = 1 - a;
 
   /* ----- panel ----- */
-  const X = d * (lock ? ia : ia * ia) * 100 - nX * c * P.exit * 38;
-  const arriving = lock ? -(1 - en.enterT) * vh : (en.enterT - a) * vh;
+  const isPortal = P.entrance === "portal";
+  const effectiveLock = isPortal ? 1 : lock;
+  const X = d * (effectiveLock ? ia : ia * ia) * 100 - nX * c * P.exit * 38;
+  const arriving = effectiveLock ? -(1 - en.enterT) * vh : (en.enterT - a) * vh;
   const Y = arriving + (nL ? 0 : -c * 0.4 * vh * P.exit) + en.bounce;
+  // Portal: seamless full-bleed blank canvas cross-fade (no box/edge line),
+  // then inner content glides in cleanly afterward.
   const S = (1 - c * P.depth) * (1 + (en.fromScale - 1) * ia);
   const R = (ia * ia * 5 + c * 4) * P.tilt;
 
@@ -211,36 +216,70 @@ function step(en, dt, vh) {
       `translate3d(${X.toFixed(2)}%,${Y.toFixed(1)}px,0) scale(${S.toFixed(4)})` +
       (P.tilt > 0 ? ` rotateX(${R.toFixed(2)}deg)` : "");
   put(en, "pt", en.panel, "transform", T);
+  if (isPortal) {
+    // Seamless direct crossfade from tunnel into Skills (no blank pause)
+    put(en, "po", en.panel, "opacity", smooth(clamp01(a / 0.65)).toFixed(3));
+    const pe = a < 0.35 ? "none" : "auto";
+    put(en, "ppe", en.panel, "pointerEvents", pe);
+    put(en, "epe", en.el, "pointerEvents", pe);
+  }
 
   const moving = !idle || a < 0.999 || c > 0.001;
   put(en, "pw", en.panel, "willChange", moving ? "transform" : "auto");
 
   /* ----- surface ----- */
-  const rounded = (a < 0.995 || c > 0.005) && P.radius > 0;
+  const rounded = !isPortal && (a < 0.995 || c > 0.005) && P.radius > 0;
   if (en.rounded !== rounded) {
     en.rounded = rounded;
     const r = rounded ? P.radius + "px" : "0px";
     en.clip.style.borderRadius = r;
     en.shadow.style.borderRadius = r;
   }
-  put(en, "so", en.shadow, "opacity", ia.toFixed(3));
+  put(en, "so", en.shadow, "opacity", isPortal ? "0" : ia.toFixed(3));
   put(en, "do", en.dim, "opacity", (c * P.dim).toFixed(3));
-  put(en, "eo", en.edge, "opacity", Math.min(0.8, ia * 0.8).toFixed(3));
-  put(en, "et", en.edge, "transform", `scaleX(${Math.max(0.18, a).toFixed(3)})`);
+  if (en.curve) {
+    // 0 on the Home page (a=0), peaks mid-transition (a=0.5), flattens on settle (a=1)
+    const arch = a <= 0.001 || a >= 0.999 ? 0 : Math.pow(Math.sin(a * Math.PI), 0.75);
+    const visible = arch > 0.002;
+    put(en, "cv", en.curve, "transform", visible ? `scaleY(${arch.toFixed(4)})` : "scaleY(0)");
+    put(en, "cvo", en.curve, "opacity", visible ? "1" : "0");
+    if (en.edge) put(en, "eo", en.edge, "opacity", "0");
+  } else if (isPortal) {
+    if (en.edge) put(en, "eo", en.edge, "opacity", "0");
+  } else if (en.edge) {
+    put(en, "eo", en.edge, "opacity", Math.min(0.8, ia * 0.8).toFixed(3));
+    put(en, "et", en.edge, "transform", `scaleX(${Math.max(0.18, a).toFixed(3)})`);
+  }
 
   /* ----- content (moves against the panel) ----- */
-  const CY = (lock ? 0 : Math.pow(ia, 1.5) * 120 * P.drift) - c * 60 * P.drift - f * 50 * P.drift;
-  const CX = lock ? -d * ia * 24 * P.drift : 0;
-  const cIdle = Math.abs(CX) < 0.01 && Math.abs(CY) < 0.05;
-  put(
-    en,
-    "ct",
-    en.content,
-    "transform",
-    cIdle ? "none" : `translate3d(${CX.toFixed(2)}%,${CY.toFixed(1)}px,0)`
-  );
-  const op = (0.3 + 0.7 * smooth(clamp01(a * 1.6))) * (1 - c * 0.25) * (1 - f);
-  put(en, "co", en.content, "opacity", op.toFixed(3));
+  if (isPortal) {
+    // Skills glides in directly as the tunnel fades out (zero blank gap)
+    const contentT = smooth(clamp01((a - 0.12) / 0.78));
+    const cy = (1 - contentT) * 28;
+    const cIdle = contentT >= 0.999;
+    put(
+      en,
+      "ct",
+      en.content,
+      "transform",
+      cIdle ? "none" : `translate3d(0,${cy.toFixed(1)}px,0)`
+    );
+    const op = contentT * (1 - c * 0.25) * (1 - f);
+    put(en, "co", en.content, "opacity", op.toFixed(3));
+  } else {
+    const CY = (lock ? 0 : Math.pow(ia, 1.5) * 120 * P.drift) - c * 60 * P.drift - f * 50 * P.drift;
+    const CX = lock ? -d * ia * 24 * P.drift : 0;
+    const cIdle = Math.abs(CX) < 0.01 && Math.abs(CY) < 0.05;
+    put(
+      en,
+      "ct",
+      en.content,
+      "transform",
+      cIdle ? "none" : `translate3d(${CX.toFixed(2)}%,${CY.toFixed(1)}px,0)`
+    );
+    const op = (0.3 + 0.7 * smooth(clamp01(a * 1.6))) * (1 - c * 0.25) * (1 - f);
+    put(en, "co", en.content, "opacity", op.toFixed(3));
+  }
 
   /* ----- skip painting a section that's fully hidden behind the next ----- */
   const hidden =
@@ -292,9 +331,10 @@ export default function StackSection({
   exit = 1, // how far the covered section moves out (0 = pinned)
   tilt = 0, // flat slider motion is cheaper and clearer
   perspective = 1400,
-  smoothing = 2.4, // track Lenis tightly without secondary lag
+  smoothing = 1.8, // glide smoothly in step with Lenis inertia
   bounce = 0, // avoid competing bounce on top of Lenis inertia
   hideCovered = true, // stop painting a section once it is fully covered
+  curvedTop = false, // convex arch that swells during scroll transition and flattens at rest
   background = "var(--bg, #000000)", // must be opaque
   className = "",
   style,
@@ -306,6 +346,7 @@ export default function StackSection({
   const content = useRef(null);
   const dimEl = useRef(null);
   const edge = useRef(null);
+  const curveEl = useRef(null);
 
   const props = useRef(null);
   props.current = {
@@ -314,6 +355,8 @@ export default function StackSection({
   };
 
   useEffect(() => {
+    const [initX, initScale, initLock, initDelay] =
+      ENTRANCES[entrance ?? "premium"] ?? ENTRANCES.premium;
     const en = {
       el: outer.current,
       panel: panel.current,
@@ -322,19 +365,23 @@ export default function StackSection({
       content: content.current,
       dim: dimEl.current,
       edge: edge.current,
+      curve: curveEl.current,
       props,
       h: 0,
       ready: false,
       enter: 1, covered: 0, // smoothed
       enterT: 1, coverT: 0, // targets (exact scroll position)
-      fromX: 0, fromScale: 1, lock: 0, delay: 0,
+      fromX: initX, fromScale: initScale, lock: initLock, delay: initDelay,
       bounce: 0, lastTarget: 1,
       lastE: -1, lastC: -1, lastT: -1,
       rounded: null,
       active: null,
       w: {}, // last written values
     };
-    en.shadow.style.boxShadow = SHADOW_UP;
+    en.shadow.style.boxShadow =
+      entrance === "portal"
+        ? "0 0 0 1px var(--section-edge), 0 32px 90px rgba(0,0,0,0.65)"
+        : SHADOW_UP;
 
     entries.add(en);
     byEl.set(en.el, en);
@@ -369,7 +416,61 @@ export default function StackSection({
       className={`stack-section ${className}`}
       style={{ position: "sticky", top: 0, ...style }}
     >
-      <div ref={panel} style={{ position: "relative", transformOrigin: "50% 100%" }}>
+      <div
+        ref={panel}
+        style={{
+          position: "relative",
+          transformOrigin: entrance === "portal" ? "50% 0%" : "50% 100%",
+          ...(entrance === "portal" ? { opacity: 0, pointerEvents: "none" } : null),
+        }}
+      >
+        {curvedTop && (
+          <svg
+            ref={curveEl}
+            aria-hidden="true"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: "calc(100% - 1px)",
+              width: "100%",
+              height: "clamp(72px, 13vw, 150px)",
+              display: "block",
+              pointerEvents: "none",
+              transformOrigin: "50% 100%",
+              transform: "scaleY(0)",
+              opacity: 0,
+              zIndex: 2,
+              willChange: "transform",
+            }}
+          >
+            {curvedTop === "concave" ? (
+              <>
+                <path d="M0,0 Q50,100 100,0 L100,100 L0,100 Z" fill={background} />
+                <path
+                  d="M0,0 Q50,100 100,0"
+                  fill="none"
+                  stroke="var(--section-edge)"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </>
+            ) : (
+              <>
+                <path d="M0,100 Q50,0 100,100 Z" fill={background} />
+                <path
+                  d="M0,100 Q50,0 100,100"
+                  fill="none"
+                  stroke="var(--section-edge)"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                />
+              </>
+            )}
+          </svg>
+        )}
         {/* static shadow: only its opacity animates */}
         <div
           ref={shadow}
@@ -384,20 +485,22 @@ export default function StackSection({
             background,
           }}
         >
-          <div
-            ref={edge}
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: "0 0 auto",
-              height: "1px",
-              background: "linear-gradient(90deg, transparent, var(--section-edge), transparent)",
-              transformOrigin: "center",
-              opacity: 0,
-              pointerEvents: "none",
-              zIndex: 31,
-            }}
-          />
+          {entrance !== "portal" && (
+            <div
+              ref={edge}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: "0 0 auto",
+                height: "1px",
+                background: "linear-gradient(90deg, transparent, var(--section-edge), transparent)",
+                transformOrigin: "center",
+                opacity: 0,
+                pointerEvents: "none",
+                zIndex: 31,
+              }}
+            />
+          )}
           <div ref={content}>{children}</div>
           {/* dim layer while the next section covers this one */}
           <div

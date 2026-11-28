@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useLenis } from '../../contexts/LenisContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import ThemeToggle from '../ui/ThemeToggle';
@@ -54,6 +55,37 @@ function Header() {
   const [activeId, setActiveId] = useState('hero');
   const [isDockHidden, setIsDockHidden] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dockNavRef = useRef(null);
+  const reduceMotion = useReducedMotion();
+
+  // Close mobile dock menu on route change, Escape, outside tap, or resize to desktop
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    const onPointerDown = (e) => {
+      if (dockNavRef.current && !dockNavRef.current.contains(e.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    const onResize = () => {
+      if (window.innerWidth > 768) setIsMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      window.removeEventListener('resize', onResize);
+    };
+  }, [isMobileMenuOpen]);
 
   // Keyboard shortcut to open search modal (Cmd+K, Ctrl+K, or /)
   useEffect(() => {
@@ -100,7 +132,7 @@ function Header() {
           setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
         });
       }
-      if (lenis && lenis.isScrolling && Date.now() - lastUserScrollTimeRef.current > 40) {
+      if (lenis && lenis.isScrolling === 'smooth' && Date.now() - lastUserScrollTimeRef.current > 40) {
         return;
       }
       hideDock();
@@ -132,7 +164,7 @@ function Header() {
     if (lenis) {
       const onLenisScroll = (e) => {
         const vel = Math.abs(e.velocity);
-        if (vel < 1.2) {
+        if (vel > 0 && vel < 1.2) {
           showDock();
           if (scrollTimeoutRef.current) {
             clearTimeout(scrollTimeoutRef.current);
@@ -296,7 +328,7 @@ function Header() {
   }, []);
 
   const measureWidths = useCallback(() => {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 640;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
     slotRefs.current.forEach((slot, idx) => {
       if (!slot) return;
       const tile = tileRefs.current[idx];
@@ -433,7 +465,7 @@ function Header() {
   }, [getMotionState]);
 
   const handlePointerMove = useCallback((e) => {
-    if (e.pointerType === 'touch' || (typeof window !== 'undefined' && window.innerWidth <= 640)) {
+    if (e.pointerType === 'touch' || (typeof window !== 'undefined' && window.innerWidth <= 768)) {
       return;
     }
     pointerRef.current = { x: e.clientX, inside: true };
@@ -717,8 +749,124 @@ function Header() {
       {/* Global Search Modal */}
       <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
+      {/* Mobile menu soft backdrop */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            key="dock-mobile-backdrop"
+            className="dock-mobile-backdrop"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: reduceMotion ? 0.01 : 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: reduceMotion ? 0.01 : 0.16 } }}
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ---------- Bottom dock navigation ---------- */}
-      <nav className={`dock ${isDockHidden ? 'is-hidden' : ''}`} aria-label="Main navigation">
+      <nav
+        ref={dockNavRef}
+        className={`dock ${isDockHidden && !isMobileMenuOpen ? 'is-hidden' : ''} ${isMobileMenuOpen ? 'is-menu-open' : ''}`}
+        aria-label="Main navigation"
+      >
+        {/* Mobile hamburger spring popover menu */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              key="dock-mobile-menu"
+              className="dock-mobile-menu"
+              role="menu"
+              aria-label="Navigation menu"
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.92 }}
+              animate={
+                reduceMotion
+                  ? { opacity: 1, transition: { duration: 0.01 } }
+                  : {
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { type: 'spring', stiffness: 420, damping: 30, mass: 0.78 },
+                    }
+              }
+              exit={
+                reduceMotion
+                  ? { opacity: 0, transition: { duration: 0.01 } }
+                  : {
+                      opacity: 0,
+                      y: 10,
+                      scale: 0.94,
+                      transition: { duration: 0.16, ease: [0.4, 0, 1, 1] },
+                    }
+              }
+              style={{ transformOrigin: '50% 100%' }}
+            >
+              <ul className="dock-mobile-list">
+                {navItems.map((item, idx) => {
+                  const active = isActive(item);
+                  return (
+                    <motion.li
+                      key={item.id}
+                      role="none"
+                      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        transition: reduceMotion
+                          ? { duration: 0.01 }
+                          : { delay: 0.04 + idx * 0.03, duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+                      }}
+                    >
+                      <motion.button
+                        type="button"
+                        role="menuitem"
+                        whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                        className={`dock-mobile-link ${active ? 'active' : ''}`}
+                        aria-current={active ? 'true' : undefined}
+                        onClick={(e) => {
+                          setIsMobileMenuOpen(false);
+                          handleNav(e, item);
+                        }}
+                      >
+                        <span className="dock-mobile-link-left">
+                          <span className="dock-mobile-idx" aria-hidden="true">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                          <span>{item.label}</span>
+                        </span>
+                        <span className="dock-mobile-dot" aria-hidden="true" />
+                      </motion.button>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+              <motion.div
+                className="dock-mobile-footer"
+                initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: reduceMotion
+                    ? { duration: 0.01 }
+                    : { delay: 0.04 + navItems.length * 0.03, duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+                }}
+              >
+                <motion.a
+                  href="mailto:bikashdhakal546@gmail.com"
+                  whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                  className="dock-mobile-cta"
+                  onClick={(e) => {
+                    setIsMobileMenuOpen(false);
+                    handleMailClick(e);
+                  }}
+                >
+                  Let&apos;s talk
+                </motion.a>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div
           className="dock-inner"
           onPointerMove={handlePointerMove}
@@ -733,6 +881,7 @@ function Header() {
               className="dock-logo dock-tile"
               aria-label="Home"
               onClick={(e) => {
+                setIsMobileMenuOpen(false);
                 triggerHop(0);
                 handleHome(e);
               }}
@@ -743,6 +892,9 @@ function Header() {
               B.
             </button>
           </div>
+          <span className="dock-mobile-label" aria-hidden="true">
+            {title}
+          </span>
           <ul className="dock-list">
             {navItems.map((item, idx) => {
               const itemIdx = idx + 1;
@@ -788,6 +940,17 @@ function Header() {
               Let&apos;s talk
             </a>
           </div>
+          <button
+            type="button"
+            className={`dock-hamburger ${isMobileMenuOpen ? 'is-open' : ''}`}
+            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMobileMenuOpen}
+            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          >
+            <span className="dock-hamburger-line" aria-hidden="true" />
+            <span className="dock-hamburger-line" aria-hidden="true" />
+            <span className="dock-hamburger-line" aria-hidden="true" />
+          </button>
         </div>
       </nav>
 

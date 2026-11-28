@@ -75,36 +75,45 @@ export const PROJECTS = [
   }
 ];
 
+// Unique curated home wall for each project: glides to center on approach, returns to home wall on pass
+export const PROJECT_SLOTS = [
+  { row: 1.5, wall: 'left' },
+  { row: 4.5, wall: 'right' },
+  { row: 7.5, wall: 'top' },
+];
+
 // ===== TUNABLE CONFIGURATION =====
 export const CONFIG = {
   // Layout & dimensions
-  ROWS: 28,            // Total rows in finite tunnel
-  ROW_SPACING: 2.4,    // Distance along Z between consecutive rows
-  CYCLE_LENGTH: 67.2,  // Total Z length of tunnel (28 * 2.4)
-  MAX_SCROLL: 66,      // Finite scroll boundary: camera travels smoothly from start to finish
-  COLS_DESKTOP: 4,     // Wall columns on desktop
-  COLS_MOBILE: 2,      // Wall columns on mobile
-  TILE_W: 1.7,         // Width of each card plane
-  TILE_H: 1.08,        // Height of each card plane
-  GAP: 0.22,           // Spacing between tiles
-  TUNNEL_W: 7.5,       // Tunnel cross-section width
-  TUNNEL_H: 5.0,       // Tunnel cross-section height
+  ROWS: 11,            // Compact, purposeful finite tunnel
+  ROW_SPACING: 3.2,    // Generous Z spacing for larger hero tiles
+  CYCLE_LENGTH: 35.2,
+  MAX_SCROLL: 30.5,    // Finite scroll boundary
+  COLS_DESKTOP: 2,     // Larger architectural grid panels, far fewer draw calls
+  COLS_MOBILE: 1,
+  TILE_W: 2.55,        // Bigger architectural panel width
+  TILE_H: 1.6,         // Bigger architectural panel height
+  HERO_TILE_W: 3.15,   // Oversized hero project tile width
+  HERO_TILE_H: 1.98,   // Oversized hero project tile height
+  GAP: 0.32,           // Clean breathing room between panels
+  TUNNEL_W: 7.6,       // Tunnel cross-section width
+  TUNNEL_H: 5.2,       // Tunnel cross-section height
 
-  // Randomization (seeded)
-  TILT_RANGE: 3.0,     // Subtle tilt
-  Z_JITTER: 0.08,      // Subtle depth jitter
+  // Randomization (seeded, subtle)
+  TILT_RANGE: 1.6,
+  Z_JITTER: 0.05,
 
-  // Camera & flight speed (calibrated slower for comfortable viewing)
-  FOV_DESKTOP: 75,
-  FOV_MOBILE: 68,
-  CAMERA_Z_START: 8,
-  SCROLL_SPEED_FORWARD: 0.022, // Slower, calmer flight speed
-  LERP_FACTOR: 0.065,          // Silky smooth inertia damping
-  PARALLAX_X: 3.0,             // ± degrees yaw parallax
-  PARALLAX_Y: 3.0,             // ± degrees pitch parallax
+  // Camera & flight speed
+  FOV_DESKTOP: 70,
+  FOV_MOBILE: 66,
+  CAMERA_Z_START: 6.5,
+  SCROLL_SPEED_FORWARD: 0.02,
+  LERP_FACTOR: 0.085,
+  PARALLAX_X: 2.8,
+  PARALLAX_Y: 2.2,
 
   // Animation timings
-  FOCUS_DURATION: 0.85,
-  HOVER_Z: 0.38,
-  HOVER_SCALE: 1.08,
+  FOCUS_DURATION: 0.8,
+  HOVER_Z: 0.52,
+  HOVER_SCALE: 1.07,
 };

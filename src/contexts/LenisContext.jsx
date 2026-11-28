@@ -1,22 +1,35 @@
 import { createContext, useContext, useEffect, useRef, useCallback, useState } from 'react';
-import Lenis from '@studio-freight/lenis';
+import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const LenisContext = createContext(null);
 
+const SMOOTH_EASING = (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t));
+
 function ensureResizeObserver() {
-  if (typeof window === 'undefined' || 'ResizeObserver' in window) {
-    return;
+  if (typeof window !== 'undefined' && !('ResizeObserver' in window)) {
+    class ResizeObserverMock {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    window.ResizeObserver = ResizeObserverMock;
   }
-
-  class ResizeObserverMock {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+  if (typeof window !== 'undefined' && typeof window.matchMedia !== 'function') {
+    window.matchMedia = () => ({
+      matches: false,
+      media: '',
+      onchange: null,
+      addListener() {},
+      removeListener() {},
+      addEventListener() {},
+      removeEventListener() {},
+      dispatchEvent() {
+        return false;
+      },
+    });
   }
-
-  window.ResizeObserver = ResizeObserverMock;
 }
 
 export function LenisProvider({ children }) {
@@ -27,36 +40,44 @@ export function LenisProvider({ children }) {
   useEffect(() => {
     ensureResizeObserver();
 
+    const hasMatchMedia = typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+    const reduceMotion = hasMatchMedia
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false;
+
     const instance = new Lenis({
-      lerp: 0.14,
+      lerp: reduceMotion ? 1 : 0.08,
       orientation: 'vertical',
       gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.0,
+      smoothWheel: !reduceMotion,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.2,
       infinite: false,
+      autoRaf: false,
+      overscroll: false,
     });
 
     lenisRef.current = instance;
     setLenis(instance);
-    const hasScrollTriggerEnv = typeof window !== 'undefined' && typeof window.matchMedia === 'function';
-    if (hasScrollTriggerEnv) {
+
+    if (hasMatchMedia) {
       gsap.registerPlugin(ScrollTrigger);
       instance.on('scroll', ScrollTrigger.update);
     }
 
-    let frameId = 0;
-    function raf(time) {
-      instance.raf(time);
-      frameId = requestAnimationFrame(raf);
-    }
-    frameId = requestAnimationFrame(raf);
+    // Drive Lenis from GSAP's single unified ticker so scroll & animations
+    // stay phase-locked on the exact same frame with zero double-RAF jitter.
+    const onTick = (time) => {
+      instance.raf(time * 1000);
+    };
+    gsap.ticker.add(onTick);
+    gsap.ticker.lagSmoothing(0);
 
     setIsReady(true);
 
     return () => {
-      cancelAnimationFrame(frameId);
-      if (hasScrollTriggerEnv) {
+      gsap.ticker.remove(onTick);
+      if (hasMatchMedia) {
         instance.off('scroll', ScrollTrigger.update);
       }
       instance.destroy();
@@ -68,7 +89,10 @@ export function LenisProvider({ children }) {
 
   const scrollTo = useCallback((target, options = {}) => {
     if (lenisRef.current) {
-      lenisRef.current.scrollTo(target, options);
+      const defaults = options.immediate
+        ? {}
+        : { duration: 1.15, easing: SMOOTH_EASING };
+      lenisRef.current.scrollTo(target, { ...defaults, ...options });
     }
   }, []);
 
