@@ -35,18 +35,16 @@
   will-change: translate, scale, opacity;
 }
 
-/* Front layer: the portrait moves straight up, faster than the page.
-   No sideways drift, tilt or zoom, and it ignores the pointer. */
-.hero-avatar-front {
+/* Front layer: the interactive 2D avatar moves straight up, faster than the page. */
+.hero-avatar-stage {
   translate: 0 calc(var(--hs) * -18vh);
-  filter: brightness(calc(1 - var(--hs) * 0.35));
   will-change: translate;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-glow,
   .hero-name,
-  .hero-avatar-front {
+  .hero-avatar-stage {
     translate: none;
     will-change: auto;
   }

@@ -1,0 +1,320 @@
+.hero-avatar-stage {
+  position: absolute;
+  bottom: -5vh;
+  left: 50%;
+  z-index: 2;
+  height: 106vh;
+  max-height: 1120px;
+  aspect-ratio: 560 / 760;
+  width: auto;
+  opacity: 0;
+  transform: translateX(-50%) scale(0.97) translateY(24px);
+  pointer-events: none;
+  will-change: transform, opacity;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.is-loaded .hero-avatar-stage {
+  animation: avatarIn 0.78s cubic-bezier(0.22, 1, 0.3, 1) 0.05s both;
+}
+
+/* Scroll parallax matching the previous .hero-avatar-front behavior */
+.hero-avatar-stage {
+  translate: 0 calc(var(--hs, 0) * -18vh);
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.42))
+    brightness(calc(1 - var(--hs, 0) * 0.35));
+}
+
+[data-theme='light'] .hero-avatar-stage {
+  filter: drop-shadow(0 20px 36px rgba(0, 0, 0, 0.16))
+    brightness(calc(1 - var(--hs, 0) * 0.15));
+}
+
+.hero-avatar-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Only painted character regions intercept pointer events so BIKASH / DHAKAL remain hoverable */
+.avatar-hit-zone {
+  pointer-events: visiblePainted;
+  cursor: pointer;
+}
+
+.hero-avatar-svg--dragging,
+.hero-avatar-svg--dragging .avatar-hit-zone {
+  cursor: grabbing;
+}
+
+.hero-avatar-svg--charging {
+  filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.42));
+  transition: filter 0.25s ease;
+}
+
+/* Comic sparkle burst FX */
+.avatar-sparkles {
+  opacity: 0;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.avatar-sparkles--active {
+  animation: avatarSparklePop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes avatarSparklePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.55) rotate(-14deg);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.12) rotate(6deg);
+  }
+  70% {
+    opacity: 0.9;
+    transform: scale(1) rotate(2deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25) rotate(12deg);
+  }
+}
+
+/* Comic "broke" FX: temple sweat-drop + empty-pocket dust puff & moth */
+.avatar-sweat {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.avatar-sweat--active {
+  animation: avatarSweatDrop 2.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes avatarSweatDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  78% {
+    opacity: 1;
+    transform: translateY(22px) scale(0.98);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(34px) scale(0.85);
+  }
+}
+
+.avatar-hit-zone:focus,
+.avatar-hit-zone:focus-visible {
+  outline: none;
+}
+
+.hero-avatar-stage:has(:focus-visible) .avatar-focus-ring {
+  opacity: 0.7;
+}
+
+.avatar-focus-ring {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+/* Subtle glint sparkle animation */
+@keyframes avatarGlintPulse {
+  0%, 100% {
+    opacity: 0.75;
+    transform: scale(0.92) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12) rotate(12deg);
+  }
+}
+
+.avatar-star-glint {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: avatarGlintPulse 3.6s ease-in-out infinite;
+}
+
+.avatar-star-glint--flash {
+  animation: avatarGlintFlash 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes avatarGlintFlash {
+  0% {
+    opacity: 1;
+    transform: scale(0.6) rotate(-25deg);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.75) rotate(22deg);
+  }
+  100% {
+    opacity: 0.85;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Comic-style chat speech bubble on interaction click */
+.avatar-quip {
+  position: absolute;
+  top: 18%;
+  left: 65%;
+  z-index: 6;
+  pointer-events: none;
+  padding: 0.85rem 1.4rem;
+  border-radius: 24px 24px 24px 8px;
+  background: #ffffff;
+  color: #18181b;
+  border: 3px solid #18181b;
+  box-shadow: 5px 5px 0 #18181b;
+  font-family: var(--font-heading);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  transform-origin: bottom left;
+  transform: translateY(10px) scale(0.72) rotate(-4deg);
+  transition:
+    opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-flex;
+  align-items: center;
+}
+
+.avatar-quip--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1) rotate(-1.5deg);
+  animation: avatarBubbleFloat 2.8s ease-in-out 0.35s infinite;
+}
+
+@keyframes avatarBubbleFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.015) rotate(-0.8deg);
+  }
+}
+
+.avatar-quip-text {
+  position: relative;
+  z-index: 1;
+}
+
+.avatar-quip-tail {
+  position: absolute;
+  left: -12px;
+  bottom: -14px;
+  width: 28px;
+  height: 22px;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(4px 4px 0 #18181b);
+}
+
+/* Whisper-subtle hover cue before first interaction */
+.avatar-hint {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 6;
+  pointer-events: none;
+  padding: 0.32rem 0.72rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.avatar-hint--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Responsive sizing matching the hero composition */
+@media (max-width: 1024px) {
+  .hero-avatar-stage {
+    bottom: -4vh;
+    height: clamp(540px, 90dvh, 148vw);
+    max-height: none;
+  }
+  .avatar-quip {
+    left: 62%;
+    top: 14%;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-avatar-stage {
+    bottom: -4vh;
+    height: clamp(480px, 84dvh, 148vw);
+  }
+  .avatar-quip {
+    left: 50%;
+    top: -2.2rem;
+    padding: 0.7rem 1.15rem;
+    font-size: 0.95rem;
+    border-radius: 20px;
+    transform-origin: bottom center;
+    transform: translateX(-50%) translateY(10px) scale(0.75);
+  }
+  .avatar-quip--visible {
+    transform: translateX(-50%) translateY(0) scale(1) rotate(-1deg);
+    animation: none;
+  }
+  .avatar-quip-tail {
+    left: 50%;
+    bottom: -13px;
+    transform: translateX(-50%) rotate(-32deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-avatar-stage {
+    bottom: -4vh;
+    height: clamp(430px, 80dvh, 146vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-avatar-stage {
+    opacity: 1;
+    transform: translateX(-50%);
+    translate: none;
+    will-change: auto;
+  }
+  .avatar-star-glint,
+  .avatar-star-glint--flash,
+  .avatar-quip--visible {
+    animation: none;
+  }
+}

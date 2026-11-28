@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import InteractiveAvatar2D from './InteractiveAvatar2D';
 import './hero-parallax.css';
 
 const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -154,8 +155,8 @@ function Hero() {
             </span>
           </h1>
 
-          {/* Portrait */}
-          <img className="hero-avatar-front" src="/avatar.png" alt="Bikash Dhakal" />
+          {/* Interactive 2D Avatar Model */}
+          <InteractiveAvatar2D />
 
           {/* Fade into the next section - black fade */}
           <div className="hero-fade" aria-hidden="true" />
