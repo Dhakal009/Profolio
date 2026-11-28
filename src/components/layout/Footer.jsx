@@ -123,7 +123,7 @@ function Footer() {
         <div className="footer-hero-section">
           <div className="footer-eyebrow">
             <span className="footer-eyebrow-left">
-              FULL STACK DEVELOPER / CREATIVE TECHNOLOGIST
+              FULL STACK & DEVOPS ENGINEER
             </span>
             <span className="footer-eyebrow-right">
               PORTFOLIO 2026

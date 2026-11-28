@@ -101,7 +101,7 @@ function Preloader() {
       </div>
 
       <div className="pl-bottom">
-        <span>Full Stack Developer</span>
+        <span>Full Stack & DevOps Engineer</span>
         <span className="pl-count">
           {String(count).padStart(3, '0')}
           <small>%</small>

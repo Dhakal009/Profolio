@@ -20,19 +20,19 @@ export const DELIVERABLES = [
     ]
   },
   {
-    id: 'pixel-perfect-ui',
+    id: 'containers-cloud',
     index: '02',
-    title: 'Pixel-Perfect UI',
-    subtitle: 'Crafted Design Engineering',
-    tag: 'INTERFACE',
+    title: 'Containers & Cloud',
+    subtitle: 'Reproducible Deployments',
+    tag: 'DEVOPS',
     accent: '#a855f7', // Purple
     description:
-      'Bridging the gap between design and engineering with obsessive attention to micro-interactions, responsive fluidity, typographic rhythm, and design system fidelity.',
+      'Applications packaged with Docker so they run the same on a laptop, in CI and in production, then deployed to cloud hosts with environment-based configuration and secrets kept out of the code.',
     highlights: [
-      'Micro-Interactions & Hover Polish',
-      'Design Token Systems & Tailwind CSS',
-      'Fluid Responsive Typography',
-      'Hardware-Accelerated 60+ FPS Motion'
+      'Dockerfiles & Docker Compose Stacks',
+      'Nginx Reverse Proxy & HTTPS',
+      'Environment & Secrets Management',
+      'Linux Server Setup & Hardening'
     ]
   },
   {
@@ -68,19 +68,19 @@ export const DELIVERABLES = [
     ]
   },
   {
-    id: 'creative-motion',
+    id: 'ci-cd-automation',
     index: '05',
-    title: 'Creative Motion & 3D',
-    subtitle: 'Immersive Storytelling',
-    tag: 'EXPERIENCE',
+    title: 'CI/CD & Automation',
+    subtitle: 'Ship Faster, Safer',
+    tag: 'PIPELINES',
     accent: '#ec4899', // Pink
     description:
-      'Crafting memorable digital narratives using hardware-accelerated WebGL shaders, GSAP timelines, and tactile physical feedback that delight without sacrificing speed.',
+      'Every push is linted, tested and built automatically, then deployed through GitHub Actions pipelines, so releases are small, repeatable and easy to roll back.',
     highlights: [
-      'Custom GLSL Shaders & WebGL Canvas',
-      'Smooth Scroll Choreography',
-      'Spatial & Spring Physics Interactions',
-      'Zero-Jank GPU Rendering Pipeline'
+      'GitHub Actions Build, Test & Deploy',
+      'Automated Linting & Unit Tests',
+      'Preview & Production Environments',
+      'Rollbacks & Release Versioning'
     ]
   },
   {
@@ -96,7 +96,7 @@ export const DELIVERABLES = [
       'End-to-End Type Safety',
       'Redis Caching & Low-Latency Responses',
       'Schema Design & Migration Strategies',
-      'Fault-Tolerant Error Handling & Logging'
+      'Error Handling, Logging & Monitoring'
     ]
   }
 ];

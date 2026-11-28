@@ -37,7 +37,6 @@ const GROUPS = [
       { name: "MongoDB", level: 80 },
       { name: "Redis", level: 62 },
       { name: "Prisma", level: 75 },
-      { name: "Docker", level: 68 },
     ],
   },
   {
@@ -56,11 +55,13 @@ const GROUPS = [
     title: "DevOps & Tooling",
     skills: [
       { name: "Git", level: 90 },
+      { name: "Docker", level: 72 },
       { name: "GitHub Actions", level: 72 },
+      { name: "CI/CD pipelines", level: 70 },
+      { name: "Linux", level: 68 },
+      { name: "Nginx", level: 62 },
       { name: "AWS", level: 60 },
       { name: "Vercel", level: 88 },
-      { name: "CI/CD pipelines", level: 70 },
-      { name: "Jest", level: 68 },
     ],
   },
 ];

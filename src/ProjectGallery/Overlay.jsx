@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
@@ -196,7 +196,8 @@ const Scene = styled.div`
 const Tilt = styled.div`
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.18s ease-out;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.25s ease-out;
   will-change: transform;
 
   /* floating shadow layer sits behind the card to create depth */
@@ -237,6 +238,21 @@ const ModalCard = styled.div`
   opacity: ${(p) => (p.$isClosing ? 0 : 1)};
   animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   scrollbar-width: thin;
+
+  /* soft light that follows the pointer, gives the glass-card depth */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      520px circle at var(--gx, 30%) var(--gy, 0%),
+      ${(p) => (p.$isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.55)')},
+      transparent 60%
+    );
+    z-index: 5;
+  }
 
   @keyframes popIn {
     from { transform: scale(0.94) translateY(16px) rotateX(6deg); opacity: 0; }
@@ -313,32 +329,37 @@ const Header = styled.div`
 
 const ProjectTitle = styled.h2`
   font-size: clamp(1.65rem, 3.4vw, 2.55rem);
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
-  margin: 0 0 0.4rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  margin: 0 0 0.45rem;
 `
 
 const ProjectSubtitle = styled.p`
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
+  font-size: 1rem;
+  font-weight: 500;
+  color: ${(p) => (p.$isDark ? '#a1a1aa' : '#52525b')};
   margin: 0;
 `
 
 const Layout = styled.div`
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: clamp(1rem, 2vw, 1.5rem);
-  align-items: start;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: clamp(1.25rem, 2.6vw, 2.25rem);
+  align-items: stretch;
   flex: 1;
-  height: auto;
   min-height: 0;
+  overflow: hidden;
+  padding: 4px 4px 0.5rem;
+  margin: 0 -4px;
 
   @media (max-width: 860px) {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
     flex: 1 1 auto;
     overflow-y: auto;
+    align-items: start;
     padding-right: 0.15rem;
   }
 `
@@ -350,15 +371,30 @@ const Column = styled.div`
   min-width: 0;
   min-height: 0;
 
+  &:first-child { overflow: hidden; }
+  @media (max-width: 860px) {
+    &:first-child { overflow: visible; }
+    &:last-child { height: auto; max-height: none; overflow: visible; }
+  }
+
   &:last-child {
     overflow-y: auto;
-    padding-right: 0.25rem;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    gap: 1.35rem;
+    overscroll-behavior: contain;
+    padding: 0.1rem 0.5rem 1rem 0;
     scrollbar-width: thin;
   }
 `
 
 /* ----- Screenshot viewer (browser frame with slight 3D lean) ----- */
 const BrowserFrame = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)')};
@@ -367,17 +403,13 @@ const BrowserFrame = styled.div`
     p.$isDark
       ? '0 30px 50px -18px rgba(0,0,0,0.8), 0 12px 20px -10px rgba(0,0,0,0.6)'
       : '0 30px 50px -18px rgba(20,20,40,0.3), 0 12px 20px -10px rgba(20,20,40,0.18)'};
-  transform: perspective(1200px) rotateY(-4deg) rotateX(2deg);
-  transform-origin: center;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-
-  &:hover { transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(-3px); }
-
-  @media (max-width: 860px) { transform: none; &:hover { transform: none; } }
-  @media (prefers-reduced-motion: reduce) { transform: none; &:hover { transform: none; } }
+  transform: translate3d(calc(var(--px, 0) * -10px), calc(var(--py, 0) * -8px), 0);
+  transition: transform 0.25s ease-out;
+  @media (max-width: 860px) { transform: none; }
 `
 
 const BrowserBar = styled.div`
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -402,8 +434,11 @@ const BrowserBar = styled.div`
 const ShotImage = styled.img`
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 8.8;
+  flex: 1 1 0;
+  min-height: 0;
   object-fit: cover;
+  object-position: top left;
+  @media (max-width: 860px) { flex: none; aspect-ratio: 16 / 9; }
   background: ${(p) => (p.$isDark ? '#12131a' : '#f1f1f5')};
   animation: shotIn 0.35s ease-out;
 
@@ -411,11 +446,12 @@ const ShotImage = styled.img`
 `
 
 const Thumbs = styled.div`
+  flex: 0 0 auto;
   display: flex;
   gap: 0.6rem;
   margin-top: 0.45rem;
   overflow-x: auto;
-  padding: 4px 2px 6px;
+  padding: 6px 4px 8px;
 `
 
 const Thumb = styled.button`
@@ -433,7 +469,7 @@ const Thumb = styled.button`
 
   img { width: 100%; height: 100%; object-fit: cover; display: block; }
   &:hover { opacity: 1; transform: translateY(-2px); }
-  &:focus-visible { outline: 2px solid ${(p) => p.$accent || '#38bdf8'}; outline-offset: 2px; }
+  &:focus-visible { outline: ${(p) => (p.$active ? 'none' : `2px solid ${p.$accent || '#38bdf8'}`)}; outline-offset: 2px; }
 `
 
 /* ------------------------ Info panels (right) ------------------------ */
@@ -455,27 +491,54 @@ const PanelTitle = styled.h3`
 const Stats = styled.div`
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.6rem;
+  border-top: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')};
+  border-bottom: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')};
 
-  div { font-size: 0.78rem; color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')}; }
+  > div {
+    padding: 0.8rem 0.9rem 0.8rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  > div + div {
+    padding-left: 0.9rem;
+    border-left: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)')};
+  }
+  span {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: ${(p) => (p.$isDark ? '#8d8d95' : '#71717a')};
+  }
   strong {
-    display: block;
-    margin-bottom: 2px;
     font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.3;
     color: ${(p) => (p.$isDark ? '#fff' : '#09090b')};
   }
 `
 
+const SectionLabel = styled.h3`
+  margin: 0 0 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: ${(p) => (p.$isDark ? '#8d8d95' : '#71717a')};
+`
+
 const ProjectDescription = styled.p`
-  font-size: 0.88rem;
-  line-height: 1.48;
+  font-size: 1rem;
+  line-height: 1.65;
   margin: 0;
-  color: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.84)' : 'rgba(0,0,0,0.78)')};
+  color: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.86)' : 'rgba(0,0,0,0.8)')};
 `
 
 const CredHint = styled.p`
-  margin: -0.2rem 0 0.45rem;
-  font-size: 0.72rem;
+  margin: -0.3rem 0 0.7rem;
+  font-size: 0.8rem;
   line-height: 1.35;
   color: ${(p) => (p.$isDark ? '#a1a1aa' : '#71717a')};
 `
@@ -485,9 +548,9 @@ const CredBlock = styled.div`
 `
 
 const CredRole = styled.div`
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.35rem;
   color: ${(p) => p.$accent || (p.$isDark ? '#38bdf8' : '#0284c7')};
 `
 
@@ -546,9 +609,9 @@ const TechList = styled.div`
 
 const TechPill = styled.span`
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.35rem 0.8rem;
-  border-radius: 8px;
+  border-radius: 999px;
   background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)')};
   border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)')};
   color: ${(p) => (p.$isDark ? '#e4e4e7' : '#3f3f46')};
@@ -557,11 +620,12 @@ const TechPill = styled.span`
 const ActionRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  justify-content: flex-end;
+  gap: 0.6rem;
   flex-wrap: wrap;
   flex: 0 0 auto;
-  margin-top: 0.7rem;
-  padding-top: 0.7rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
   border-top: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')};
 `
 
@@ -569,17 +633,17 @@ const PrimaryButton = styled.a`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  border-radius: 999px;
-  font-size: 0.93rem;
-  font-weight: 700;
+  padding: 0.7rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-decoration: none;
   background: ${(p) => p.$accent || (p.$isDark ? '#ffffff' : '#09090b')};
   color: ${(p) => (p.$accent ? '#ffffff' : p.$isDark ? '#09090b' : '#ffffff')};
-  box-shadow: 0 4px 16px ${(p) => (p.$accent ? `${p.$accent}44` : 'rgba(0,0,0,0.2)')};
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
   transition: transform 0.2s, box-shadow 0.2s;
 
-  &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px ${(p) => (p.$accent ? `${p.$accent}66` : 'rgba(0,0,0,0.3)')}; }
+  &:hover { transform: translateY(-1px); filter: brightness(1.08); }
   &:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
 `
 
@@ -587,10 +651,10 @@ const SecondaryButton = styled.a`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.4rem;
-  border-radius: 999px;
-  font-size: 0.93rem;
-  font-weight: 600;
+  padding: 0.7rem 1.15rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
   text-decoration: none;
   background: ${(p) => (p.$isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)')};
   border: 1px solid ${(p) => (p.$isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)')};
@@ -649,7 +713,7 @@ function Credentials({ list, isDark, accent }) {
 
   return (
     <Panel $isDark={isDark}>
-      <PanelTitle $isDark={isDark}>Try the live demo</PanelTitle>
+      <SectionLabel $isDark={isDark}>Try the live demo</SectionLabel>
       <CredHint $isDark={isDark}>Use these test accounts to log in. Data is sample only.</CredHint>
       {list.map((c, i) => {
         const pw = shown[i]
@@ -712,7 +776,6 @@ export default function Overlay({
   const [isClosing, setIsClosing] = useState(false)
   const [isOpening, setIsOpening] = useState(true)
   const [activeShot, setActiveShot] = useState(0)
-  const tiltRef = useRef(null)
 
   useEffect(() => {
     const timer = setTimeout(() => setIsOpening(false), 1200)
@@ -762,21 +825,36 @@ export default function Overlay({
     return () => window.removeEventListener('keydown', handleKey)
   }, [selected, isClosing])
 
-  // 3D tilt that follows the pointer (desktop only, respects reduced motion)
-  const canTilt = () =>
-    typeof window !== 'undefined' &&
-    window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
-    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
+  // 3D tilt + glare follow the pointer (fine pointers only, one update per frame)
+  const tiltRef = useRef(null)
+  const detailsRef = useRef(null)
+  const tiltRaf = useRef(0)
   const handleMove = (e) => {
-    if (!tiltRef.current || !canTilt()) return
-    const x = e.clientX / window.innerWidth - 0.5
-    const y = e.clientY / window.innerHeight - 0.5
-    tiltRef.current.style.transform = `rotateX(${(-y * 5).toFixed(2)}deg) rotateY(${(x * 7).toFixed(2)}deg)`
+    const el = tiltRef.current
+    if (!el || tiltRaf.current) return
+    if (
+      !window.matchMedia('(hover: hover) and (pointer: fine)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) return
+    const { clientX, clientY } = e
+    tiltRaf.current = requestAnimationFrame(() => {
+      tiltRaf.current = 0
+      const x = clientX / window.innerWidth - 0.5
+      const y = clientY / window.innerHeight - 0.5
+      el.style.setProperty('--rx', `${(-y * 6).toFixed(2)}deg`)
+      el.style.setProperty('--ry', `${(x * 8).toFixed(2)}deg`)
+      el.style.setProperty('--px', x.toFixed(3))
+      el.style.setProperty('--py', y.toFixed(3))
+      el.style.setProperty('--gx', `${((x + 0.5) * 100).toFixed(1)}%`)
+      el.style.setProperty('--gy', `${((y + 0.5) * 100).toFixed(1)}%`)
+    })
   }
   const resetTilt = () => {
-    if (tiltRef.current) tiltRef.current.style.transform = 'rotateX(0deg) rotateY(0deg)'
+    const el = tiltRef.current
+    if (!el) return
+    ;['--rx', '--ry', '--px', '--py', '--gx', '--gy'].forEach((k) => el.style.removeProperty(k))
   }
+  useEffect(() => () => cancelAnimationFrame(tiltRaf.current), [])
 
   return (
     <>
@@ -799,6 +877,7 @@ export default function Overlay({
 
       {selected && typeof document !== 'undefined' && createPortal(
         <ModalBackdrop
+          data-lenis-prevent
           $isDark={isDark}
           $isClosing={isClosing}
           onClick={(e) => {
@@ -806,7 +885,12 @@ export default function Overlay({
           }}
           onMouseMove={handleMove}
           onMouseLeave={resetTilt}
-          onWheel={(e) => e.stopPropagation()}
+          onWheel={(e) => {
+            e.stopPropagation()
+            // wheel anywhere over the popup scrolls the details column
+            const col = detailsRef.current
+            if (col && !col.contains(e.target)) col.scrollTop += e.deltaY
+          }}
           onTouchMove={(e) => e.stopPropagation()}
         >
           <Scene>
@@ -877,31 +961,37 @@ export default function Overlay({
                   </Column>
 
                   {/* Right: details */}
-                  <Column>
-                    <Panel $isDark={isDark}>
-                      <Stats $isDark={isDark}>
-                        <div><strong>{project.stat || project.category}</strong>Focus</div>
-                        <div><strong>{project.year || '2026'}</strong>Year</div>
-                        <div><strong>Live demo</strong>Deployment</div>
-                      </Stats>
-                    </Panel>
+                  <Column ref={detailsRef}>
+                    <Stats $isDark={isDark}>
+                      <div><span>Focus</span><strong>{project.stat || project.category}</strong></div>
+                      <div><span>Year</span><strong>{project.year || '2026'}</strong></div>
+                      <div><span>Deployment</span><strong>Live demo</strong></div>
+                    </Stats>
 
                     <ProjectDescription $isDark={isDark}>{project.description}</ProjectDescription>
 
-                    <Credentials list={credentials} isDark={isDark} accent={project.accent} />
-
                     <div>
-                      <PanelTitle $isDark={isDark}>Built with</PanelTitle>
+                      <SectionLabel $isDark={isDark}>Built with</SectionLabel>
                       <TechList>
                         {project.tech.map((item) => (
                           <TechPill key={item} $isDark={isDark}>{item}</TechPill>
                         ))}
                       </TechList>
                     </div>
+
+                    <Credentials list={credentials} isDark={isDark} accent={project.accent} />
                   </Column>
                 </Layout>
 
                 <ActionRow $isDark={isDark}>
+                  <SecondaryButton
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    $isDark={isDark}
+                  >
+                    <GithubIcon /> Source code
+                  </SecondaryButton>
                   <PrimaryButton
                     href={project.link}
                     target="_blank"
@@ -911,14 +1001,6 @@ export default function Overlay({
                   >
                     Open live demo <ExternalIcon />
                   </PrimaryButton>
-                  <SecondaryButton
-                    href={project.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    $isDark={isDark}
-                  >
-                    <GithubIcon /> Source code
-                  </SecondaryButton>
                 </ActionRow>
               </ModalCard>
             </Tilt>

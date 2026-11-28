@@ -15,23 +15,23 @@ gsap.registerPlugin(ScrollTrigger);
 /* ------------------------------ Content ---------------------------------- */
 
 const TEXT =
-  "Designing with clarity, engineering for speed, building web products that feel alive.";
+  "Building full stack products, shipping them with automated pipelines, running them reliably.";
 
 const LINES = [
-  "Designing with clarity,",
-  "engineering for speed,",
-  "building web products",
-  "that feel alive.",
+  "Building full stack products,",
+  "shipping them with pipelines,",
+  "running them reliably,",
+  "end to end.",
 ];
 
 const BIO = {
   strong: "Computer Science undergraduate",
-  rest: " from Kathmandu turning complex ideas into fast, accessible, and interactive web applications, bridging clean architecture with tactile 60fps interfaces.",
+  rest: " from Kathmandu building full stack web applications and the DevOps pipeline around them: containerised with Docker, tested and deployed through CI/CD, and monitored in production.",
 };
 
 const SPECS = [
   { label: "Based in", value: "Kathmandu, Nepal", icon: "pin" },
-  { label: "Focus", value: "Full stack and 3D interfaces", icon: "code" },
+  { label: "Focus", value: "Full stack & DevOps", icon: "code" },
   { label: "Availability", value: "Open to projects", icon: "live" },
 ];
 
@@ -65,15 +65,15 @@ const ICONS = {
 // Scrolling facts along the bottom of the card. Edit freely; keep each one short.
 const FACTS = [
   { label: "Education", text: "Final-year B.Sc. CSIT at Himalaya College of Engineering" },
-  { label: "Role", text: "Full Stack Developer" },
+  { label: "Role", text: "Full Stack & DevOps Engineer" },
   { label: "Stack", text: "React, Node.js, Express, MongoDB" },
   { label: "Built", text: "A government queue management system" },
   { label: "Also built", text: "Employee, e-commerce and hostel management systems" },
-  { label: "Craft", text: "Scroll-driven interfaces with GSAP and React Three Fiber" },
+  { label: "DevOps", text: "Docker, GitHub Actions CI/CD, Linux and cloud deployments" },
   { label: "Side project", text: "Jarvis, a Python voice and typing assistant for Windows" },
-  { label: "Learning", text: "TypeScript and Next.js" },
+  { label: "Learning", text: "Kubernetes, Terraform and cloud infrastructure" },
   { label: "Interests", text: "Problem solving and getting the most out of generative AI" },
-  { label: "Looking for", text: "Entry-level full-stack roles" },
+  { label: "Looking for", text: "Full stack and DevOps roles" },
 ];
 
 const FONT = "var(--font-heading, 'Inter Tight'), 'Inter', system-ui, sans-serif";
@@ -113,6 +113,7 @@ const S = {
     height: "100vh",
     minHeight: "100dvh",
     overflow: "hidden",
+    contain: "layout paint",
     background: "var(--bg)",
     color: "var(--foam)",
   },
@@ -130,9 +131,33 @@ const S = {
   card: {
     background: "var(--card-bg)",
     border: "1px solid var(--line)",
+    backgroundImage:
+      "linear-gradient(180deg, color-mix(in srgb, var(--foam) 5%, transparent), transparent 38%)",
     boxShadow:
-      "inset 0 1px 0 color-mix(in srgb, var(--foam) 6%, transparent), 0 30px 70px -40px rgba(0,0,0,0.55)",
+      "inset 0 1px 0 color-mix(in srgb, var(--foam) 10%, transparent), 0 24px 48px -32px rgba(0,0,0,0.6)",
     opacity: 0,
+    willChange: "transform, opacity",
+  },
+  edge: {
+    padding: "1px",
+    background:
+      "radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--foam) 45%, transparent), transparent 60%)",
+    WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+    WebkitMaskComposite: "xor",
+    mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+    opacity: 0,
+  },
+  sheen: {
+    width: "45%",
+    transform: "translateX(-130%) skewX(-18deg)",
+    background:
+      "linear-gradient(90deg, transparent, color-mix(in srgb, var(--foam) 14%, transparent) 50%, transparent)",
+    opacity: 0,
+  },
+  aurora: {
+    inset: 0,
+    background:
+      "radial-gradient(45% 40% at 20% 15%, color-mix(in srgb, var(--foam) 7%, transparent), transparent 70%)",
   },
   glow: {
     background:
@@ -163,18 +188,25 @@ const S = {
     fontSize: "10vw", // replaced by the fit function once mounted
   },
   fit: { display: "inline-block" },
-  word: { display: "inline-block", willChange: "transform, opacity" },
+  word: {
+    display: "inline-block",
+    willChange: "transform, opacity",
+    backgroundImage:
+      "linear-gradient(180deg, var(--foam) 35%, color-mix(in srgb, var(--foam) 62%, transparent))",
+    WebkitBackgroundClip: "text",
+    backgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    paddingBottom: "0.04em",
+  },
   tile: {
     position: "relative",
     overflow: "hidden",
     border: "1px solid var(--line)",
-    background: "color-mix(in srgb, var(--foam) 3%, transparent)",
+    background: "transparent",
     opacity: 0,
   },
   iconBox: {
-    border: "1px solid var(--line)",
-    background: "color-mix(in srgb, var(--foam) 5%, transparent)",
-    color: "var(--foam)",
+    color: "var(--muted)",
   },
   // shown on hover: a brighter edge plus a soft light that follows the cursor
   tileHover: {
@@ -354,8 +386,8 @@ export default function AboutSection() {
               card,
               {
                 opacity: 0,
-                y: 70,
-                scale: 0.95,
+                y: 90,
+                scale: 0.93,
                 transformOrigin: "50% 100%",
                 clipPath: "inset(10% 5% 10% 5% round 44px)",
               },
@@ -363,8 +395,8 @@ export default function AboutSection() {
                 opacity: 1,
                 y: 0,
                 scale: 1,
-                clipPath: "inset(0% 0% 0% 0% round 24px)",
-                duration: 1.2,
+                clipPath: "inset(0% 0% 0% 0% round 28px)",
+                duration: 1.5,
                 ease: "expo.out",
                 force3D: true,
                 // clip-path would cut off the card's shadow, so drop it once finished
@@ -386,6 +418,17 @@ export default function AboutSection() {
               },
               0.2
             );
+
+            const sheen = card.querySelector(".about-sheen");
+            if (sheen) {
+              intro.fromTo(
+                sheen,
+                { xPercent: 0, opacity: 1 },
+                { xPercent: 420, duration: 1.8, ease: "power2.inOut" },
+                0.35
+              );
+              intro.set(sheen, { opacity: 0 }, 2.2);
+            }
 
             if (hint) intro.fromTo(hint, { opacity: 0 }, { opacity: 1, duration: 0.6 }, 0.9);
 
@@ -428,8 +471,8 @@ export default function AboutSection() {
             if (tiles.length) {
               tl.fromTo(
                 tiles,
-                { opacity: 0, y: 16 },
-                { opacity: 1, y: 0, duration: 0.2, stagger: 0.06, ease: "power3.out", force3D: true },
+                { opacity: 0, y: 24, scale: 0.96 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.24, stagger: 0.07, ease: "back.out(1.4)", force3D: true },
                 0.46
               );
             }
@@ -473,6 +516,7 @@ export default function AboutSection() {
                 tween: null,
               }));
               const spotEl = card.querySelector(".about-spot");
+              const edgeEl = card.querySelector(".about-edge");
               const target = { x: 0, y: 0 };
               const cur = { x: 0, y: 0 };
               let spotSeen = false;
@@ -483,14 +527,46 @@ export default function AboutSection() {
               const setTile = (t, on) => {
                 t.over = on;
                 t.tween?.kill();
-                t.tween = gsap.to(t.el, { scale: on ? 1.025 : 1, duration: 0.4, ease: "power3.out" });
+                t.tween = gsap.to(t.el, {
+                  scale: on ? 1.03 : 1,
+                  duration: on ? 0.5 : 0.4,
+                  ease: on ? "back.out(2.2)" : "power3.out",
+                });
                 gsap.to(t.ring, { opacity: on ? 1 : 0, duration: 0.35, ease: "power2.out" });
               };
 
-              const onMove = (e) => {
-                const { clientX: x, clientY: y } = e;
+              // pointer events are coalesced to one pass per frame, and element
+              // rects are cached (invalidated on scroll/resize) to avoid layout reads
+              let rects = null;
+              let pending = null;
+              let moveRaf = 0;
+              const invalidate = () => {
+                rects = null;
+              };
+              const getRects = () =>
+                rects ||
+                (rects = {
+                  card: card.getBoundingClientRect(),
+                  tiles: items.map((t) => t.el.getBoundingClientRect()),
+                  marquee: marquee ? marquee.getBoundingClientRect() : null,
+                });
 
-                const cr = card.getBoundingClientRect();
+              const onMove = (e) => {
+                pending = e;
+                if (!moveRaf) {
+                  moveRaf = requestAnimationFrame(() => {
+                    moveRaf = 0;
+                    if (pending) handleMove(pending);
+                    pending = null;
+                  });
+                }
+              };
+
+              const handleMove = (e) => {
+                const { clientX: x, clientY: y } = e;
+                const R = getRects();
+
+                const cr = R.card;
                 target.x = x - cr.left;
                 target.y = y - cr.top;
                 if (!spotSeen) {
@@ -498,10 +574,12 @@ export default function AboutSection() {
                   cur.x = target.x;
                   cur.y = target.y;
                   gsap.to(spotEl, { opacity: 1, duration: 0.6 });
+                  if (edgeEl) gsap.to(edgeEl, { opacity: 1, duration: 0.6 });
                 }
 
-                items.forEach((t) => {
-                  const r = t.el.getBoundingClientRect();
+
+                items.forEach((t, ti) => {
+                  const r = R.tiles[ti];
                   const on = Number(gsap.getProperty(t.el, "opacity")) > 0.6 && inside(r, x, y);
                   if (on) {
                     t.el.style.setProperty("--tx", `${x - r.left}px`);
@@ -511,7 +589,7 @@ export default function AboutSection() {
                 });
 
                 if (marquee) {
-                  const on = inside(marquee.getBoundingClientRect(), x, y);
+                  const on = inside(R.marquee, x, y);
                   if (on !== overMarquee) {
                     overMarquee = on;
                     hover.slowTarget = on ? 0.15 : 1;
@@ -520,8 +598,11 @@ export default function AboutSection() {
               };
 
               const onLeave = () => {
+                pending = null;
+                rects = null;
                 spotSeen = false;
                 gsap.to(spotEl, { opacity: 0, duration: 0.5 });
+                if (edgeEl) gsap.to(edgeEl, { opacity: 0, duration: 0.5 });
                 items.forEach((t) => t.over && setTile(t, false));
                 overMarquee = false;
                 hover.slowTarget = 1;
@@ -535,11 +616,16 @@ export default function AboutSection() {
                 card.style.setProperty("--my", `${cur.y}px`);
               };
 
-              stage.addEventListener("pointermove", onMove);
+              stage.addEventListener("pointermove", onMove, { passive: true });
+              window.addEventListener("scroll", invalidate, { passive: true });
+              window.addEventListener("resize", invalidate);
               stage.addEventListener("pointerleave", onLeave);
               gsap.ticker.add(tickSpot);
               cleanups.push(() => {
                 stage.removeEventListener("pointermove", onMove);
+                window.removeEventListener("scroll", invalidate);
+                window.removeEventListener("resize", invalidate);
+                cancelAnimationFrame(moveRaf);
                 stage.removeEventListener("pointerleave", onLeave);
                 gsap.ticker.remove(tickSpot);
               });
@@ -677,9 +763,12 @@ export default function AboutSection() {
           {/* The card */}
           <div
             ref={cardRef}
-            className="relative flex flex-col flex-1 min-h-0 rounded-3xl overflow-hidden"
+            className="relative flex flex-col flex-1 min-h-0 rounded-[28px] overflow-hidden"
             style={S.card}
           >
+            <div aria-hidden="true" className="pointer-events-none absolute" style={S.aurora} />
+            <div aria-hidden="true" className="about-sheen pointer-events-none absolute inset-y-0 left-0" style={S.sheen} />
+            <div aria-hidden="true" className="about-edge pointer-events-none absolute inset-0 rounded-[28px]" style={S.edge} />
             <div aria-hidden="true" className="about-spot pointer-events-none absolute inset-0" style={S.spot} />
 
             <div className="relative flex flex-col md:flex-row flex-1 min-h-0">
@@ -694,22 +783,7 @@ export default function AboutSection() {
                   }}
                 />
                 <span aria-hidden="true" className="pointer-events-none absolute inset-0" style={S.glow} />
-                <p
-                  className="about-hint relative inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs"
-                  style={{
-                    color: "var(--muted)",
-                    opacity: 0,
-                    border: "1px solid var(--line)",
-                    background: "color-mix(in srgb, var(--foam) 4%, transparent)",
-                  }}
-                >
-                  <span
-                    className="h-1 w-1 rounded-full"
-                    style={{ background: "var(--foam)", opacity: 0.6 }}
-                    aria-hidden="true"
-                  />
-                  Drag the badge to swing it
-                </p>
+                
               </div>
 
               {/* Right: headline, bio, details */}
@@ -752,7 +826,7 @@ export default function AboutSection() {
 
                 <div className="flex flex-col gap-4 sm:gap-5">
                   <p
-                    className="about-bio text-sm sm:text-[15px] leading-relaxed max-w-2xl"
+                    className="about-bio text-sm sm:text-base leading-relaxed max-w-2xl"
                     style={{ color: "var(--muted)", opacity: 0 }}
                   >
                     <span style={{ color: "var(--foam)", fontWeight: 500 }}>{BIO.strong}</span>
@@ -765,32 +839,27 @@ export default function AboutSection() {
                     {SPECS.map((s, i) => (
                       <div
                         key={s.label}
-                        className={`about-tile flex items-center gap-3 rounded-2xl px-4 py-3 sm:py-3.5 ${
+                        className={`about-tile flex flex-col justify-between gap-3 rounded-[18px] px-4 py-3.5 sm:py-4 ${
                           i === 2 ? "sm:col-span-1 md:col-span-2 lg:col-span-1" : ""
                         }`}
                         style={S.tile}
                       >
                         <span
                           aria-hidden="true"
-                          className="about-tile-hover pointer-events-none absolute inset-0 rounded-2xl"
+                          className="about-tile-hover pointer-events-none absolute inset-0 rounded-[18px]"
                           style={S.tileHover}
                         />
-                        <span
-                          className="about-icon relative grid h-9 w-9 shrink-0 place-items-center rounded-xl"
-                          style={S.iconBox}
+                        <div className="relative flex items-center gap-2" style={{ color: "var(--muted)" }}>
+                          <span className="about-icon grid h-4 w-4 place-items-center" style={S.iconBox}>
+                            {ICONS[s.icon]}
+                          </span>
+                          <span className="text-[11px] uppercase tracking-[0.14em]">{s.label}</span>
+                        </div>
+                        <div
+                          className="relative text-[15px] font-semibold leading-snug tracking-tight"
+                          style={{ color: "var(--foam)" }}
                         >
-                          {ICONS[s.icon]}
-                        </span>
-                        <div className="relative min-w-0">
-                          <div className="text-xs" style={{ color: "var(--muted)" }}>
-                            {s.label}
-                          </div>
-                          <div
-                            className="mt-0.5 text-sm font-medium sm:truncate"
-                            style={{ color: "var(--foam)" }}
-                          >
-                            {s.value}
-                          </div>
+                          {s.value}
                         </div>
                       </div>
                     ))}
@@ -805,21 +874,28 @@ export default function AboutSection() {
               style={S.marquee}
               aria-label={FACTS.map((f) => `${f.label}: ${f.text}`).join(". ")}
             >
-              <div className="about-marquee-inner flex w-max items-center py-3.5 sm:py-4" aria-hidden="true">
+              <div className="about-marquee-inner flex w-max items-center py-3 sm:py-3.5" aria-hidden="true">
                 {[0, 1].map((copy) => (
                   <div key={copy} className="flex shrink-0 items-center">
                     {FACTS.map((f) => (
                       <span key={`${copy}-${f.label}`} className="flex items-center">
-                        <span className="px-5 sm:px-6 text-[13px] sm:text-base whitespace-nowrap">
-                          <span style={{ color: "var(--muted)" }}>{f.label}</span>
-                          <span className="ml-2 sm:ml-2.5 font-semibold" style={{ color: "var(--foam)" }}>
+                        <span
+                          className="mx-1.5 inline-flex items-center gap-2.5 rounded-full px-4 py-1.5 text-[13px] whitespace-nowrap"
+                          style={{
+                            border: "1px solid var(--line)",
+                            background: "color-mix(in srgb, var(--foam) 4%, transparent)",
+                          }}
+                        >
+                          <span
+                            className="text-[10px] uppercase tracking-[0.14em]"
+                            style={{ color: "var(--muted)" }}
+                          >
+                            {f.label}
+                          </span>
+                          <span className="font-medium" style={{ color: "var(--foam)" }}>
                             {f.text}
                           </span>
                         </span>
-                        <span
-                          className="h-1 w-1 rounded-full"
-                          style={{ background: "var(--muted)", opacity: 0.5 }}
-                        />
                       </span>
                     ))}
                   </div>

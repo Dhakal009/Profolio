@@ -53,7 +53,7 @@ describe('Clean Editorial Brutalist Footer Component', () => {
   it('renders giant uppercase name and eyebrow text', () => {
     renderFooter();
 
-    expect(screen.getByText(/FULL STACK DEVELOPER \/ CREATIVE TECHNOLOGIST/i)).toBeInTheDocument();
+    expect(screen.getByText(/FULL STACK & DEVOPS ENGINEER/i)).toBeInTheDocument();
     expect(screen.getByText(/PORTFOLIO 2026/i)).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'BIKASH DHAKAL' })).toBeInTheDocument();
   });

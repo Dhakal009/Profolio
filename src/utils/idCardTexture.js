@@ -160,7 +160,7 @@ function renderFront(photo, p, isDark) {
 
   ctx.fillStyle = p.muted;
   ctx.font = '600 24px Inter, system-ui, sans-serif';
-  ctx.fillText('Full Stack Developer', metaX, 434);
+  ctx.fillText('Full Stack & DevOps Engineer', metaX, 434);
 
   ctx.strokeStyle = p.line;
   ctx.lineWidth = 2;
@@ -179,7 +179,7 @@ function renderFront(photo, p, isDark) {
   };
 
   drawField('BASED IN', 'Kathmandu, NP', 524);
-  drawField('FOCUS', 'Web & 3D UI', 626);
+  drawField('FOCUS', 'Full Stack & DevOps', 626);
 
   ctx.fillStyle = p.muted;
   ctx.font = '600 18px "JetBrains Mono", ui-monospace, monospace';
@@ -210,7 +210,7 @@ function renderFront(photo, p, isDark) {
   ctx.font = '400 29px Inter, system-ui, sans-serif';
   drawWrappedText(
     ctx,
-    'Rooted in Kathmandu, trained in computer science. Building fast, accessible web apps & interactive 3D interfaces.',
+    'Rooted in Kathmandu, trained in computer science. Building full stack apps and shipping them with Docker and CI/CD.',
     pad,
     992,
     W - pad * 2,
@@ -263,7 +263,7 @@ function renderBack(p, isDark) {
   ctx.fillStyle = p.muted;
   ctx.font = '500 22px "JetBrains Mono", ui-monospace, monospace';
   ctx.textAlign = 'right';
-  ctx.fillText('DEVELOPER PASS', W - pad, 192);
+  ctx.fillText('ENGINEER PASS', W - pad, 192);
   ctx.textAlign = 'left';
 
   ctx.strokeStyle = p.line;
@@ -294,7 +294,7 @@ function renderBack(p, isDark) {
   ctx.font = '600 22px "JetBrains Mono", ui-monospace, monospace';
   ctx.fillText('CORE STACK', pad, 590);
 
-  const skills = ['React 19', 'TypeScript', 'Node.js', 'Tailwind CSS', 'Three.js', 'GSAP'];
+  const skills = ['React 19', 'Node.js', 'MongoDB', 'Docker', 'CI/CD', 'Linux'];
   let px = pad;
   let py = 630;
   ctx.font = '500 24px "JetBrains Mono", ui-monospace, monospace';

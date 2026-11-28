@@ -699,7 +699,16 @@ const stepSimulation = (sim, dt, physics, time) => {
 
   let energy = body.velocity.lengthSq() + body.angular.lengthSq() * 0.3;
   for (let i = 1; i < JOINTS; i++) energy += velocities[i].lengthSq() * 0.05;
-  sim.calm = energy < 2e-4 ? sim.calm + dt : 0;
+  // Settling: once the badge is nearly still, bleed off the leftover solver
+  // jitter so it comes to a true rest (and the render loop can sleep).
+  if (!grab && energy < 0.05) {
+    const k = Math.exp(-12 * dt);
+    body.velocity.multiplyScalar(k);
+    body.angular.multiplyScalar(k);
+    for (let i = 1; i < JOINTS; i++) velocities[i].multiplyScalar(k);
+    energy *= k * k;
+  }
+  sim.calm = energy < 2e-3 ? sim.calm + dt : 0;
 };
 
 const Lanyard = ({
@@ -876,6 +885,7 @@ const Lanyard = ({
     let hoverRaf = 0;
     let last = performance.now();
     let time = 0;
+    let acc = 0;
     const stackSection = container.closest('.stack-section');
     let ioVisible = true;
     let stackVisible = stackSection ? stackSection.dataset.stackActive !== 'false' : true;
@@ -1137,11 +1147,18 @@ const Lanyard = ({
     const tick = now => {
       raf = 0;
       if (!alive) return;
-      const dt = Math.min(1 / 30, Math.max(1 / 240, (now - last) / 1000));
+      const dt = Math.min(1 / 30, Math.max(0, (now - last) / 1000));
       last = now;
-      time += dt;
+      // Fixed timestep: a variable step size excites the stiff strap solver
+      // and makes the badge buzz. Always integrate in whole MAX_STEP slices.
+      acc += dt;
+      const n = Math.min(8, Math.floor(acc / MAX_STEP + 1e-9));
       const current = physics();
-      stepSimulation(sim, dt, current, time);
+      if (n > 0) {
+        acc -= n * MAX_STEP;
+        time += n * MAX_STEP;
+        stepSimulation(sim, n * MAX_STEP, current, time);
+      }
       const body = sim.body;
       if (!Number.isFinite(body.position.x + body.position.y + body.position.z + body.quaternion.w)) {
         sim.grab = null;

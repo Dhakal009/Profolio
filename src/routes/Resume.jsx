@@ -13,7 +13,7 @@ export default function Resume() {
             </div>
             <h1 className="resume-title">Curriculum Vitae</h1>
             <p className="resume-subtitle">
-              Bikash Dhakal · Full Stack Developer · Kathmandu, Nepal
+              Bikash Dhakal · Full Stack & DevOps Engineer · Kathmandu, Nepal
             </p>
           </div>
 
